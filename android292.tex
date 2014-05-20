@@ -249,95 +249,140 @@ keyword1, keyword2
   \section{Java Specification Request 292}
 
     The \JSR is a request from \JCP and led by \SUN in 2006.
-    It is integrated in 2011 in the \JVM specification 7.
-    The Java language in its version 7, implements this \Jsr.
+    It had been integrated in 2011 in the version 7 of Java,
+    modifying both the Java language specification and the \JVM specification.
 
-    It allows dynamic typed languages implementation on top the \JVM.
-    The support for dynamic typed languages in the \JVM, opens it to other communities.
-    And a dynamic language found in the \JVM, support and efficient algorithms like the garbage collector.
-    Indeed, with this \Jsr , it makes easier to produce high quality implementations of dynamic typed languages.
+    Since late 90's, a lot of language
+    https://en.wikipedia.org/wiki/List_of_JVM_languages
+    implementors have chosen the JVM as their target platform,
+    for several reasons among the size of the ecosystem,
+    the presence of mature GCs and Just In Time compilers. 
 
-    \subsection{Dynamic typed languages}
-      We can divide programming languages into two parts.
-      The statically typed languages and the dynamically typed languages.
+    The aim of this \Jsr is to ease the implementation of dynamically typed languages
+    by providing a new way to do function calls that allows language implementors
+    to specify a specific semantics, independantly of the semantics of the language Java.
+    
+    This \Jsr is composed of two parts, the first part, specifies the semantics of
+    new opcodes. The second part defined an API, java.lang.invoke that allows
+    to create runtime typesafe function pointers (java.lang.invoke.MethodHandle) and
+    methods to combine those function pointers to do thing like function composition,
+    function argument permutation, etc.
 
-      A statically typed language means that its variables are strongly typed and bound to specific data types.
-      While a dynamically typed language imply that its variables are weakly typed and not necessary bound to specific data types.\cite{ieee-paulson-shift-dynamic-languages}
+    The next sections will present the new API and new instructions but before
+    we want to introduce an example that we will use for the rest of the paper.
+
+    \subsection{Example}
+      Let suppose we have the following code in Groovy (REF!)
       
-      So the most difference between them is the time where they have to choose their semantics depending to the data types.\\
-      For example, the symbol ``+'' may means we want to add two integers or two real numbers,
-      but it may means also we want to concatenate two character sequences.
-
-      % example with bytecode
-
-      This is an example with a static typed language (Java) :
-
-      {\tiny      
-      \begin{verbatim}
-  String foo(String a) {
-    return a + 2 // a.concat(String.valueOf(2))
-  }
-
-  int foo(int a) {
-    return a + 2 // Integer.sum(a, 2)
-  }
-
-  public static void main(String[] args) {
-    System.out.println(foo(10));
-    System.out.println(foo("bar"));
-  }
-      \end{verbatim}
-      }
-
-      In this code we can see two methods with same name, one for each type (String and int).
-      Each method knows the ``+'' method to call, because it knows all types.
-      The first line of the main method calls with an integer and the second with a String.
-      In compile time, the java compiler (javac) can choose the specific method with the type of the argument
-      corresponding to the type of variable passed into the method.\\
-
-      The same example with a dynamic typed language (Groovy) :
-
       {\tiny      
       \begin{verbatim}
   def foo(a) {
     a + 2
   }
 
-  println foo(10)
+  println foo(9)
   println foo("test")
       \end{verbatim}
       }
 
-      Here, we have an only one method ``foo'' which takes a dynamic typed argument.
-      The problem is at the ``+'' method that we have to call.
-      In runtime, the interpreter has to choose the specific ``+'' method depending to the type of the argument.
-      We can't do this choice at compile time because we don't know types.
+      It prints 11 and test2. For the fist call to foo, a is an integer so the function + refers
+      to the function +(int,int) while for the second call to foo, a is a string, so the
+      function + refers to the function +(String,String).
 
-%       The code produced contains an invokedynamic instruction.
-%       
-%       {\tiny
-%       \begin{verbatim}
-%   BootstrapMethods:
-%     3: #42 invokestatic bootstrap:(MethodHandles$Lookup;String;MethodType;String;I)CallSite;
-%       Method arguments:
-%         #72 plus
-%         #45 0
-% 
-%   public Object test(Object);
-%     Code:
-%        0: aload_1
-%        1: iconst_2
-%        2: invokedynamic #75,  0
-%            // InvokeDynamic #3:invoke:(Object;I)Object;
-%        7: areturn
-%        8: nop
-%        9: athrow
-%       \end{verbatim}
-%       }
+      If one try to translate that code in Java bytecode, it will be something like
+      {\tiny      
+      \begin{verbatim}
+  def foo(a) {
+    aload 0   // 0 is offset of first variable, 'a' here
+    iconst_2  // load the integer constant 2
+    invokevirtual java/lang/Object + (I)Ljava/lang/Object;
+    areturn 
+  }
+      \end{verbatim}
+      }
 
+      As you can see, the Java bytecode is typed, each instruction is prefixed 
+      by the type of the operand ('a' for object, 'i' for integer, etc)
+      and the method call (invokevirtual) specify the type of the receiver and its parameter ;
+      an object (java/lang/Object) followed by an int (I) ; and its return type
+      which is also an object in the example.
 
-      A static language does this choice throughout the compilation
-      unlike a dynamic language which does this throughout the execution.
+      The code above doesn't work because invokevirtual is an existing Java bytecode that call
+      a virtual method using the Java semantics so the Virtual Machine or more precisely
+      the bytecode verifier will check that there is a method '+' on java.lang.Object
+      that takes an int and return an Object. If you have used Java, you alreadty know
+      that this method doesn't exist. So the bytecode verification will fail. 
+
+      Another possible translation is to use a cascade of if ... instanceof.
+      {\tiny      
+      \begin{verbatim}
+  static Object plus(String v, Object v2) {
+    return v.concat(String.valueOf(v2));
+  }
+
+  static Object plus(int v, int v2) {
+    return Integer.sum(v, v2)
+  }
+
+  static Object foo(Object v, int i) {
+    if (v instanceof Integer) {
+      return plus((Integer)v, i);
+    }
+    if (v instanceof String) {
+      return plus((String)v, i);
+    }
+    throw new Error();
+  }
+
+  public static void main(String[] args) {
+    System.out.println(foo(9));
+    System.out.println(foo("bar"));
+  }
+      \end{verbatim}
+      }
+
+      While this code works, it supposes that all possible variations of + are known at compile time,
+      something which is not true in most dynamic languages (Ruby, Groovy, Dart by example).
+      This code can also be slow because for real languages, the number of if ... instanceof branches
+      can be greater than a dozen. 
+      
+      To solve these issues, the \Jsr introduces a new bytecode named invokedynamic with no predefined
+      linking semantics and a mechanism that allows to specify the linking semantics in Java
+      or any languages that can be compiled to bytecodes.
+      Invokedynamic is a function call so it can simulate every other existing Java calls that delegate
+      its linking semantics to an external Java method, the bootstrap method.
+      The bootstrap method is called the first time the invokedynamic opcode is encounter by the interpreter,
+      with the context where the opcode is located i.e.
+      the declaring class (encapsulated in a java/lang/invoke/Lookup object), a symbolic name,
+      the declared parameter types as a java/lang/invoke/MethodType and return
+      a CallSite object which is a box that contains a function pointer (a java/lang/MethodHandle).
+      Any subsequent execution of the invokedynamic opcode will call the function pointer
+      stored inside the callsite object returned by the bootstrap method.
+      
+      For our running example, the code of foo with invokedynamic is
+     {\tiny      
+      \begin{verbatim}
+  def foo(a) {
+    aload 0
+    iconst_2 
+    invokedynamic  + (Ljava/lang/Object;I)Ljava/lang/Object;
+      bsm: invokestatic RT.bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    areturn 
+  }
+      \end{verbatim}
+      }
+
+      The first time that foo is executed, the method bootstrap of the class RT will be called, with a lookup corresponding to the class containing foo,
+      with "+" as string and a MethodType corresponding to the descriptor "(Ljava/lang/Object;I)Ljava/lang/Object;".
+
+      
+
+      Moreover, invokedynamic comes with an API that allow to create several data pattern
+      dynamically and lazily like by example a tree of if ... instanceof branches.
+
+ 
+      
+
 
     \subsection{Package java.lang.invoke}
       The \JSR has created a new package named ``java.lang.invoke''.
