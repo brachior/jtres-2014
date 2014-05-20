@@ -33,7 +33,7 @@
 \usepackage{xspace}
 \usepackage{hyperref}
 \hypersetup{
-    bookmarks=true,         % show bookmarks bar?
+    bookmarks=false,        % show bookmarks bar?
     unicode=false,          % non-Latin characters in Acrobat’s bookmarks
     pdftoolbar=true,        % show Acrobat’s toolbar?
     pdfmenubar=true,        % show Acrobat’s menu?
@@ -52,21 +52,33 @@
     filecolor=black,        % color of file links
     urlcolor=black          % color of external links
 }
-\usepackage{acronym}
+% \usepackage{acronym}
 
 %% macros
-\def \JCP{\ac{JCP}\xspace}
+% \def \JCP{\ac{JCP}\xspace}
+% \def \SUN{\mbox{Sun Microsystems}\xspace}
+% \def \ORACLE{\mbox{Oracle}\xspace}
+% \def \DALVIK{\mbox{Dalvik}\xspace}
+% \def \Jsr{\ac{JSR}\xspace}
+% \def \JSR{\Jsr 292\xspace}
+% \def \GOOGLE{\mbox{Google}\xspace}
+% \def \ANDROID{\mbox{Android}\xspace}
+% \def \JVM{\ac{JVM}\xspace}
+% \def \DEX{\mbox{DEX}\xspace}
+% \def \VM{\ac{VM}\xspace}
+% \def \BSM{\ac{BSM}\xspace}
+\def \JCP{JCP\xspace}
 \def \SUN{\mbox{Sun Microsystems}\xspace}
 \def \ORACLE{\mbox{Oracle}\xspace}
 \def \DALVIK{\mbox{Dalvik}\xspace}
-\def \Jsr{\ac{JSR}\xspace}
+\def \Jsr{JSR\xspace}
 \def \JSR{\Jsr 292\xspace}
 \def \GOOGLE{\mbox{Google}\xspace}
 \def \ANDROID{\mbox{Android}\xspace}
-\def \JVM{\ac{JVM}\xspace}
+\def \JVM{JVM\xspace}
 \def \DEX{\mbox{DEX}\xspace}
-\def \VM{\ac{VM}\xspace}
-\def \BSM{\ac{BSM}\xspace}
+\def \VM{VM\xspace}
+\def \BSM{BSM\xspace}
 
 \newcommand{\executeiffilenewer}[3]{%
   \ifnum\pdfstrcmp{\pdffilemoddate{#1}}{\pdffilemoddate{#2}}>0%
@@ -252,8 +264,7 @@ keyword1, keyword2
     It had been integrated in 2011 in the version 7 of Java,
     modifying both the Java language specification and the \JVM specification.
 
-    Since late 90's, a lot of language
-    https://en.wikipedia.org/wiki/List_of_JVM_languages
+    Since late 90's, a lot of language \cite{wiki-jvm-lang}
     implementors have chosen the JVM as their target platform,
     for several reasons among the size of the ecosystem,
     the presence of mature GCs and Just In Time compilers. 
@@ -295,7 +306,7 @@ keyword1, keyword2
   def foo(a) {
     aload 0   // 0 is offset of first variable, 'a' here
     iconst_2  // load the integer constant 2
-    invokevirtual java/lang/Object + (I)Ljava/lang/Object;
+    invokevirtual Object + (I)LObject;
     areturn 
   }
       \end{verbatim}
@@ -365,8 +376,8 @@ keyword1, keyword2
   def foo(a) {
     aload 0
     iconst_2 
-    invokedynamic  + (Ljava/lang/Object;I)Ljava/lang/Object;
-      bsm: invokestatic RT.bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    invokedynamic  + (LObject;I)LObject;
+      bsm: invokestatic RT.bootstrap:(LMethodHandles$Lookup;LString;LMethodType;)LCallSite;
     areturn 
   }
       \end{verbatim}
@@ -669,13 +680,13 @@ Acknowledgments, if needed.
 \makeatother
 
 %   \section{Acronyms}
-    \begin{acronym}[TDMA]
-      \acro{JCP}{Java Community Process}
-      \acro{VM}{Virtual Machine}
-      \acro{JVM}{Java Virtual Machine}
-      \acro{JSR}{Java Specification Request}
-      \acro{BSM}{Bootstrap Method}
-    \end{acronym}
+%     \begin{acronym}[TDMA]
+%       \acro{JCP}{Java Community Process}
+%       \acro{VM}{Virtual Machine}
+%       \acro{JVM}{Java Virtual Machine}
+%       \acro{JSR}{Java Specification Request}
+%       \acro{BSM}{Bootstrap Method}
+%     \end{acronym}
 
 \bibliographystyle{abbrvnat}
 
@@ -688,8 +699,10 @@ Acknowledgments, if needed.
   IDC website (2013) - \\ \url{www.idc.com/getdoc.jsp?containerId=prUS24257413}
 
   \bibitem{wiki-android}
-  \ANDROID Wikipedia - \\ \url{en.wikipedia.org/wiki/Android_(operating_system)#Linux}
+  \ANDROID (Wikipedia) - \\ \url{en.wikipedia.org/wiki/Android\_(operating\_system)#Linux}
 
+  \bibitem{wiki-jvm-lang}
+  \JVM languages (Wikipedia) - \\ \url{https://en.wikipedia.org/wiki/List\_of\_JVM\_languages}
 %   @ARTICLE{5676144, 
 %   author={Butler, M.}, 
 %   journal={Pervasive Computing, IEEE}, 
