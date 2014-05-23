@@ -53,6 +53,29 @@
     filecolor=black,        % color of file links
     urlcolor=black          % color of external links
 }
+
+\usepackage{listings}
+
+\definecolor{javared}{rgb}{0.6,0,0} % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadocblue
+
+\lstset{language=Java,
+basicstyle= \tiny,
+keywordstyle=\color{javapurple}\bfseries,
+stringstyle=\color{javared},
+commentstyle=\color{javagreen},
+morecomment=[s][\color{javadocblue}]{/**}{*/},
+numbers=none, %numbers=left,
+numberstyle=\tiny\color{black},
+% stepnumber=2,
+% numbersep=10pt,
+tabsize=2,
+showspaces=false,
+showstringspaces=false,
+columns=fullflexible}
+
 % \usepackage{acronym}
 
 %% macros
@@ -90,6 +113,27 @@
   \executeiffilenewer{#1.svg}{#1.pdf}{inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-latex}%
   \input{#1.pdf_tex}%
 }
+
+\newcommand{\tinyline}[3]{
+  \tiny #1 &
+  \tiny #2 &
+  \tiny #3\\
+  \hline
+}
+
+\newenvironment{listminimal}[1]%
+{ \begin{minipage}{#1}%
+    \medskip
+    \begin{list}%
+      {}%
+      {%
+        \setlength{\labelwidth}{0pt}%
+        \setlength{\leftmargin}{0pt}%
+        \setlength{\itemsep}{1pt}%
+        \setlength{\parskip}{0pt}%
+        \setlength{\parsep}{0pt}}%
+}%
+{ \\ \end{list} \end{minipage} }
 
 \begin{document}
 
@@ -182,14 +226,6 @@ keyword1, keyword2
 %     De plus, \ANDROID est portable et doit pouvoir s'adapter \`a differents appareils.
 %     Ce qui l'oblige \`a s'abstraire du materiel.
 
-    \begin{figure}
-      \centering
-      \def\svgwidth{\columnwidth}
-      \includesvg{android-system-architecture}
-      \caption{android system architecture \cite{wiki-android}}
-      \label{ASA}
-    \end{figure}
-
     The \ANDROID architecture is described like a ``software stack'' (fig. \ref{ASA}).
     It's composed to:
 %     Il est descrit comme \'etant une ``pile de logiciels'' (software stack) (fig. \ref{ASA}).
@@ -248,7 +284,7 @@ keyword1, keyword2
       Unlike the \JVM, \DALVIK uses one constant-pool by type of constant
       except for the primitive types which are directly encoded with the opcode.\\
 
-      \begin{figure}[h]
+      \begin{figure}[t]
         \centering
         \includegraphics[width=\columnwidth]{dex-tools-chain.png}
         \caption{\ANDROID application tools-chain}
@@ -258,6 +294,15 @@ keyword1, keyword2
       \DALVIK cannot directly execute Java bytecode.
       It have first to translate the Java byte code to a \DALVIK specific bytecode called \DEX
       and It cans optimize its bytecode (\mbox{ODEX}) to save space (fig. \ref{DTC}).
+
+
+    \begin{figure}
+      \centering
+      \def\svgwidth{\columnwidth}
+      \includesvg{android-system-architecture}
+      \caption{android system architecture \cite{wiki-android}}
+      \label{ASA}
+    \end{figure}
 
   \section{Java Specification Request 292}
 
@@ -385,16 +430,13 @@ keyword1, keyword2
       }
 
       The first time that foo is executed, the method bootstrap of the class RT will be called, with a lookup corresponding to the class containing foo,
-      "+" as string and a MethodType corresponding to the descriptor "(Ljava/lang/Object;I)Ljava/lang/Object;".
-      The implementation of the method bootstrap is able to create lazily a code shape similar to the tree of test if ... instanceof,
-      we have seen above by creating method handles (function pointers) that can be organized as a tree. 
-      
-      So invokedynamic allows to separate the code of a dynamic language in two parts, a static part which is compiled directly to JVM bytecode
-      and a dynamic part which is specified by a tree of method handles.
-      The way to create a tree of method handles is to use the package java.lang.invoke.      
-
+      with "+" as string and a MethodType corresponding to the descriptor "(Ljava/lang/Object;I)Ljava/lang/Object;".
 
       
+
+      Moreover, invokedynamic comes with an API that allow to create several data pattern
+      dynamically and lazily like by example a tree of if ... instanceof branches.
+
       \begin{figure}
         % graph 1
         \centering \resizebox{.6\linewidth}{!}{%
@@ -402,7 +444,7 @@ keyword1, keyword2
             \node[text width=3in,align=center](A1) at (2,-2){AsType};
             \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
             \node[text width=3in,align=center](A3) at (2,-4){BindTo};
-            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(CallSite,Object[])Object}};
+            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(MutableCallSite,Object[])Object}};
 
             \draw[thick,->](A1) -- (A2);
             \draw[thick,->](A2) -- (A3);
@@ -419,12 +461,12 @@ keyword1, keyword2
             \node[text width=3in,align=center](A1) at (2,-2){AsType};
             \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
             \node[text width=3in,align=center](A3) at (2,-4){BindTo};
-            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(CallSite,Object[])Object}};
+            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(MutableCallSite,Object[])Object}};
 
             \node[text width=1in,align=center](G1) at (1,-1){GuardWithTest};
 
             \node[text width=3in,align=center](B1) at (0,-2){AsType};
-            \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)int}};
+            \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)Object}};
 
             \node[text width=1in,align=center](C1) at (4.5,-1){DropArguments};
             \node[text width=3in,align=center](C2) at (4.5,-2){InsertArguments};
@@ -453,12 +495,12 @@ keyword1, keyword2
               \node[text width=3in,align=center](A1) at (2,-2){AsType};
               \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
               \node[text width=3in,align=center](A3) at (2,-4){BindTo};
-              \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(CallSite,Object[])Object}};
+              \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(MutableCallSite,Object[])Object}};
 
               \node[text width=1in,align=center](G1) at (1,-1){GuardWithTest};
 
               \node[text width=3in,align=center](B1) at (0,-2){AsType};
-              \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)int}};
+              \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)Object}};
 
               \node[text width=1in,align=center](C1) at (4.5,-1){DropArguments};
               \node[text width=3in,align=center](C2) at (4.5,-2){InsertArguments};
@@ -467,7 +509,7 @@ keyword1, keyword2
               \node[text width=1in,align=center](G2) at (0, 0){GuardWithTest};
 
               \node[text width=3in,align=center](D1) at (-2,-1){AsType};
-              \node[text width=3in,align=center](D2) at (-2,-2){MethodHandle\\{\it plus:(String,int)String}};
+              \node[text width=3in,align=center](D2) at (-2,-2){MethodHandle\\{\it plus:(String,int)Object}};
 
               \node[text width=1in,align=center](E1) at (7, 0){DropArguments};
               \node[text width=3in,align=center](E2) at (7,-1){InsertArguments};
@@ -495,45 +537,13 @@ keyword1, keyword2
         \caption{}
       \end{figure*}
 
-      \subsection{Package java.lang.invoke}
 
+    \subsection{Package java.lang.invoke}
       The \JSR has created a new package named ``java.lang.invoke''.
       It contains several classes to ease the implementation of dynamic languages support.
       These classes are directly understood by the \JVM.
       It is composed of classes MethodType, MethodHandle, CallSite and SwitchPoint.
       All classes answer to one or more problems coming from dynamic languages optimizations or implementations.
-
-
-
-      \subsubsection{MethodHandle}
-        A method handle is a runtime type checked, directly executable reference to
-        either an underlying method, constructor, field, or similar low-level operation,
-        or to a combiner operation that takes one or more method handles as input and
-        applies an operation like an argument transformation, a function compositions, etc.
-        The former kind of method handle is called a direct method handle,
-        the later is called a combiner method handle.
-        
-        To guarantee runtime type safety, any method handle embodies a method type (of type java.lang.invoke.MethodType)
-        that describe the parameter types and the return type that a method handle accept.
-        When a method handle is called, the method type is checked using different semantics depending on the
-        kind of call.
-
-        There are two kind of method handle call semantics. 
-        \begin{itemize}
-          \item the exact call semantics, in that case, the declared type of the arguments (and return value) at a call site
-                must be exactly the same as the types of the method type.
-          \item the generic call semantics, in that case, the arguments can be converted using widening primitive conversions,
-                boxing and unboxing conversions and varargs conversions as defined in the Java Language Specification.
-        \end{itemize}
-        None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
-        for classical Java method calls like invokestatic or invokevirtual
-        \footnote{There is also a minor difference between the generic call semantics and the call semantics of
-         the Java Language Specification if the method is a varargs and the call as the same number of parameters as the method.
-         The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.},
-        the exact call semantics is more strict, and the generic call semantics is more permissive.
-
-        
-
 
       \subsubsection{MethodType}
         A method type represents the arguments and return type accepted and returned by a method handle,
@@ -554,7 +564,27 @@ keyword1, keyword2
           \end{verbatim}
         }
 
-      
+      \subsubsection{MethodHandle / MethodHandles}
+        A method handle is a typed, directly executable reference to
+        an underlying method, constructor, field, or similar low-level operation,
+        with optional transformations of arguments or return values.
+        This class represents a function pointer.
+        
+        A method handle can be create by different factory methods depending to the kind of method handle and accessibility.
+        
+
+        \begin{enumerate}
+          \item \textbf{Kinds of MethodHandle}\\
+            The MethodHandle class is composed of different types grouped into 4 kinds,
+            ``constant'', ``bound'', ``invokers'' and ``others''.
+            The three first have many specials paths in the \VM for each instruction.
+            While ``others'' have a unique path.
+          \item \textbf{Contents}\\
+            It contains a type descriptor (methodtype).
+            All instances of MethodHandle are immutable.
+            It have a pair of special invoker methods called invokeExact and invoke.
+            The invokeExact invoker accepts calls which exactly match the method handle's own type.
+        \end{enumerate}
 
       \subsubsection{CallSite}
         A CallSite is a holder for a variable MethodHandle, which is called its target.
@@ -747,9 +777,115 @@ keyword1, keyword2
 \section{Nouveau DEX}
 
   \subsection{opcodes / LDC}
+    \begin{figure}
+      \centering
+      \begin{tabular}{|l|l|l|}
+        \hline
+        \tinyline
+          {3e}{21c}
+          {%
+            \begin{listminimal}{6cm}
+              \item const-methodtype vA, methodtype$@$BBBB
+                \item \hspace{.2in}A : destination register or pair (4 bits)
+                \item \hspace{.2in}B : methodtype reference index (16 bits)
+            \end{listminimal}
+          }
+        \tinyline
+          {3f}{21c}
+          {%
+            \begin{listminimal}{6cm}
+              \item const-methodhandle vA, methodhandle$@$BBBB
+                \item \hspace{.2in}A : destination register or pair (4 bits)
+                \item \hspace{.2in}B : methodhandle reference index (16 bits)
+            \end{listminimal}
+          }
+      \end{tabular}
+      \caption{methodtype and methodhandle ldc} % FIXME 'LDC' full-form
+      \label{MTMHldc}
+    \end{figure}
+
+    \begin{figure}
+      \centering
+      \begin{tabular}{|l|l|l|l|}
+        \hline
+        \tinyline
+          {40..41}{35c}
+          {
+            \begin{listminimal}{6cm}
+              \item invoke-\textit{kind} \{vC, vD, vE, vF, vG\}, methodtype$@$BBBB
+                \item \hspace{.1in}40 : invoke-exact
+                \item \hspace{.1in}41 : invoke-generic
+                  \item \hspace{.2in}A : argument word count (4 bits)
+                  \item \hspace{.2in}B : methodtype reference index (16 bits)
+                  \item \hspace{.2in}C..G : argument registers (4 bits each)
+            \end{listminimal}
+          }
+        \tinyline
+          {42..43}{3rc}
+          {
+            \begin{listminimal}{6cm}
+              \item invoke-\textit{kind}/range \{vCCCC .. vNNNN\}, methodtype$@$BBBB
+                \item \hspace{.1in}42 : invoke-exact/range
+                \item \hspace{.1in}43 : invoke-generic/range
+                  \item \hspace{.2in}A : argument word count (8 bits)
+                  \item \hspace{.2in}B : methodtype reference index (16 bits)
+                  \item \hspace{.2in}C : first argument register (16 bits)
+                  \item \hspace{.2in}N = A + C - 1
+            \end{listminimal}
+          }
+      \end{tabular}
+      \caption{invoke-generic/exact instruction}
+      \label{INGEins}
+    \end{figure}
+
+    \begin{figure}
+      \centering
+      \begin{tabular}{|l|l|l|l|}
+        \hline
+        \tinyline
+          {73}{55ci}
+          {
+            \begin{listminimal}{6cm}
+              \item 73 : invoke-dynamic \{vC, vD, vE, vF, vG\}, indy$@$BBBB, \#ZZZZZZZZ
+                \item \hspace{.2in}A:C-G : like invoke-exact and invoke-generic
+                \item \hspace{.2in}B : invoke-dynamic reference index (16 bits)
+                \item \hspace{.2in}Z : callsite\_index (32 bits)
+            \end{listminimal}
+          }
+        \tinyline
+          {79}{5rci}
+          {
+            \begin{listminimal}{6cm}
+              \item 79 : invoke-dynamic/range \{vCCCC .. vNNNN\}, indy$@$BBBB, \#ZZZZZZZZ
+                \item \hspace{.2in}A:C-N : like invoke-exact/range and invoke-generic/range
+                \item \hspace{.2in}B : invoke-dynamic reference index (16 bits)
+                \item \hspace{.2in}Z : callsite\_index (32 bits)
+            \end{listminimal}
+          }
+      \end{tabular}
+      \caption{invoke-dynamic instruction}
+      \label{INDYins}
+    \end{figure}
   \subsection{DEX header (constant-pools)}
+  
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
+      \caption{structure of new APK files}
+      \label{SNA}
+    \end{figure}
+
   \subsection{Class header}
-  \subsection{r\'etro-compatibilit\'e}
+  \subsection{retro-compatibility}
+    Our \ANDROID version understands post-invokedynamic APK.
+    We need to modify the APK to add missing constant pools and CallSite tables.
+    However an APK is read-only.
+    But the installation time does optimizations and has to modify the APK.
+    So we take advantage to the installation time to add our work.
+    We just simulate an APK without MethodHandle, MethodType, CallSite, \dots
+    Only header and classes change, we add empty constant pools to the header
+    and an empty table to each class representing the CallSite table.
+    No offset changes, just the size of header and classes.
 
 \section{Impl\'ementations d'invoke-kind et des LDC}
 
@@ -768,6 +904,65 @@ keyword1, keyword2
 \section{Impl\'ementations des Combinateurs}
 
   \subsection{Impl\'ementation g\'en\'erale}
+    The Java interpreter (fig. \ref{intepret}) is used to interpret method handle trees.
+    It is implemented using a continuation mechanism (context) to treat the return value.
+    Each combiner execute its own code and can produce a 'context'.
+    For example, AsType converts arguments and produces a context if it has to convert the return value.
+    So when the interpreter treats a 'final' method handle,
+    which means a method handle produced by a call to 'lookup.findXXX(\dots)' (instance, static, getter, \dots),
+    it does an invoke-generic and check if a context exist.
+    If there is a context, the interpreter execute the second part of the method handle,
+    convert the return value in the case of AsType.
+    Afterwards, the interpreter repeats the loop.
+    
+    This implementation avoids to pile up a call in the stack for each method handle.
+    We pile up only if we have a 'final' method handle, which is not a subtree.
+
+    \begin{figure}[!h]
+      \begin{lstlisting}[language=Java]
+private static Object invokeCombiner(MethodHandle mh, Object[] arguments) throws Throwable {
+  ContextInterpret contexts = null;
+  main_loop: for (;;) {
+    if (mh.getClass() == MethodHandle.class) {
+      // method handle produced by a lookup.findXXX()
+      Object result = mh.invokeWithArguments(arguments);
+      for (;;) {
+        if (contexts != null) {
+          ContextInterpret context = contexts;
+          contexts = contexts.previous;
+          switch (context.kind) {
+            case AS_TYPE: { ... }
+            case GWT: { ... }
+            case FOLD_ARGUMENTS: { ... }
+            default:
+              throw new InternalError("shouldn't happen !");
+          }
+        }
+        return result;
+      }
+    }
+    // combiners
+    MHInterpret cmh = (MHInterpret) mh;
+    switch (cmh.interpretKind) {
+      case BIND_OBJECT: { ... }
+      case AS_TYPE: { ... }
+      case AS_COLLECTOR: { ... }
+      case AS_SPREADER: { ... }
+      case GWT: { ... }
+      case DROP_ARGUMENTS: { ... }
+      case INSERT_ARGUMENTS: { ... }
+      case FOLD_ARGUMENTS: { ... }
+        ...
+      default:
+        throw new InternalError("shouldn't happen !");
+    }
+  }
+}
+      \end{lstlisting}
+      \caption{Code of method handles (combiners) interpreter}
+      \label{intepret}
+    \end{figure}
+
   \subsection{Quelques exemples (GWT, fold, ...)}
 
 \section{Benchmark}  
@@ -775,6 +970,105 @@ keyword1, keyword2
 \section{Related Work}
 
 \section{Conclusion}
+
+\begin{figure}
+  \begin{lstlisting}[language=Java]
+import static java.lang.invoke.MethodType.*
+
+public class RT {
+    ...
+  private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
+
+  public static CallSite bsmMutableCS(MethodHandles.Lookup caller, String name, MethodType type)
+      throws IllegalAccessException, NoSuchMethodException {
+    MethodType mt = methodType(Object.class, MutableCallSite.class, Object[].class);
+    MethodHandle mh = lookup.findStatic(BootStraps.class, "change", mt);
+    return new CSMutableBind(type, mh);
+  }
+    ...
+}
+  \end{lstlisting}
+  \caption{}
+\end{figure}
+
+\begin{figure}
+  \begin{lstlisting}[language=Java]
+import static java.lang.invoke.MethodType.*
+
+public class RT {
+    ...
+  private static final MethodHandle TARGET_INT;
+  private static final MethodHandle TARGET_STRING;
+  private static final MethodHandle TARGET_CHECK;
+
+  static {
+    try {
+      TARGET_INT = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, int.class, int.class));
+      TARGET_STRING = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, String.class, int.class));
+      TARGET_CHECK = lookup.findStatic(BootStraps.class, "check", methodType(boolean.class, Object.class, Class.class));
+    } catch (NoSuchMethodException|IllegalAccessException e) {
+      throw new AssertionError(e);
+    }
+  }
+    ...
+}
+  \end{lstlisting}
+  \caption{}
+\end{figure}
+
+\begin{figure}
+  \begin{lstlisting}[language=Java]
+public class RT {
+    ...
+  private static Object change(MutableCallSite callSite, Object[] arguments) throws Throwable {
+    MethodHandle target;
+    MethodType type = callSite.type();
+    Class<?> aClass = arguments[0].getClass();
+    if (aClass == Integer.class) {
+      target = TARGET_INT.asType(type);
+    } else if (aClass == String.class) {
+      target = TARGET_STRING.asType(type);
+    } else {
+      throw new LinkageError("bad receiver class");
+    }
+    MethodHandle test = MethodHandles.insertArguments(TARGET_CHECK, 1, aClass);
+    test = MethodHandles.dropArguments(test, 1, type.parameterType(1));
+    callSite.setTarget(MethodHandles.guardWithTest(test, target, callSite.getTarget()));
+    return target.invokeWithArguments(arguments);
+  }
+
+  private static Object plus(int a, int b) {
+    return a + b;
+  }
+
+  private static Object plus(String a, int b) {
+    return a + b;
+  }
+
+  private static boolean check(Object value, Class<?> clazz) {
+    return value.getClass() == clazz;
+  }
+    ...
+}
+  \end{lstlisting}
+  \caption{}
+\end{figure}
+
+\begin{figure}
+  \begin{lstlisting}[language=Java]
+public class RT {
+    ...
+  private static class CSMutableBind extends MutableCallSite {
+    CSMutableBind(MethodType type, MethodHandle mh) {
+      super(type);
+      setTarget(mh.bindTo(this).asCollector(Object[].class, type.parameterCount()).asType(type));
+    }
+  }
+    ...
+}
+  \end{lstlisting}
+  \caption{}
+\end{figure}
 
 
 \appendix
