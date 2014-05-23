@@ -28,12 +28,13 @@
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
 
+\usepackage{tikz}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xspace}
 \usepackage{hyperref}
 \hypersetup{
-    bookmarks=true,         % show bookmarks bar?
+    bookmarks=false,        % show bookmarks bar?
     unicode=false,          % non-Latin characters in Acrobat’s bookmarks
     pdftoolbar=true,        % show Acrobat’s toolbar?
     pdfmenubar=true,        % show Acrobat’s menu?
@@ -52,21 +53,33 @@
     filecolor=black,        % color of file links
     urlcolor=black          % color of external links
 }
-\usepackage{acronym}
+% \usepackage{acronym}
 
 %% macros
-\def \JCP{\ac{JCP}\xspace}
+% \def \JCP{\ac{JCP}\xspace}
+% \def \SUN{\mbox{Sun Microsystems}\xspace}
+% \def \ORACLE{\mbox{Oracle}\xspace}
+% \def \DALVIK{\mbox{Dalvik}\xspace}
+% \def \Jsr{\ac{JSR}\xspace}
+% \def \JSR{\Jsr 292\xspace}
+% \def \GOOGLE{\mbox{Google}\xspace}
+% \def \ANDROID{\mbox{Android}\xspace}
+% \def \JVM{\ac{JVM}\xspace}
+% \def \DEX{\mbox{DEX}\xspace}
+% \def \VM{\ac{VM}\xspace}
+% \def \BSM{\ac{BSM}\xspace}
+\def \JCP{JCP\xspace}
 \def \SUN{\mbox{Sun Microsystems}\xspace}
 \def \ORACLE{\mbox{Oracle}\xspace}
 \def \DALVIK{\mbox{Dalvik}\xspace}
-\def \Jsr{\ac{JSR}\xspace}
+\def \Jsr{JSR\xspace}
 \def \JSR{\Jsr 292\xspace}
 \def \GOOGLE{\mbox{Google}\xspace}
 \def \ANDROID{\mbox{Android}\xspace}
-\def \JVM{\ac{JVM}\xspace}
+\def \JVM{JVM\xspace}
 \def \DEX{\mbox{DEX}\xspace}
-\def \VM{\ac{VM}\xspace}
-\def \BSM{\ac{BSM}\xspace}
+\def \VM{VM\xspace}
+\def \BSM{BSM\xspace}
 
 \newcommand{\executeiffilenewer}[3]{%
   \ifnum\pdfstrcmp{\pdffilemoddate{#1}}{\pdffilemoddate{#2}}>0%
@@ -253,8 +266,7 @@ keyword1, keyword2
     modifying both the Java language specification and the \JVM specification.
 
     Since late 90's, a lot of language
-    https://en.wikipedia.org/wiki/List_of_JVM_languages
-    implementors have chosen the JVM as their target platform,
+    implementors have chosen the JVM as their target platform \cite{wiki-jvm-lang},
     for several reasons among the size of the ecosystem,
     the presence of mature GCs and Just In Time compilers. 
 
@@ -272,7 +284,7 @@ keyword1, keyword2
     we want to introduce an example that we will use for the rest of the paper.
 
     \subsection{Example}
-      Let suppose we have the following code in Groovy (REF!)
+      Let suppose we have the following code in Groovy \cite{lang-groovy}
       
       {\tiny      
       \begin{verbatim}
@@ -295,7 +307,7 @@ keyword1, keyword2
   def foo(a) {
     aload 0   // 0 is offset of first variable, 'a' here
     iconst_2  // load the integer constant 2
-    invokevirtual java/lang/Object + (I)Ljava/lang/Object;
+    invokevirtual Object + (I)LObject;
     areturn 
   }
       \end{verbatim}
@@ -365,31 +377,163 @@ keyword1, keyword2
   def foo(a) {
     aload 0
     iconst_2 
-    invokedynamic  + (Ljava/lang/Object;I)Ljava/lang/Object;
-      bsm: invokestatic RT.bootstrap:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    invokedynamic  + (LObject;I)LObject;
+      bsm: invokestatic RT.bootstrap:(LMethodHandles$Lookup;LString;LMethodType;)LCallSite;
     areturn 
   }
       \end{verbatim}
       }
 
       The first time that foo is executed, the method bootstrap of the class RT will be called, with a lookup corresponding to the class containing foo,
-      with "+" as string and a MethodType corresponding to the descriptor "(Ljava/lang/Object;I)Ljava/lang/Object;".
+      "+" as string and a MethodType corresponding to the descriptor "(Ljava/lang/Object;I)Ljava/lang/Object;".
+      The implementation of the method bootstrap is able to create lazily a code shape similar to the tree of test if ... instanceof,
+      we have seen above by creating method handles (function pointers) that can be organized as a tree. 
+      
+      So invokedynamic allows to separate the code of a dynamic language in two parts, a static part which is compiled directly to JVM bytecode
+      and a dynamic part which is specified by a tree of method handles.
+      The way to create a tree of method handles is to use the package java.lang.invoke.      
+
 
       
+      \begin{figure}
+        % graph 1
+        \centering \resizebox{.6\linewidth}{!}{%
+          \begin{tikzpicture}[scale=1.6]
+            \node[text width=3in,align=center](A1) at (2,-2){AsType};
+            \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
+            \node[text width=3in,align=center](A3) at (2,-4){BindTo};
+            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(CallSite,Object[])Object}};
 
-      Moreover, invokedynamic comes with an API that allow to create several data pattern
-      dynamically and lazily like by example a tree of if ... instanceof branches.
+            \draw[thick,->](A1) -- (A2);
+            \draw[thick,->](A2) -- (A3);
+            \draw[thick,->](A3) -- (A4);
+          \end{tikzpicture}
+        }
+        \caption{}
+      \end{figure}
 
- 
-      
+      \begin{figure}
+        % graph 2
+        \centering \resizebox{\linewidth}{!}{%
+          \begin{tikzpicture}[scale=1.6]
+            \node[text width=3in,align=center](A1) at (2,-2){AsType};
+            \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
+            \node[text width=3in,align=center](A3) at (2,-4){BindTo};
+            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(CallSite,Object[])Object}};
 
+            \node[text width=1in,align=center](G1) at (1,-1){GuardWithTest};
 
-    \subsection{Package java.lang.invoke}
+            \node[text width=3in,align=center](B1) at (0,-2){AsType};
+            \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)int}};
+
+            \node[text width=1in,align=center](C1) at (4.5,-1){DropArguments};
+            \node[text width=3in,align=center](C2) at (4.5,-2){InsertArguments};
+            \node[text width=3in,align=center](C3) at (4.5,-3){MethodHandle\\{\it check:(Object,Class)bool}};
+
+            \draw[thick,->](A1) -- (A2);
+            \draw[thick,->](A2) -- (A3);
+            \draw[thick,->](A3) -- (A4);
+            \draw[thick,->](B1) -- (B2);
+
+            \draw[thick,->](C1) -- (C2);
+            \draw[thick,->](C2) -- (C3);
+            \draw[thick,->](G1) -- node[right] {\small (false)} (A1);
+            \draw[thick,->](G1) -- node[left]  {\small (true)}  (B1);
+            \draw[thick,->](G1) -- node[above] {\small (test)}  (C1);
+          \end{tikzpicture}
+        }
+        \caption{}
+      \end{figure}
+
+      \begin{figure*}
+        % graph 3
+        \centering
+        \resizebox{.8\linewidth}{!}{%
+          \begin{tikzpicture}[scale=1.6]
+              \node[text width=3in,align=center](A1) at (2,-2){AsType};
+              \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
+              \node[text width=3in,align=center](A3) at (2,-4){BindTo};
+              \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(CallSite,Object[])Object}};
+
+              \node[text width=1in,align=center](G1) at (1,-1){GuardWithTest};
+
+              \node[text width=3in,align=center](B1) at (0,-2){AsType};
+              \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)int}};
+
+              \node[text width=1in,align=center](C1) at (4.5,-1){DropArguments};
+              \node[text width=3in,align=center](C2) at (4.5,-2){InsertArguments};
+              \node[text width=3in,align=center](C3) at (4.5,-3){MethodHandle\\{\it check:(Object,Class)bool}};
+
+              \node[text width=1in,align=center](G2) at (0, 0){GuardWithTest};
+
+              \node[text width=3in,align=center](D1) at (-2,-1){AsType};
+              \node[text width=3in,align=center](D2) at (-2,-2){MethodHandle\\{\it plus:(String,int)String}};
+
+              \node[text width=1in,align=center](E1) at (7, 0){DropArguments};
+              \node[text width=3in,align=center](E2) at (7,-1){InsertArguments};
+              \node[text width=3in,align=center](E3) at (7,-2){MethodHandle\\{\it check:(Object,Class)bool}};
+
+              \draw[thick,->](A1) -- (A2);
+              \draw[thick,->](A2) -- (A3);
+              \draw[thick,->](A3) -- (A4);
+              \draw[thick,->](B1) -- (B2);
+
+              \draw[thick,->](C1) -- (C2);
+              \draw[thick,->](C2) -- (C3);
+              \draw[thick,->](G1) -- node[right] {\small (false)} (A1);
+              \draw[thick,->](G1) -- node[left]  {\small (true)}  (B1);
+              \draw[thick,->](G1) -- node[above] {\small (test)}  (C1);
+
+              \draw[thick,->](D1) -- (D2);
+              \draw[thick,->](E1) -- (E2);
+              \draw[thick,->](E2) -- (E3);
+              \draw[thick,->](G2) -- node[right] {\small (false)} (G1);
+              \draw[thick,->](G2) -- node[left]  {\small (true)}  (D1);
+              \draw[thick,->](G2) -- node[above] {\small (test)}  (E1);
+          \end{tikzpicture}
+        }
+        \caption{}
+      \end{figure*}
+
+      \subsection{Package java.lang.invoke}
+
       The \JSR has created a new package named ``java.lang.invoke''.
       It contains several classes to ease the implementation of dynamic languages support.
       These classes are directly understood by the \JVM.
       It is composed of classes MethodType, MethodHandle, CallSite and SwitchPoint.
       All classes answer to one or more problems coming from dynamic languages optimizations or implementations.
+
+
+
+      \subsubsection{MethodHandle}
+        A method handle is a runtime type checked, directly executable reference to
+        either an underlying method, constructor, field, or similar low-level operation,
+        or to a combiner operation that takes one or more method handles as input and
+        applies an operation like an argument transformation, a function compositions, etc.
+        The former kind of method handle is called a direct method handle,
+        the later is called a combiner method handle.
+        
+        To guarantee runtime type safety, any method handle embodies a method type (of type java.lang.invoke.MethodType)
+        that describe the parameter types and the return type that a method handle accept.
+        When a method handle is called, the method type is checked using different semantics depending on the
+        kind of call.
+
+        There are two kind of method handle call semantics. 
+        \begin{itemize}
+          \item the exact call semantics, in that case, the declared type of the arguments (and return value) at a call site
+                must be exactly the same as the types of the method type.
+          \item the generic call semantics, in that case, the arguments can be converted using widening primitive conversions,
+                boxing and unboxing conversions and varargs conversions as defined in the Java Language Specification.
+        \end{itemize}
+        None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
+        for classical Java method calls like invokestatic or invokevirtual
+        \footnote{There is also a minor difference between the generic call semantics and the call semantics of
+         the Java Language Specification if the method is a varargs and the call as the same number of parameters as the method.
+         The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.},
+        the exact call semantics is more strict, and the generic call semantics is more permissive.
+
+        
+
 
       \subsubsection{MethodType}
         A method type represents the arguments and return type accepted and returned by a method handle,
@@ -410,27 +554,7 @@ keyword1, keyword2
           \end{verbatim}
         }
 
-      \subsubsection{MethodHandle / MethodHandles}
-        A method handle is a typed, directly executable reference to
-        an underlying method, constructor, field, or similar low-level operation,
-        with optional transformations of arguments or return values.
-        This class represents a function pointer.
-        
-        A method handle can be create by different factory methods depending to the kind of method handle and accessibility.
-        
-
-        \begin{enumerate}
-          \item \textbf{Kinds of MethodHandle}\\
-            The MethodHandle class is composed of different types grouped into 4 kinds,
-            ``constant'', ``bound'', ``invokers'' and ``others''.
-            The three first have many specials paths in the \VM for each instruction.
-            While ``others'' have a unique path.
-          \item \textbf{Contents}\\
-            It contains a type descriptor (methodtype).
-            All instances of MethodHandle are immutable.
-            It have a pair of special invoker methods called invokeExact and invoke.
-            The invokeExact invoker accepts calls which exactly match the method handle's own type.
-        \end{enumerate}
+      
 
       \subsubsection{CallSite}
         A CallSite is a holder for a variable MethodHandle, which is called its target.
@@ -669,13 +793,13 @@ Acknowledgments, if needed.
 \makeatother
 
 %   \section{Acronyms}
-    \begin{acronym}[TDMA]
-      \acro{JCP}{Java Community Process}
-      \acro{VM}{Virtual Machine}
-      \acro{JVM}{Java Virtual Machine}
-      \acro{JSR}{Java Specification Request}
-      \acro{BSM}{Bootstrap Method}
-    \end{acronym}
+%     \begin{acronym}[TDMA]
+%       \acro{JCP}{Java Community Process}
+%       \acro{VM}{Virtual Machine}
+%       \acro{JVM}{Java Virtual Machine}
+%       \acro{JSR}{Java Specification Request}
+%       \acro{BSM}{Bootstrap Method}
+%     \end{acronym}
 
 \bibliographystyle{abbrvnat}
 
@@ -687,9 +811,14 @@ Acknowledgments, if needed.
   \bibitem{idc-website}
   IDC website (2013) - \\ \url{www.idc.com/getdoc.jsp?containerId=prUS24257413}
 
+  \bibitem{lang-groovy}
+  Groovy website - \\ \url{http://groovy.codehaus.org/}
+  
   \bibitem{wiki-android}
-  \ANDROID Wikipedia - \\ \url{en.wikipedia.org/wiki/Android_(operating_system)#Linux}
+  \ANDROID (Wikipedia) - \\ \url{en.wikipedia.org/wiki/Android\_(operating\_system)#Linux}
 
+  \bibitem{wiki-jvm-lang}
+  \JVM languages (Wikipedia) - \\ \url{https://en.wikipedia.org/wiki/List\_of\_JVM\_languages}
 %   @ARTICLE{5676144, 
 %   author={Butler, M.}, 
 %   journal={Pervasive Computing, IEEE}, 
