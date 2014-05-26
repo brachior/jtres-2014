@@ -1,0 +1,38 @@
+{\tiny \begin{verbatim}
+  private static CallSite callBootstrapMethod(MethodHandle methodHandle, Class<?> lookupClass,
+                                          String indyName, MethodType indyType,
+                                          Object[] bootstrapArguments) throws Throwable {
+    MethodHandles.Lookup lookup = new MethodHandles.Lookup(MethodHandles.Lookup.PRIVATE, lookupClass);
+    CallSite callSite;
+    try {
+      if (bootstrapArguments == null) {  // fast path
+        callSite = (CallSite) methodHandle.invokeExact(lookup, indyName, indyType);
+      } else {
+        Object[] args = new Object[3 + bootstrapArguments.length];
+        args[0] = lookup;
+        args[1] = indyName;
+        args[2] = indyType;
+        System.arraycopy(bootstrapArguments, 0, args, 3, bootstrapArguments.length);
+        callSite = (CallSite) methodHandle.invokeWithArguments(args);
+      }
+    } catch (WrongMethodTypeException e) {
+      throw new BootstrapMethodError(e);
+    }
+    if (callSite == null) {
+      throw new BootstrapMethodError("callsite is null");
+    }
+    Object mhOrType = callSite.target;
+    if (mhOrType == null) {
+      throw new BootstrapMethodError("callsite.target is null");
+    }
+    if (!(mhOrType instanceof MethodHandle)) {
+      throw new BootstrapMethodError("callsite.target is not initialized");
+    }
+    MethodHandle target = (MethodHandle) mhOrType;
+    if (target.type() != indyType) {
+      throw new BootstrapMethodError(
+          new WrongMethodTypeException("target.type " + target.type() + " type " + indyType));
+    }
+    return callSite;
+  }
+\end{verbatim} }

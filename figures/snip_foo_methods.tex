@@ -1,0 +1,34 @@
+{\tiny \begin{verbatim}
+public class RT {
+    ...
+  private static Object change(MutableCallSite callSite, Object[] arguments) throws Throwable {
+    MethodHandle target;
+    MethodType type = callSite.type();
+    Class<?> aClass = arguments[0].getClass();
+    if (aClass == Integer.class) {
+      target = TARGET_INT.asType(type);
+    } else if (aClass == String.class) {
+      target = TARGET_STRING.asType(type);
+    } else {
+      throw new LinkageError("bad receiver class");
+    }
+    MethodHandle test = MethodHandles.insertArguments(TARGET_CHECK, 1, aClass);
+    test = MethodHandles.dropArguments(test, 1, type.parameterType(1));
+    callSite.setTarget(MethodHandles.guardWithTest(test, target, callSite.getTarget()));
+    return target.invokeWithArguments(arguments);
+  }
+
+  private static Object plus(int a, int b) {
+    return a + b;
+  }
+
+  private static Object plus(String a, int b) {
+    return a + b;
+  }
+
+  private static boolean check(Object value, Class<?> clazz) {
+    return value.getClass() == clazz;
+  }
+    ...
+}
+\end{verbatim} }

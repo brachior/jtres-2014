@@ -1,24 +1,3 @@
-%-----------------------------------------------------------------------------
-%
-%               Template for sigplanconf LaTeX Class
-%
-% Name:         sigplanconf-template.tex
-%
-% Purpose:      A template for sigplanconf.cls, which is a LaTeX 2e class
-%               file for SIGPLAN conference proceedings.
-%
-% Guide:        Refer to "Author's Guide to the ACM SIGPLAN Class,"
-%               sigplanconf-guide.pdf
-%
-% Author:       Paul C. Anagnostopoulos
-%               Windfall Software
-%               978 371-2316
-%               paul@windfall.com
-%
-% Created:      15 February 2005
-%
-%-----------------------------------------------------------------------------
-
 \documentclass{sigplanconf}
 
 % The following \documentclass options may be useful:
@@ -54,43 +33,6 @@
     urlcolor=black          % color of external links
 }
 
-\usepackage{listings}
-
-\definecolor{javared}{rgb}{0.6,0,0} % for strings
-\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
-\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
-\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadocblue
-
-\lstset{language=Java,
-basicstyle= \tiny,
-keywordstyle=\color{javapurple}\bfseries,
-stringstyle=\color{javared},
-commentstyle=\color{javagreen},
-morecomment=[s][\color{javadocblue}]{/**}{*/},
-numbers=none, %numbers=left,
-numberstyle=\tiny\color{black},
-% stepnumber=2,
-% numbersep=10pt,
-tabsize=2,
-showspaces=false,
-showstringspaces=false,
-columns=fullflexible}
-
-% \usepackage{acronym}
-
-%% macros
-% \def \JCP{\ac{JCP}\xspace}
-% \def \SUN{\mbox{Sun Microsystems}\xspace}
-% \def \ORACLE{\mbox{Oracle}\xspace}
-% \def \DALVIK{\mbox{Dalvik}\xspace}
-% \def \Jsr{\ac{JSR}\xspace}
-% \def \JSR{\Jsr 292\xspace}
-% \def \GOOGLE{\mbox{Google}\xspace}
-% \def \ANDROID{\mbox{Android}\xspace}
-% \def \JVM{\ac{JVM}\xspace}
-% \def \DEX{\mbox{DEX}\xspace}
-% \def \VM{\ac{VM}\xspace}
-% \def \BSM{\ac{BSM}\xspace}
 \def \JCP{JCP\xspace}
 \def \SUN{\mbox{Sun Microsystems}\xspace}
 \def \ORACLE{\mbox{Oracle}\xspace}
@@ -204,32 +146,19 @@ keyword1, keyword2
     In Q2 2013, \ANDROID occupies almost 80\% of the market share with more than 187 million units shipped \cite{idc-website}.
     The success of \ANDROID can be explain by an open project and an open market
     which are very attractive for devices producers, service providers and application developers \cite{ieee-butler-android-landscape}.
-%     \ANDROID est l'OS mobile de Google.
-%     C'est un projet open-source appel\'e ``\ANDROID Open-Source Project'' (AOSP).
-%     Au 2\`eme trimestre 2013, \ANDROID occupe pr\`es de 80\% de part de march\'e avec plus de 187 millions d'unit\'es livr\'ees.
 
     \ANDROID mainly run on embedded environments like smartphones and tablets.
     Therefore, strong constraints apply to \ANDROID
     and it have to support ARM architecture and now Intel architecture.
-%     \ANDROID tourne principalement sur des environnements embarqu\'es tels que les t\'el\'ephones portables et les tablettes tactiles.
-%     De ce fait, des contraintes fortes s'appliquent \`a \ANDROID.
-%     Il doit donc supporter les architectures ARM m\^eme si les architectures Intel commencent \`a arriver.
     
     Even if hardware of devices which supports \ANDROID becomes more efficient,
     devices can't be as efficient as a desktop computer because of miniaturization of devices.
     Being a mobile device requires a minimal energetic consumption.
     Moreover, \ANDROID is portable and it must be adaptable to different devices.
     Forcing it to abstract itself from hardware.
-%     Meme si le materiel des appareils supportant \ANDROID devient de plus en plus performant,
-%     la miniaturisation des appareils fait qu'ils ne peuvent pas \^etre aussi performant que les ordinateurs.
-%     Le fait d'\^etre sur de machine mobile demande aussi une consommation energ\'etique minimale.
-%     De plus, \ANDROID est portable et doit pouvoir s'adapter \`a differents appareils.
-%     Ce qui l'oblige \`a s'abstraire du materiel.
 
     The \ANDROID architecture is described like a ``software stack'' (fig. \ref{ASA}).
     It's composed to:
-%     Il est descrit comme \'etant une ``pile de logiciels'' (software stack) (fig. \ref{ASA}).
-%     Cette \emph{pile} se compose
     \begin{itemize}
       \item a modified version of the Linux kernel.
         It offers an hardware abstraction,
@@ -243,18 +172,12 @@ keyword1, keyword2
         which can be assimilate to the version 5 or 6 of the Java API;
       \item an application framework to enable the making of \ANDROID applications;
       \item and some default applications.
-%      \item d'un noyau linux modifi\'e;
-%      \item d'un ensemble de biblioth\'eques \'ecrites en C/C++;
-%      \item d'une machine virtuelle (\DALVIK) et d'une API \'ecrite en Java;
-%      \item d'un framework pour concevoir des applications.
-%      \item ainsi que d'une suite d'applications par d\'efaut.
     \end{itemize}
 
     \subsection{Differences between the JVM and Dalvik}
 
       \begin{figure}[h]
-        \centering
-        \includegraphics[width=\columnwidth]{structure-jar-apk.png}
+        \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
         \caption{structure of JAR and APK files}
         \label{SJA}
       \end{figure}
@@ -269,12 +192,6 @@ keyword1, keyword2
       Among these tables, one is the table of constants (constant-pool).
       This table stores most of the constant values of the class (numbers or texts)
       and more evolved elements (data types, class names, attribute names, \dots).
-%       Le format compil\'e du code Java est donn\'e dans un fichier ``.class'' et ne contient le code que d'une seule classe.
-%       Ce fichier contient entre autre, une suite de tables contenant diverses informations et le code de la classe.
-%       Le code contient des r\'ef\'erences vers ces tables.
-%       Parmis ces tables, il y a la table des constantes (contants-pool).
-%       La table des constantes stocke la plupart des valeurs constantes dans la classe (nombres ou textes)
-%       ainsi que d'\'el\'ements plus \'evolu\'es (types de donn\'ees, noms de classes, noms d'attributs, ...).
 
       Whereas, \DEX format contains all the code of the application (fig. \ref{SJA}).
       It will be loaded in one piece.
@@ -285,8 +202,7 @@ keyword1, keyword2
       except for the primitive types which are directly encoded with the opcode.\\
 
       \begin{figure}[t]
-        \centering
-        \includegraphics[width=\columnwidth]{dex-tools-chain.png}
+        \centering \includegraphics[width=\columnwidth]{dex-tools-chain.png}
         \caption{\ANDROID application tools-chain}
         \label{DTC}
       \end{figure}
@@ -297,9 +213,7 @@ keyword1, keyword2
 
 
     \begin{figure}
-      \centering
-      \def\svgwidth{\columnwidth}
-      \includesvg{android-system-architecture}
+      \centering \def\svgwidth{\columnwidth} \includesvg{android-system-architecture}
       \caption{android system architecture \cite{wiki-android}}
       \label{ASA}
     \end{figure}
@@ -330,33 +244,16 @@ keyword1, keyword2
 
     \subsection{Example}
       Let suppose we have the following code in Groovy \cite{lang-groovy}
-      
-      {\tiny      
-      \begin{verbatim}
-  def foo(a) {
-    a + 2
-  }
 
-  println foo(9)
-  println foo("test")
-      \end{verbatim}
-      }
+      \input{figures/snip_foo_groovy}
 
       It prints 11 and test2. For the fist call to foo, a is an integer so the function + refers
       to the function +(int,int) while for the second call to foo, a is a string, so the
       function + refers to the function +(String,String).
 
       If one try to translate that code in Java bytecode, it will be something like
-      {\tiny      
-      \begin{verbatim}
-  def foo(a) {
-    aload 0   // 0 is offset of first variable, 'a' here
-    iconst_2  // load the integer constant 2
-    invokevirtual Object + (I)LObject;
-    areturn 
-  }
-      \end{verbatim}
-      }
+
+      \input{figures/snip_foo_bytecode}
 
       As you can see, the Java bytecode is typed, each instruction is prefixed 
       by the type of the operand ('a' for object, 'i' for integer, etc)
@@ -371,32 +268,8 @@ keyword1, keyword2
       that this method doesn't exist. So the bytecode verification will fail. 
 
       Another possible translation is to use a cascade of if ... instanceof.
-      {\tiny      
-      \begin{verbatim}
-  static Object plus(String v, Object v2) {
-    return v.concat(String.valueOf(v2));
-  }
 
-  static Object plus(int v, int v2) {
-    return Integer.sum(v, v2)
-  }
-
-  static Object foo(Object v, int i) {
-    if (v instanceof Integer) {
-      return plus((Integer)v, i);
-    }
-    if (v instanceof String) {
-      return plus((String)v, i);
-    }
-    throw new Error();
-  }
-
-  public static void main(String[] args) {
-    System.out.println(foo(9));
-    System.out.println(foo("bar"));
-  }
-      \end{verbatim}
-      }
+      \input{figures/snip_foo_java}
 
       While this code works, it supposes that all possible variations of + are known at compile time,
       something which is not true in most dynamic languages (Ruby, Groovy, Dart by example).
@@ -417,17 +290,8 @@ keyword1, keyword2
       stored inside the callsite object returned by the bootstrap method.
       
       For our running example, the code of foo with invokedynamic is
-     {\tiny      
-      \begin{verbatim}
-  def foo(a) {
-    aload 0
-    iconst_2 
-    invokedynamic  + (LObject;I)LObject;
-      bsm: invokestatic RT.bootstrap:(LMethodHandles$Lookup;LString;LMethodType;)LCallSite;
-    areturn 
-  }
-      \end{verbatim}
-      }
+
+      \input{figures/snip_foo_indy}
 
       The first time that foo is executed, the method bootstrap of the class RT will be called, with a lookup corresponding to the class containing foo,
       with "+" as string and a MethodType corresponding to the descriptor "(Ljava/lang/Object;I)Ljava/lang/Object;".
@@ -437,103 +301,21 @@ keyword1, keyword2
       Moreover, invokedynamic comes with an API that allow to create several data pattern
       dynamically and lazily like by example a tree of if ... instanceof branches.
 
+      % graph 1
       \begin{figure}
-        % graph 1
-        \centering \resizebox{.6\linewidth}{!}{%
-          \begin{tikzpicture}[scale=1.6]
-            \node[text width=3in,align=center](A1) at (2,-2){AsType};
-            \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
-            \node[text width=3in,align=center](A3) at (2,-4){BindTo};
-            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(MutableCallSite,Object[])Object}};
-
-            \draw[thick,->](A1) -- (A2);
-            \draw[thick,->](A2) -- (A3);
-            \draw[thick,->](A3) -- (A4);
-          \end{tikzpicture}
-        }
+        \centering \resizebox{.6\linewidth}{!}{\input{figures/tikz_ast_1}}
         \caption{}
       \end{figure}
 
+      % graph 2
       \begin{figure}
-        % graph 2
-        \centering \resizebox{\linewidth}{!}{%
-          \begin{tikzpicture}[scale=1.6]
-            \node[text width=3in,align=center](A1) at (2,-2){AsType};
-            \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
-            \node[text width=3in,align=center](A3) at (2,-4){BindTo};
-            \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(MutableCallSite,Object[])Object}};
-
-            \node[text width=1in,align=center](G1) at (1,-1){GuardWithTest};
-
-            \node[text width=3in,align=center](B1) at (0,-2){AsType};
-            \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)Object}};
-
-            \node[text width=1in,align=center](C1) at (4.5,-1){DropArguments};
-            \node[text width=3in,align=center](C2) at (4.5,-2){InsertArguments};
-            \node[text width=3in,align=center](C3) at (4.5,-3){MethodHandle\\{\it check:(Object,Class)bool}};
-
-            \draw[thick,->](A1) -- (A2);
-            \draw[thick,->](A2) -- (A3);
-            \draw[thick,->](A3) -- (A4);
-            \draw[thick,->](B1) -- (B2);
-
-            \draw[thick,->](C1) -- (C2);
-            \draw[thick,->](C2) -- (C3);
-            \draw[thick,->](G1) -- node[right] {\small (false)} (A1);
-            \draw[thick,->](G1) -- node[left]  {\small (true)}  (B1);
-            \draw[thick,->](G1) -- node[above] {\small (test)}  (C1);
-          \end{tikzpicture}
-        }
+        \centering \resizebox{\linewidth}{!}{\input{figures/tikz_ast_2}}
         \caption{}
       \end{figure}
 
+      % graph 3
       \begin{figure*}
-        % graph 3
-        \centering
-        \resizebox{.8\linewidth}{!}{%
-          \begin{tikzpicture}[scale=1.6]
-              \node[text width=3in,align=center](A1) at (2,-2){AsType};
-              \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
-              \node[text width=3in,align=center](A3) at (2,-4){BindTo};
-              \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(MutableCallSite,Object[])Object}};
-
-              \node[text width=1in,align=center](G1) at (1,-1){GuardWithTest};
-
-              \node[text width=3in,align=center](B1) at (0,-2){AsType};
-              \node[text width=3in,align=center](B2) at (0,-3){MethodHandle\\{\it plus:(int,int)Object}};
-
-              \node[text width=1in,align=center](C1) at (4.5,-1){DropArguments};
-              \node[text width=3in,align=center](C2) at (4.5,-2){InsertArguments};
-              \node[text width=3in,align=center](C3) at (4.5,-3){MethodHandle\\{\it check:(Object,Class)bool}};
-
-              \node[text width=1in,align=center](G2) at (0, 0){GuardWithTest};
-
-              \node[text width=3in,align=center](D1) at (-2,-1){AsType};
-              \node[text width=3in,align=center](D2) at (-2,-2){MethodHandle\\{\it plus:(String,int)Object}};
-
-              \node[text width=1in,align=center](E1) at (7, 0){DropArguments};
-              \node[text width=3in,align=center](E2) at (7,-1){InsertArguments};
-              \node[text width=3in,align=center](E3) at (7,-2){MethodHandle\\{\it check:(Object,Class)bool}};
-
-              \draw[thick,->](A1) -- (A2);
-              \draw[thick,->](A2) -- (A3);
-              \draw[thick,->](A3) -- (A4);
-              \draw[thick,->](B1) -- (B2);
-
-              \draw[thick,->](C1) -- (C2);
-              \draw[thick,->](C2) -- (C3);
-              \draw[thick,->](G1) -- node[right] {\small (false)} (A1);
-              \draw[thick,->](G1) -- node[left]  {\small (true)}  (B1);
-              \draw[thick,->](G1) -- node[above] {\small (test)}  (C1);
-
-              \draw[thick,->](D1) -- (D2);
-              \draw[thick,->](E1) -- (E2);
-              \draw[thick,->](E2) -- (E3);
-              \draw[thick,->](G2) -- node[right] {\small (false)} (G1);
-              \draw[thick,->](G2) -- node[left]  {\small (true)}  (D1);
-              \draw[thick,->](G2) -- node[above] {\small (test)}  (E1);
-          \end{tikzpicture}
-        }
+        \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_ast_3}}
         \caption{}
       \end{figure*}
 
@@ -554,15 +336,7 @@ keyword1, keyword2
 %         All instances of MethodType created by \DALVIK are not interned,
 %         all others are interned into a Java structure.
 
-        {\tiny
-          \begin{verbatim}
-    // "bar".concat(String.valueOf(2));
-  MethodType.methodtype(String.class,String.class);
-
-    // Integer.sum(a, 2);
-  MethodType.methodtype(int.class,int.class,int.class);
-          \end{verbatim}
-        }
+        \input{figures/snip_example_mt}
 
       \subsubsection{MethodHandle / MethodHandles}
         A method handle is a typed, directly executable reference to
@@ -608,22 +382,12 @@ keyword1, keyword2
         So, it can ``drop'' a optimized code to optimize it again.
         it is essential that all threads were aware of changes.
         Using the safe-point (a mechanism of Garbage Collector) is recommended.
-          % Le bytecode Java est compil\'e et optimis\'e \`a la vol\'ee par JIT.
-          % Il arrive cependant que le code est besoin d'\^etre d\'esoptimis\'e (to degrade).
-          % La JVM dispose de ``flags'' lui indiquant si un bout de code doit \^etre d\'esoptimis\'e.
-          % Elle peut alors ``jeter'' du code optimis\'e pour faire \`a nouveau les optimisations.
-          % Il est primordial que toutes les threads soient au courant de cette modification.
-          % Pour cela, l'utilisation du SavePoint (m\'ecanisme du Garbage Collector) est pr\'econis\'e.
 
         A SwitchPoint is an object allowing this mechanism.
         It indicates that a code must be degraded and synchronizes threads.
         The SavePoint is not necessarily available.
         An alternative is to synchronize all threads with a volatile variable.
         It contains a target method and a fallback method.
-          % Un SwitchPoint est un objet permettant ce m\'ecanisme.
-          % Il indique qu'un code doit \^etre d\'esoptimis\'e et synchronise les threads.
-          % Si le SavePoint n'est pas accessible, on peut synchroniser les threads \`a l'aide d'une variable volatile.
-          % Il contient une target et une fallback.
 %         http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/SwitchPoint.html
         
         
@@ -714,7 +478,16 @@ keyword1, keyword2
 %       \end{enumerate}
 
 
-    \subsection{Instructions}
+    \subsection{Instructions and constants}
+    
+%       La JSR 292 nécessite que la VM connaisse de nouvelles constantes et de nouvelles instructions.
+%       Deux nouvelles entrées dans le constant pool sont donc possibles, celle d'un MT et celle d'un MH.
+%       Pour les instructions, une seule a pu être ajoutée, celle d'invoke-dynamic.
+%       Cette instruction permet de faire des éditions de liens tardives et de pouvoir modifier ce lien à l'exécution.
+%       Lors du premier appel, une méthode d'amorce est appelée, cette dernière peut prendre entre 0 et 251 arguments.
+%       La méthode d'amorce s'occupe de créer le site d'appel (l'édition de lien) pour l'appel actuel et ceux futurs.
+%       ...
+    
       Even if formally the \JSR adds only one instruction to the opcode set (``invokedynamic''),
       it also enhances the semantics of the ldc (load constant) instructions to load two new constants.
       The \JSR add new instructions to the \VM opcode set like ``invokedynamic''.
@@ -757,10 +530,6 @@ keyword1, keyword2
         so, it's difficult or impossible to implement it in Java.
         They use variables in the stack.
         The code cannot be more optimized than with a VM instruction.
-          % Ces instructions sont l\`a pour simplifier les appels aux m\'ethodes MethodHandle.invokeExact et MethodHandle.invoke.
-          % En effet, elles ont des signatures polymorphes, il est donc difficile voir impossible de les impl\'ementer en Java.
-          % Ils utilisent les variables disponibles sur la pile.
-          % Le code ne peut donc pas \^etre mieux optimis\'e qu'avec l'utilisation d'une instruction dans la VM.
 
   \subsection{Probl\`eme}
 
@@ -778,99 +547,27 @@ keyword1, keyword2
 
   \subsection{opcodes / LDC}
     \begin{figure}
-      \centering
-      \begin{tabular}{|l|l|l|}
-        \hline
-        \tinyline
-          {3e}{21c}
-          {%
-            \begin{listminimal}{6cm}
-              \item const-methodtype vA, methodtype$@$BBBB
-                \item \hspace{.2in}A : destination register or pair (4 bits)
-                \item \hspace{.2in}B : methodtype reference index (16 bits)
-            \end{listminimal}
-          }
-        \tinyline
-          {3f}{21c}
-          {%
-            \begin{listminimal}{6cm}
-              \item const-methodhandle vA, methodhandle$@$BBBB
-                \item \hspace{.2in}A : destination register or pair (4 bits)
-                \item \hspace{.2in}B : methodhandle reference index (16 bits)
-            \end{listminimal}
-          }
-      \end{tabular}
-      \caption{methodtype and methodhandle ldc} % FIXME 'LDC' full-form
+      \centering \input{figures/inst_mh_mt}
+      \caption{methodtype and methodhandle ldc (load constant)}
       \label{MTMHldc}
     \end{figure}
 
     \begin{figure}
-      \centering
-      \begin{tabular}{|l|l|l|l|}
-        \hline
-        \tinyline
-          {40..41}{35c}
-          {
-            \begin{listminimal}{6cm}
-              \item invoke-\textit{kind} \{vC, vD, vE, vF, vG\}, methodtype$@$BBBB
-                \item \hspace{.1in}40 : invoke-exact
-                \item \hspace{.1in}41 : invoke-generic
-                  \item \hspace{.2in}A : argument word count (4 bits)
-                  \item \hspace{.2in}B : methodtype reference index (16 bits)
-                  \item \hspace{.2in}C..G : argument registers (4 bits each)
-            \end{listminimal}
-          }
-        \tinyline
-          {42..43}{3rc}
-          {
-            \begin{listminimal}{6cm}
-              \item invoke-\textit{kind}/range \{vCCCC .. vNNNN\}, methodtype$@$BBBB
-                \item \hspace{.1in}42 : invoke-exact/range
-                \item \hspace{.1in}43 : invoke-generic/range
-                  \item \hspace{.2in}A : argument word count (8 bits)
-                  \item \hspace{.2in}B : methodtype reference index (16 bits)
-                  \item \hspace{.2in}C : first argument register (16 bits)
-                  \item \hspace{.2in}N = A + C - 1
-            \end{listminimal}
-          }
-      \end{tabular}
+      \centering \input{figures/inst_gen_exa}
       \caption{invoke-generic/exact instruction}
       \label{INGEins}
     \end{figure}
 
     \begin{figure}
-      \centering
-      \begin{tabular}{|l|l|l|l|}
-        \hline
-        \tinyline
-          {73}{55ci}
-          {
-            \begin{listminimal}{6cm}
-              \item 73 : invoke-dynamic \{vC, vD, vE, vF, vG\}, indy$@$BBBB, \#ZZZZZZZZ
-                \item \hspace{.2in}A:C-G : like invoke-exact and invoke-generic
-                \item \hspace{.2in}B : invoke-dynamic reference index (16 bits)
-                \item \hspace{.2in}Z : callsite\_index (32 bits)
-            \end{listminimal}
-          }
-        \tinyline
-          {79}{5rci}
-          {
-            \begin{listminimal}{6cm}
-              \item 79 : invoke-dynamic/range \{vCCCC .. vNNNN\}, indy$@$BBBB, \#ZZZZZZZZ
-                \item \hspace{.2in}A:C-N : like invoke-exact/range and invoke-generic/range
-                \item \hspace{.2in}B : invoke-dynamic reference index (16 bits)
-                \item \hspace{.2in}Z : callsite\_index (32 bits)
-            \end{listminimal}
-          }
-      \end{tabular}
+      \centering \input{figures/inst_indy}
       \caption{invoke-dynamic instruction}
       \label{INDYins}
     \end{figure}
+
   \subsection{DEX header (constant-pools)}
   
     \begin{figure}[h]
-      \centering
-      \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
+      \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
       \caption{structure of new APK files}
       \label{SNA}
     \end{figure}
@@ -919,46 +616,13 @@ keyword1, keyword2
     We pile up only if we have a 'final' method handle, which is not a subtree.
 
     \begin{figure}[!h]
-      \begin{lstlisting}[language=Java]
-private static Object invokeCombiner(MethodHandle mh, Object[] arguments) throws Throwable {
-  ContextInterpret contexts = null;
-  main_loop: for (;;) {
-    if (mh.getClass() == MethodHandle.class) {
-      // method handle produced by a lookup.findXXX()
-      Object result = mh.invokeWithArguments(arguments);
-      for (;;) {
-        if (contexts != null) {
-          ContextInterpret context = contexts;
-          contexts = contexts.previous;
-          switch (context.kind) {
-            case AS_TYPE: { ... }
-            case GWT: { ... }
-            case FOLD_ARGUMENTS: { ... }
-            default:
-              throw new InternalError("shouldn't happen !");
-          }
-        }
-        return result;
-      }
-    }
-    // combiners
-    MHInterpret cmh = (MHInterpret) mh;
-    switch (cmh.interpretKind) {
-      case BIND_OBJECT: { ... }
-      case AS_TYPE: { ... }
-      case AS_COLLECTOR: { ... }
-      case AS_SPREADER: { ... }
-      case GWT: { ... }
-      case DROP_ARGUMENTS: { ... }
-      case INSERT_ARGUMENTS: { ... }
-      case FOLD_ARGUMENTS: { ... }
-        ...
-      default:
-        throw new InternalError("shouldn't happen !");
-    }
-  }
-}
-      \end{lstlisting}
+      \input{figures/snip_meth_bsm}
+      \caption{Code of bootstrap method invoker}
+      \label{intepret}
+    \end{figure}
+
+    \begin{figure}[!h]
+      \input{figures/snip_meth_interp}
       \caption{Code of method handles (combiners) interpreter}
       \label{intepret}
     \end{figure}
@@ -972,101 +636,22 @@ private static Object invokeCombiner(MethodHandle mh, Object[] arguments) throws
 \section{Conclusion}
 
 \begin{figure}
-  \begin{lstlisting}[language=Java]
-import static java.lang.invoke.MethodType.*
-
-public class RT {
-    ...
-  private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-  public static CallSite bsmMutableCS(MethodHandles.Lookup caller, String name, MethodType type)
-      throws IllegalAccessException, NoSuchMethodException {
-    MethodType mt = methodType(Object.class, MutableCallSite.class, Object[].class);
-    MethodHandle mh = lookup.findStatic(BootStraps.class, "change", mt);
-    return new CSMutableBind(type, mh);
-  }
-    ...
-}
-  \end{lstlisting}
+  \input{figures/snip_foo_bsm}
   \caption{}
 \end{figure}
 
 \begin{figure}
-  \begin{lstlisting}[language=Java]
-import static java.lang.invoke.MethodType.*
-
-public class RT {
-    ...
-  private static final MethodHandle TARGET_INT;
-  private static final MethodHandle TARGET_STRING;
-  private static final MethodHandle TARGET_CHECK;
-
-  static {
-    try {
-      TARGET_INT = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, int.class, int.class));
-      TARGET_STRING = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, String.class, int.class));
-      TARGET_CHECK = lookup.findStatic(BootStraps.class, "check", methodType(boolean.class, Object.class, Class.class));
-    } catch (NoSuchMethodException|IllegalAccessException e) {
-      throw new AssertionError(e);
-    }
-  }
-    ...
-}
-  \end{lstlisting}
+  \input{figures/snip_foo_mts}
   \caption{}
 \end{figure}
 
 \begin{figure}
-  \begin{lstlisting}[language=Java]
-public class RT {
-    ...
-  private static Object change(MutableCallSite callSite, Object[] arguments) throws Throwable {
-    MethodHandle target;
-    MethodType type = callSite.type();
-    Class<?> aClass = arguments[0].getClass();
-    if (aClass == Integer.class) {
-      target = TARGET_INT.asType(type);
-    } else if (aClass == String.class) {
-      target = TARGET_STRING.asType(type);
-    } else {
-      throw new LinkageError("bad receiver class");
-    }
-    MethodHandle test = MethodHandles.insertArguments(TARGET_CHECK, 1, aClass);
-    test = MethodHandles.dropArguments(test, 1, type.parameterType(1));
-    callSite.setTarget(MethodHandles.guardWithTest(test, target, callSite.getTarget()));
-    return target.invokeWithArguments(arguments);
-  }
-
-  private static Object plus(int a, int b) {
-    return a + b;
-  }
-
-  private static Object plus(String a, int b) {
-    return a + b;
-  }
-
-  private static boolean check(Object value, Class<?> clazz) {
-    return value.getClass() == clazz;
-  }
-    ...
-}
-  \end{lstlisting}
+  \input{figures/snip_foo_methods}
   \caption{}
 \end{figure}
 
 \begin{figure}
-  \begin{lstlisting}[language=Java]
-public class RT {
-    ...
-  private static class CSMutableBind extends MutableCallSite {
-    CSMutableBind(MethodType type, MethodHandle mh) {
-      super(type);
-      setTarget(mh.bindTo(this).asCollector(Object[].class, type.parameterCount()).asType(type));
-    }
-  }
-    ...
-}
-  \end{lstlisting}
+  \input{figures/snip_foo_callsite}
   \caption{}
 \end{figure}
 

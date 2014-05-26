@@ -1,0 +1,12 @@
+{\tiny \begin{verbatim}
+public class RT {
+    ...
+  private static class CSMutableBind extends MutableCallSite {
+    CSMutableBind(MethodType type, MethodHandle mh) {
+      super(type);
+      setTarget(mh.bindTo(this).asCollector(Object[].class, type.parameterCount()).asType(type));
+    }
+  }
+    ...
+}
+\end{verbatim} }

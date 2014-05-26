@@ -1,0 +1,24 @@
+{\tiny \begin{verbatim}
+  static Object plus(String v, Object v2) {
+    return v.concat(String.valueOf(v2));
+  }
+
+  static Object plus(int v, int v2) {
+    return Integer.sum(v, v2)
+  }
+
+  static Object foo(Object v, int i) {
+    if (v instanceof Integer) {
+      return plus((Integer)v, i);
+    }
+    if (v instanceof String) {
+      return plus((String)v, i);
+    }
+    throw new Error();
+  }
+
+  public static void main(String[] args) {
+    System.out.println(foo(9));
+    System.out.println(foo("bar"));
+  }
+\end{verbatim} }

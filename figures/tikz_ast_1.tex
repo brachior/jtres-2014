@@ -1,0 +1,10 @@
+\begin{tikzpicture}[scale=1.6]
+  \node[text width=3in,align=center](A1) at (2,-2){AsType};
+  \node[text width=3in,align=center](A2) at (2,-3){AsCollector};
+  \node[text width=3in,align=center](A3) at (2,-4){BindTo};
+  \node[text width=3in,align=center](A4) at (2,-5){MethodHandle\\{\it change:(MutableCallSite,Object[])Object}};
+
+  \draw[thick,->](A1) -- (A2);
+  \draw[thick,->](A2) -- (A3);
+  \draw[thick,->](A3) -- (A4);
+\end{tikzpicture}

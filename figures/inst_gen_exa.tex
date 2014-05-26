@@ -1,0 +1,28 @@
+\begin{tabular}{|l|l|l|l|}
+  \hline
+  \tinyline
+    {40..41}{35c}
+    {
+      \begin{listminimal}{6cm}
+        \item invoke-\textit{kind} \{vC, vD, vE, vF, vG\}, methodtype$@$BBBB
+          \item \hspace{.1in}40 : invoke-exact
+          \item \hspace{.1in}41 : invoke-generic
+            \item \hspace{.2in}A : argument word count (4 bits)
+            \item \hspace{.2in}B : methodtype reference index (16 bits)
+            \item \hspace{.2in}C..G : argument registers (4 bits each)
+      \end{listminimal}
+    }
+  \tinyline
+    {42..43}{3rc}
+    {
+      \begin{listminimal}{6cm}
+        \item invoke-\textit{kind}/range \{vCCCC .. vNNNN\}, methodtype$@$BBBB
+          \item \hspace{.1in}42 : invoke-exact/range
+          \item \hspace{.1in}43 : invoke-generic/range
+            \item \hspace{.2in}A : argument word count (8 bits)
+            \item \hspace{.2in}B : methodtype reference index (16 bits)
+            \item \hspace{.2in}C : first argument register (16 bits)
+            \item \hspace{.2in}N = A + C - 1
+      \end{listminimal}
+    }
+\end{tabular}

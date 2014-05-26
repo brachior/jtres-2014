@@ -1,0 +1,21 @@
+{\tiny \begin{verbatim}
+import static java.lang.invoke.MethodType.*
+
+public class RT {
+    ...
+  private static final MethodHandle TARGET_INT;
+  private static final MethodHandle TARGET_STRING;
+  private static final MethodHandle TARGET_CHECK;
+
+  static {
+    try {
+      TARGET_INT = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, int.class, int.class));
+      TARGET_STRING = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, String.class, int.class));
+      TARGET_CHECK = lookup.findStatic(BootStraps.class, "check", methodType(boolean.class, Object.class, Class.class));
+    } catch (NoSuchMethodException|IllegalAccessException e) {
+      throw new AssertionError(e);
+    }
+  }
+    ...
+}
+\end{verbatim} }
