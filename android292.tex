@@ -479,57 +479,27 @@ keyword1, keyword2
 
 
     \subsection{Instructions and constants}
-    
-%       La JSR 292 nécessite que la VM connaisse de nouvelles constantes et de nouvelles instructions.
-%       Deux nouvelles entrées dans le constant pool sont donc possibles, celle d'un MT et celle d'un MH.
-%       Pour les instructions, une seule a pu être ajoutée, celle d'invoke-dynamic.
-%       Cette instruction permet de faire des éditions de liens tardives et de pouvoir modifier ce lien à l'exécution.
-%       Lors du premier appel, une méthode d'amorce est appelée, cette dernière peut prendre entre 0 et 251 arguments.
-%       La méthode d'amorce s'occupe de créer le site d'appel (l'édition de lien) pour l'appel actuel et ceux futurs.
-%       ...
-    
-      Even if formally the \JSR adds only one instruction to the opcode set (``invokedynamic''),
-      it also enhances the semantics of the ldc (load constant) instructions to load two new constants.
-      The \JSR add new instructions to the \VM opcode set like ``invokedynamic''.
-      The ``ldc'' instruction has been enlarge to accept few new instructions.
-      And some native methods are used as instructions.
+      With the \JSR, the \VM have to know new constants and new instructions.
+      Two new entries into the constant pool can be done, one for a method type and another for a method handle.
 
-      \subsubsection{ldc\_methodtype}
-        Like classes and strings, method types can also be
-        represented directly in a class file's constant pool as constants.
-        A method type may be loaded by an ldc instruction which refers to a suitable
-        CONSTANT\_MethodType constant pool entry.
+      An only one instruction has been added on top of the \VM, ``invokedynamic''.
+      This instruction allows to do a late linker and allows to modify this link at runtime.
+      When the \VM reads an ``invokedynamic'' instruction, a bootstrap method, defined in the instruction, is called.
+      This method creates a call site for the actual call and the nexts.
+      A bootstrap method can take 0 to 251 arguments.
 
-      \subsubsection{ldc\_methodhandle}
-        % TODO footnote 'polymorphic signature'
-        Java code can create a constant native method with a polymorphic signature.
-        A method handle that directly accesses any
-        method, constructor, or field that is accessible to that code.
-        Method handles that correspond to accessible fields, methods, and constructors
-        can also be represented directly in a class file's constant pool
-        as constants to be loaded by ldc bytecodes.
+      Two other instructions has been added as native methods, ``invoke'' and ``invokeExact''.
+      These instructions handle function pointers (method handle),
+      this is why the compiler cannot find the real method to call and cannot find the signature.
+      So, the compiler creates the signature corresponding to the actual context
+      and assumes that the method (method handle) will be on the stack at runtime.
+      This process is called ``method with a polymorphic signature''.
 
-        A new type of constant pool entry, CONSTANT\_MethodHandle,
-        refers directly to an associated CONSTANT\_Methodref,
-        CONSTANT\_InterfaceMethodref or CONSTANT\_Fieldref constant pool entry.
-
-      \subsubsection{invokedynamic}
-        An invokedynamic instruction allows to call a method dynamically.
-
-        Before the first call, It must be initialized with a bootstrap method.
-        This bootstrap method can take 0 to 251 arguments.
-        Then, a call site is produced and replaces the first call.
-        Moreover, a bootstrap method may be only an invokeStatic or an newInvokeSpecial.
-
-        It needs a descriptor of the resolved type of call, the target's name and a bootstrap method.
-
-      \subsubsection{invokeVirtual on MH.invokeExact and MH.invoke}
-        These instructions are here to make simple method calls\\
-        \mbox{\textit{MethodHandle.invokeExact}} and \mbox{\textit{MethodHandle.invoke}}.
-        Indeed, they are methods with a polymorphic signatures,
-        so, it's difficult or impossible to implement it in Java.
-        They use variables in the stack.
-        The code cannot be more optimized than with a VM instruction.
+%       Even if formally the \JSR adds only one instruction to the opcode set (``invokedynamic''),
+%       it also enhances the semantics of the ldc (load constant) instructions to load two new constants.
+%       The \JSR add new instructions to the \VM opcode set like ``invokedynamic''.
+%       The ``ldc'' instruction has been enlarge to accept few new instructions.
+%       And some native methods are used as instructions.
 
   \subsection{Probl\`eme}
 
@@ -545,24 +515,10 @@ keyword1, keyword2
 
 \section{Nouveau DEX}
 
-  \subsection{opcodes / LDC}
-    \begin{figure}
-      \centering \input{figures/inst_mh_mt}
-      \caption{methodtype and methodhandle ldc (load constant)}
-      \label{MTMHldc}
-    \end{figure}
-
-    \begin{figure}
-      \centering \input{figures/inst_gen_exa}
-      \caption{invoke-generic/exact instruction}
-      \label{INGEins}
-    \end{figure}
-
-    \begin{figure}
-      \centering \input{figures/inst_indy}
-      \caption{invoke-dynamic instruction}
-      \label{INDYins}
-    \end{figure}
+  \subsection{opcodes / constants}
+    The \JSR needs two new constants (``const-methodtype'' and ``const-methodhandle'') and a new instruction (``invoke-dynamic'').
+    Regarding the two methods ``invoke'' and ``invokeExact'', we do the choice to add two new instructions:
+    ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method (that avoids all possible mix-ups).
 
   \subsection{DEX header (constant-pools)}
   
@@ -586,14 +542,31 @@ keyword1, keyword2
 
 \section{Impl\'ementations d'invoke-kind et des LDC}
 
-  \subsection{LDC}
+  \subsection{const-methodtype}
+  \subsection{const-methodhandle}
 
-    \subsubsection{MethodType (intern\'e ou pas)}
-    \subsubsection{MethodHandle}
+    \begin{figure}[!h]
+      \centering \input{figures/inst_mh_mt}
+      \caption{methodtype and methodhandle ldc (load constant)}
+      \label{MTMHldc}
+    \end{figure}
 
   \subsection{invoke-generic}
   \subsection{invoke-exact}
+
+    \begin{figure}[!h]
+      \centering \input{figures/inst_gen_exa}
+      \caption{invoke-generic/exact instruction}
+      \label{INGEins}
+    \end{figure}
+
   \subsection{invoke-dynamic}
+
+    \begin{figure}[!h]
+      \centering \input{figures/inst_indy}
+      \caption{invoke-dynamic instruction}
+      \label{INDYins}
+    \end{figure}
 
     \subsubsection{tableau des MethodHandle (volatile)}
     \subsubsection{CAS (bootstrap)}
