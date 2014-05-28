@@ -1,0 +1,40 @@
+{\tiny \begin{verbatim}
+  public Object invokeWithArguments(Object... arguments) throws Throwable {
+    switch (arguments.length) {
+      case 0: case 1: case  2: case  3: case  4: case  5: case  6: case  7: case  8:
+      case 9: case 10: case 11: case 12: case 13: case 14: case 15: case 16:
+        return invokeWithLessThan17Arguments(arguments);
+      case 17: case 18: case 19: case 20: case 21: case 22: case 23: case 24:
+      case 25: case 26: case 27: case 28: case 29: case 30: case 31: case 32:
+        return invokeWithLessThan33Arguments(arguments);
+
+          ...
+
+      case 241: case 242: case 243: case 244: case 245: case 246: case 247: case 248:
+      case 249: case 250: case 251: case 252: case 253: case 254:
+        return invokeWithLessThan255Arguments(arguments);
+      default:
+        throw new ClassFormatError("Too many arguments (" + arguments.length + ")");
+    }
+  }
+
+  private Object invokeWithLessThan17Arguments(Object... arguments) throws Throwable {
+    switch(arguments.length) {
+      case 0:
+        return this.invoke();
+      case 1:
+        return this.invoke(arguments[0]);
+      case 2:
+        return this.invoke(arguments[0], arguments[1]);
+      case 3:
+        return this.invoke(arguments[0], arguments[1], arguments[2]);
+
+          ...
+
+      default:
+        throw new ClassFormatError("Too many arguments (" + arguments.length + ")");
+    }
+  }
+
+    ...
+\end{verbatim} }

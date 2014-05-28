@@ -1,8 +1,10 @@
 {\tiny \begin{verbatim}
+  import static java.lang.invoke.MethodHandles.Lookup.PRIVATE;
+    ...
   private static CallSite callBootstrapMethod(MethodHandle methodHandle, Class<?> lookupClass,
                                           String indyName, MethodType indyType,
                                           Object[] bootstrapArguments) throws Throwable {
-    MethodHandles.Lookup lookup = new MethodHandles.Lookup(MethodHandles.Lookup.PRIVATE, lookupClass);
+    MethodHandles.Lookup lookup = new MethodHandles.Lookup(PRIVATE, lookupClass);
     CallSite callSite;
     try {
       if (bootstrapArguments == null) {  // fast path

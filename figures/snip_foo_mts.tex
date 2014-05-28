@@ -9,9 +9,12 @@ public class RT {
 
   static {
     try {
-      TARGET_INT = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, int.class, int.class));
-      TARGET_STRING = lookup.findStatic(BootStraps.class, "plus", methodType(Object.class, String.class, int.class));
-      TARGET_CHECK = lookup.findStatic(BootStraps.class, "check", methodType(boolean.class, Object.class, Class.class));
+      MethodType mt = methodType(Object.class, int.class, int.class);
+      TARGET_INT = lookup.findStatic(BootStraps.class, "plus", mt);
+      mt = methodType(Object.class, String.class, int.class);
+      TARGET_STRING = lookup.findStatic(BootStraps.class, "plus", mt);
+      mt = methodType(boolean.class, Object.class, Class.class);
+      TARGET_CHECK = lookup.findStatic(BootStraps.class, "check", mt);
     } catch (NoSuchMethodException|IllegalAccessException e) {
       throw new AssertionError(e);
     }

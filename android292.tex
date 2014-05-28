@@ -77,6 +77,8 @@
 }%
 { \\ \end{list} \end{minipage} }
 
+\newcommand{\fixme}[1]{{\color{red} // FIXME #1}\\}
+
 \begin{document}
 
 \special{papersize=8.5in,11in}
@@ -574,6 +576,49 @@ keyword1, keyword2
 \section{Impl\'ementations des Combinateurs}
 
   \subsection{Impl\'ementation g\'en\'erale}
+
+    \subsubsection{TEMP: callBootstrapMethod et invokeWithArguments}
+    When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated (fig. \ref{bsm}).
+    A bootstrap method needs at least three arguments:
+    \begin{itemize}
+      \item a lookup (Lookup) to find the bootstrap method;
+      \item a name (String) to know what the bootstrap method have to do;
+      \item a type (MethodType) to identify the method;
+      \item and other arguments.
+    \end{itemize}
+
+    \fixme{MethodHandles.Lookup.PRIVATE ???}
+    We treat the bootstrap method differently if arguments are given or not.
+    If no arguments are given, we call directly the bootstrap method
+    with an ``invokeExact'' and the basic arguments (types are known).
+
+    Else, we add the basic arguments into the other arguments
+    and because arguments are seen like an array of Object,
+    we have to call the ``invoke'' method.
+    The ``invoke'' method need the true signature when we call it,
+    so we have to dispatch arguments to create the real signature.
+    To do that, we call the method ``invokeWithArguments'' (fig. \ref{IWA})
+    which call the method invoke according to the number of arguments.
+    ``invokeWithArguments'' is separated on many functions to allow optimizations by the JIT.
+
+    When the callsite is returned, we verify the integrity of the callsite.
+    We check if it or its target isn't null and if the target's type and the type given are the same.
+
+    \fixme{mhOrType ??? pourquoi ``type'' ?}
+
+    \begin{figure}[!h]
+      \input{figures/snip_meth_bsm}
+      \caption{Code of bootstrap method invoker}
+      \label{bsm}
+    \end{figure}
+
+    \begin{figure}[!h]
+      \input{figures/snip_meth_iwa}
+      \caption{Code of invokeWithArguments}
+      \label{IWA}
+    \end{figure}
+
+    \subsubsection{TEMP: interpreteur}
     The Java interpreter (fig. \ref{intepret}) is used to interpret method handle trees.
     It is implemented using a continuation mechanism (context) to treat the return value.
     Each combiner execute its own code and can produce a 'context'.
@@ -587,12 +632,6 @@ keyword1, keyword2
     
     This implementation avoids to pile up a call in the stack for each method handle.
     We pile up only if we have a 'final' method handle, which is not a subtree.
-
-    \begin{figure}[!h]
-      \input{figures/snip_meth_bsm}
-      \caption{Code of bootstrap method invoker}
-      \label{intepret}
-    \end{figure}
 
     \begin{figure}[!h]
       \input{figures/snip_meth_interp}
