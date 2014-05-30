@@ -178,12 +178,6 @@ keyword1, keyword2
 
     \subsection{Differences between the JVM and Dalvik}
 
-      \begin{figure}[h]
-        \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
-        \caption{structure of JAR and APK files}
-        \label{SJA}
-      \end{figure}
-
       The main difference between these two machines is that \DALVIK is a register based machine while the \JVM is stack based.
       A stack based VM uses more instructions to manipulate data and to implement Java code than a register based VM.
       But the register based VM instructions tends to be larger \cite{ieee-paul-kundu-energy-perspective}
@@ -195,13 +189,20 @@ keyword1, keyword2
       This table stores most of the constant values of the class (numbers or texts)
       and more evolved elements (data types, class names, attribute names, \dots).
 
+      \begin{figure}[h]
+        \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
+        \caption{structure of JAR and APK files}
+        \label{SJA}
+      \end{figure}
+
       Whereas, \DEX format contains all the code of the application (fig. \ref{SJA}).
       It will be loaded in one piece.
       It is a read-only format, so the code can't be changed at runtime.
       Duplicate constants such as strings used in multiple class files
       are included only once in the \DEX file to save space.
       Unlike the \JVM, \DALVIK uses one constant-pool by type of constant
-      except for the primitive types which are directly encoded with the opcode.\\
+      except for the primitive types which are directly encoded with the opcode.
+      It means more smaller indexes for instructions.\\
 
       \begin{figure}[t]
         \centering \includegraphics[width=\columnwidth]{dex-tools-chain.png}
@@ -266,8 +267,8 @@ keyword1, keyword2
       The code above doesn't work because invokevirtual is an existing Java bytecode that call
       a virtual method using the Java semantics so the Virtual Machine or more precisely
       the bytecode verifier will check that there is a method '+' on java.lang.Object
-      that takes an int and return an Object. If you have used Java, you alreadty know
-      that this method doesn't exist. So the bytecode verification will fail. 
+      that takes an int and returns an Object. If you have used Java, you already know
+      that this method doesn't exist. So the bytecode verification will fail.
 
       Another possible translation is to use a cascade of if ... instanceof.
 
@@ -341,6 +342,7 @@ keyword1, keyword2
         \input{figures/snip_example_mt}
 
       \subsubsection{MethodHandle / MethodHandles}
+        \label{MH}
         A method handle is a typed, directly executable reference to
         an underlying method, constructor, field, or similar low-level operation,
         with optional transformations of arguments or return values.
@@ -520,14 +522,38 @@ keyword1, keyword2
   \subsection{opcodes / constants}
     The \JSR needs two new constants (``const-methodtype'' and ``const-methodhandle'') and a new instruction (``invoke-dynamic'').
     Regarding the two methods ``invoke'' and ``invokeExact'', we do the choice to add two new instructions:
-    ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method (that avoids all possible mix-ups).
+    ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method (that avoids all possible mix-ups with the reflection API).
 
   \subsection{DEX header (constant-pools)}
-  
+
+    Dalvik have a constant pool for each entry type.
+    So we have to add four constant pools (fig. \ref{SNA}), one for each entry we need
+    (MethodType, MethodHandle, InvokeDynamic and Bootstrap Arguments).
+
     \begin{figure}[h]
       \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
       \caption{structure of new APK files}
       \label{SNA}
+    \end{figure}
+
+    The MethodType entry contains an index into the prototype constant pool.
+    The MethodHandle entry contains the method handle kind (cf. \ref{MH})
+    and an index into the method or the field constant pool, according to the kind.
+    The InvokeDynamic entry contains indexes into the string, the prototype,
+    the method handle and the bootstrap arguments constant pools.
+    And the Bootstrap arguments entry contains its arguments number
+    and a data block representing the arguments.
+    Each argument is encoded with a tag
+    followed by a constant pool index or the primitive value according to the tag.
+    (fig. \ref{DVMstruct})
+
+    \begin{figure}[!h]
+      \centering \input{figures/snip_dvm_struct_mt}
+      \centering \input{figures/snip_dvm_struct_mh}
+      \centering \input{figures/snip_dvm_struct_indy}
+      \centering \input{figures/snip_dvm_struct_bsm}
+      \caption{MethodType, MethodHandle, InvokeDynamic and Bootstrap arguments constant pool entries}
+      \label{DVMstruct}
     \end{figure}
 
   \subsection{Class header}
@@ -581,13 +607,13 @@ keyword1, keyword2
     When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated (fig. \ref{bsm}).
     A bootstrap method needs at least three arguments:
     \begin{itemize}
-      \item a lookup (Lookup) to find the bootstrap method;
-      \item a name (String) to know what the bootstrap method have to do;
-      \item a type (MethodType) to identify the method;
-      \item and other arguments.
+      \item a lookup (Lookup) a security token object encapsulating access rigths of class containing the invokedynamic opcode;
+      \item an arbitrary name (String) specified as parameter of the invokedynamic opcode;
+      \item a method type (MethodType), a reified object of the descriptor specified as parameter of the invokedynamic opcode;
+      \item and any constant values specified as bootstrap arguments of the invokedynamic opcode.
     \end{itemize}
 
-    \fixme{MethodHandles.Lookup.PRIVATE ???}
+    At first, we have to create the lookup from the declaring class given.
     We treat the bootstrap method differently if arguments are given or not.
     If no arguments are given, we call directly the bootstrap method
     with an ``invokeExact'' and the basic arguments (types are known).
@@ -595,7 +621,7 @@ keyword1, keyword2
     Else, we add the basic arguments into the other arguments
     and because arguments are seen like an array of Object,
     we have to call the ``invoke'' method.
-    The ``invoke'' method need the true signature when we call it,
+    The ``invoke'' method needs the true signature when we call it,
     so we have to dispatch arguments to create the real signature.
     To do that, we call the method ``invokeWithArguments'' (fig. \ref{IWA})
     which call the method invoke according to the number of arguments.
@@ -603,8 +629,7 @@ keyword1, keyword2
 
     When the callsite is returned, we verify the integrity of the callsite.
     We check if it or its target isn't null and if the target's type and the type given are the same.
-
-    \fixme{mhOrType ??? pourquoi ``type'' ?}
+    Because the target callsite could be uninitialized we have to check if the target contains a method handle or a method type.
 
     \begin{figure}[!h]
       \input{figures/snip_meth_bsm}
@@ -619,7 +644,7 @@ keyword1, keyword2
     \end{figure}
 
     \subsubsection{TEMP: interpreteur}
-    The Java interpreter (fig. \ref{intepret}) is used to interpret method handle trees.
+    The method handle interpreter written in Java (fig. \ref{intepret}) is used to interpret method handle trees which start by a combiner.
     It is implemented using a continuation mechanism (context) to treat the return value.
     Each combiner execute its own code and can produce a 'context'.
     For example, AsType converts arguments and produces a context if it has to convert the return value.
