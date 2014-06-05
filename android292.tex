@@ -505,32 +505,39 @@ keyword1, keyword2
 %       The ``ldc'' instruction has been enlarge to accept few new instructions.
 %       And some native methods are used as instructions.
 
-  \subsection{Probl\`eme}
+  \subsection{Problemes and solutions}
 
-    \subsubsection{2 impl\'ementations (J9/HotSpot)}
-    \subsubsection{Dalivk = VM sp\'ecifique}
-    \subsubsection{non r\'eutilisation des techniques}
-    \subsubsection{pas le m\^eme format DEX}
+    Currently only the desktop (HotSpot) and the server (J9) version of the JVM have a complete implementation of the JSR 292.
+    These implementations use mechanisms that we cannot reuse with Dalvik (code generation, rewriting, \dots)
+    because of the power costs and computing restrictions.
+    So, Dalvik is seen like a specific virtual machine from language developers.
+    
+    Our solution is to make an implementation of the JSR 292 for Android.
+    But, because Android have many constraints from its environment,
+    we have to reinterpret the JSR.
+    The API is the same, but not the VM specification.
+    
+    To do this, we made a new DEX format with new instructions, new constants, \dots
+    And we made an specific interpreter, written in Java, which execute method handle trees (combiners).
 
-  \subsection{Solutions}
+\section{A new DEX format}
 
-    \subsubsection{nouveau format DEX}
-    \subsubsection{nouvelles fa\c cons d'impl\'ementations}
-
-\section{Nouveau DEX}
+  New instructions and new constants imply a new format of the DEX file.
+  We enhance the opcode set, add constant-pools and change the header of classes.
+  But we have to maintained the compatibility with the pre-JSR 292 APK files.
 
   \subsection{opcodes / constants}
     The \JSR needs two new constants (``const-methodtype'' and ``const-methodhandle'') and a new instruction (``invoke-dynamic'').
     Regarding the two methods ``invoke'' and ``invokeExact'', we do the choice to add two new instructions:
     ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method (that avoids all possible mix-ups with the reflection API).
 
-  \subsection{DEX header (constant-pools)}
+  \subsection{constant-pools}
 
     Dalvik have a constant pool for each entry type.
     So we have to add four constant pools (fig. \ref{SNA}), one for each entry we need
     (MethodType, MethodHandle, InvokeDynamic and Bootstrap Arguments).
 
-    \begin{figure}[h]
+    \begin{figure}[!h]
       \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
       \caption{structure of new APK files}
       \label{SNA}
@@ -544,8 +551,8 @@ keyword1, keyword2
     And the Bootstrap arguments entry contains its arguments number
     and a data block representing the arguments.
     Each argument is encoded with a tag
-    followed by a constant pool index or the primitive value according to the tag.
-    (fig. \ref{DVMstruct})
+    followed by a constant pool index or the primitive value according to the tag
+    (fig. \ref{DVMstruct}).
 
     \begin{figure}[!h]
       \centering \input{figures/snip_dvm_struct_mt}
@@ -557,27 +564,52 @@ keyword1, keyword2
     \end{figure}
 
   \subsection{Class header}
-  \subsection{retro-compatibility}
+
+    \fixme{A TRADUIRE}
+    Un call site est lie a une instruction il n'est donc pas interresant d'avoir un constant-pool pour les stocker.
+    Il y a trois facons de stocker les call sites: le header du DEX; la methode ou se situe l'instruction ou dans la classe contenant l'instruction.
+    Le probleme de stocker dans le DEX est qu'il regroupe toutes les classes d'un programme
+    et qu'une classe peut contenir jusqu'a 65535 methodes (jvms 4.11: http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html\#jvms-4.11),
+    une methode pouvant contenir plusieurs call sites, le tableau pourrait rapidement exploser.
+    La meilleur solution serait de stocker les call sites au niveau des methodes.
+    Le probleme est que Dalvik ne possede pas de mecanisme lazy pour la creation des methodes.
+    En effet, toutes les methodes d'une classe sont creees lors de la creation de la classe.
+    Stocker les call sites dans les methodes revient donc trop chere en terme d'implementation.
+    La solution retenue est donc de stocker les call sites au niveau du header de chaque classe.
+
+  \subsection{Pre-JSR compatibility}
     Our \ANDROID version understands post-invokedynamic APK.
     We need to modify the APK to add missing constant pools and CallSite tables.
     However an APK is read-only.
     But the installation time does optimizations and has to modify the APK.
     So we take advantage to the installation time to add our work.
     We just simulate an APK without MethodHandle, MethodType, CallSite, \dots
-    Only header and classes change, we add empty constant pools to the header
+    Only the DEX header and classes header change, we add empty constant pools to the header
     and an empty table to each class representing the CallSite table.
     No offset changes, just the size of header and classes.
 
-\section{Impl\'ementations d'invoke-kind et des LDC}
+\section{New constants and new invoke instructions}
 
-  \subsection{const-methodtype}
-  \subsection{const-methodhandle}
+  \fixme{A TRADUIRE}
+  Les seuls MH constants utilises sont ceux crees via les ldc et dans les bsm arguments.
+  Les ldc des MH apparaissent peu souvent et les bsm ne sont utilisees qu'une fois.
+  Il n'est donc pas necessaire de faire un cache pour les MethodHandles.
+  De ce fait, resoudre un MethodHandle consiste a aller chercher les informations dans son constant-pool et de le creer.
+  La creation d'un MH ne peut se faire qu'en Java, il est donc necessaire de faire un up call.
 
-    \begin{figure}[!h]
-      \centering \input{figures/inst_mh_mt}
-      \caption{methodtype and methodhandle ldc (load constant)}
-      \label{MTMHldc}
-    \end{figure}
+  La comparaison entre MethodTypes arrive tres frequemment.
+  Pour simplifier et optimiser ces tests, il faut maintenir un cache s'assurant que deux MethodTypes decrivant la meme signature soient uniques.
+  De ce fait, tous les MT sont mis dans un cache.
+  Etant donne qu'un MT peut etre cree cote Java et cote VM, le cache est gere cote Java (plus simple).
+  Le test entre deux MethodTypes devient un simple test d'egalité sur les pointeurs.
+  Resoudre un MethodType consiste a chercher la signature correspondante dans le constant-pool associe et de creer le MT en Java (up call).
+  On differencie deux types de MT, ceux crees par la VM (strong) qui ne doivent pas etre liberes par le GC, et les autres (weak) que le GC peut liberer si besoin.
+
+  \begin{figure}[!h]
+    \centering \input{figures/inst_mh_mt}
+    \caption{methodtype and methodhandle ldc (load constant)}
+    \label{MTMHldc}
+  \end{figure}
 
   \subsection{invoke-generic}
   \subsection{invoke-exact}
