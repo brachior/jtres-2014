@@ -335,17 +335,32 @@ keyword1, keyword2
 
       \subsubsection{MethodHandle / MethodHandles}
         \label{MH}
-        A method handle is a typed, directly executable reference to
-        an underlying method, constructor, field, or similar low-level operation,
-        with optional transformations of arguments or return values.
-        This class represents a function pointer.
-        A method handle can be create by different factory methods depending to the kind of method handle and accessibility.
+        A method handle is a runtime type checked, directly executable reference to
+        either an underlying method, constructor, field, or similar low-level operation,
+        or to a combiner operation that takes one or more method handles as input and
+        applies an operation like an argument transformation, a function compositions, etc.
+        The former kind of method handle is called a direct method handle,
+        the later is called a combiner method handle.
 
-        We can distinguish two kinds of method handle:
-        the one which do a direct call to a method or to a field access, this method handle is final;
-        and the one which manipulate arguments, they are called ``combinors''.
-        The combinors contains at least one final method handle and can be represent by a tree.
+        To guarantee runtime type safety, any method handle embodies a method type (of type java.lang.invoke.MethodType)
+        that describe the parameter types and the return type that a method handle accept.
+        When a method handle is called, the method type is checked using different semantics depending on the
+        kind of call.
 
+        There are two kind of method handle call semantics.
+        \begin{itemize}
+          \item the exact call semantics, in that case, the declared type of the arguments (and return value) at a call site
+                must be exactly the same as the types of the method type.
+          \item the generic call semantics, in that case, the arguments can be converted using widening primitive conversions,
+                boxing and unboxing conversions and varargs conversions as defined in the Java Language Specification.
+        \end{itemize}
+        None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
+        for classical Java method calls like invokestatic or invokevirtual
+        \footnote{There is also a minor difference between the generic call semantics and the call semantics of
+         the Java Language Specification if the method is a varargs and the call as the same number of parameters as the method.
+         The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.},
+        the exact call semantics is more strict, and the generic call semantics is more permissive. 
+        
         In our example, we want to call a method which takes an Object and an integer and which returns an Object: (Object,I)Object.
         We need to resolve which right method we have to call (addition or concatenation).
         To do that, we write a method which will create the right method handle called ``change'' (detailed after).
