@@ -1,11 +1,4 @@
-\documentclass{sigplanconf}
-
-% The following \documentclass options may be useful:
-
-% preprint      Remove this option only once the paper is in final form.
-% 10pt          To set in 10-point type instead of 9-point.
-% 11pt          To set in 11-point type instead of 9-point.
-% authoryear    To obtain author/year citation style instead of numeric.
+\documentclass{sig-alternate}
 
 \usepackage{tikz}
 \usepackage{amsmath}
@@ -34,15 +27,15 @@
 }
 
 \def \JCP{JCP\xspace}
-\def \SUN{\mbox{Sun Microsystems}\xspace}
-\def \ORACLE{\mbox{Oracle}\xspace}
-\def \DALVIK{\mbox{Dalvik}\xspace}
+\def \SUN{Sun Microsystems\xspace}
+\def \ORACLE{Oracle\xspace}
+\def \DALVIK{Dalvik\xspace}
 \def \Jsr{JSR\xspace}
 \def \JSR{\Jsr 292\xspace}
-\def \GOOGLE{\mbox{Google}\xspace}
-\def \ANDROID{\mbox{Android}\xspace}
+\def \GOOGLE{Google\xspace}
+\def \ANDROID{Android\xspace}
 \def \JVM{JVM\xspace}
-\def \DEX{\mbox{DEX}\xspace}
+\def \DEX{DEX\xspace}
 \def \VM{VM\xspace}
 \def \BSM{BSM\xspace}
 
@@ -81,40 +74,30 @@
 
 \begin{document}
 
-\special{papersize=8.5in,11in}
+\conferenceinfo{WOODSTOCK}{'97 El Paso, Texas USA}
+%\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
+%\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
+% --- End of Author Metadata ---
+
+\title{Alternate {\ttlit ACM} SIG Proceedings Paper in LaTeX Format \titlenote{(Produces the permission block, and copyright information). For use with SIG-ALTERNATE.CLS. Supported by ACM.}}
+\subtitle{[Extended Abstract]
+\titlenote{A full version of this paper is available as \textit{Author's Guide to Preparing ACM SIG Proceedings Using \LaTeX$2_\epsilon$\ and BibTeX} at \texttt{www.acm.org/eaddress.htm}}}
+
+\numberofauthors{3}
+\author{
+  \alignauthor Gilles Roussel\\
+    \affaddr{University Paris-Est Marne-la-Vallee}\\
+    \email{roussel@univ-mlv.fr}
+  \alignauthor Remi Forax\\
+    \affaddr{University Paris-Est Marne-la-Vallee}\\
+    \email{forax@univ-mlv.fr}
+  \alignauthor Jerome Pilliet\\
+    \affaddr{University Paris-Est Marne-la-Vallee}\\
+    \email{pilliet@univ-mlv.fr}
+}
+
 \setlength{\pdfpageheight}{\paperheight}
 \setlength{\pdfpagewidth}{\paperwidth}
-
-\conferenceinfo{PPPJ '14}{Month d--d, 20yy, City, ST, Country} 
-\copyrightyear{2014} 
-\copyrightdata{978-1-nnnn-nnnn-n/14/mm} 
-\doi{nnnnnnn.nnnnnnn}
-
-% Uncomment one of the following two, if you are not going for the 
-% traditional copyright transfer agreement.
-
-%\exclusivelicense                % ACM gets exclusive license to publish, 
-                                  % you retain copyright
-
-%\permissiontopublish             % ACM gets nonexclusive license to publish
-                                  % (paid open-access papers, 
-                                  % short abstracts)
-
-\titlebanner{banner above paper title}        % These are ignored unless
-\preprintfooter{short description of paper}   % 'preprint' option specified.
-
-\title{Title Text}
-\subtitle{Subtitle Text, if any}
-
-\authorinfo{Roussel Gilles}
-           {University Paris-Est Marne-la-Vallee}
-           {roussel@univ-mlv.fr}
-\authorinfo{Forax Remi}
-           {University Paris-Est Marne-la-Vallee}
-           {forax@univ-mlv.fr}
-\authorinfo{Pilliet Jerome}
-           {University Paris-Est Marne-la-Vallee}
-           {pilliet@univ-mlv.fr}
 
 \maketitle
 
@@ -212,7 +195,7 @@ keyword1, keyword2
       except for the primitive types which are directly encoded with the opcode.
       It means more smaller indexes for instructions.\\
 
-      \begin{figure}[t]
+      \begin{figure}[!h]
         \centering \includegraphics[width=\columnwidth]{dex-tools-chain.png}
         \caption{\ANDROID application tools-chain}
         \label{DTC}
@@ -286,270 +269,178 @@ keyword1, keyword2
       something which is not true in most dynamic languages (Ruby, Groovy, Dart by example).
       This code can also be slow because for real languages, the number of if ... instanceof branches
       can be greater than a dozen. 
-      
+
       To solve these issues, the \Jsr introduces a new bytecode named invokedynamic with no predefined
       linking semantics and a mechanism that allows to specify the linking semantics in Java
       or any languages that can be compiled to bytecodes.
       Invokedynamic is a function call so it can simulate every other existing Java calls that delegate
-      its linking semantics to an external Java method, the bootstrap method.
+      its linking semantics to an external Java method, the bootstrap method, and returns
+      a CallSite object which is a box that contains a function pointer (java/lang/MethodHandle).
+
+      The \JSR has created a new package named\\ ``java.lang.invoke''.
+      It contains several classes to ease the implementation of dynamic languages support.
+      These classes are directly understood by the \JVM.
+      It is composed of classes MethodType, MethodHandle, CallSite and SwitchPoint.
+      All classes answer to one or more problems coming from dynamic languages optimizations or implementations.
+
+    \subsection{invoke-dynamic and MethodHandle}
+
       The bootstrap method is called the first time the invokedynamic opcode is encounter by the interpreter,
       with the context where the opcode is located i.e.
       the declaring class (encapsulated in a java/lang/invoke/Lookup object), a symbolic name,
-      the declared parameter types as a java/lang/invoke/MethodType and return
-      a CallSite object which is a box that contains a function pointer (a java/lang/MethodHandle).
+      the declared parameter types as a\\ java/lang/invoke/MethodType.
       Any subsequent execution of the invokedynamic opcode will call the function pointer
       stored inside the callsite object returned by the bootstrap method.
       
       For our example, the code of foo with invokedynamic is
 
-      \newpage
       \input{figures/snip_foo_indy}
 
       The first time that foo is executed, the method bootstrap of the class RT will be called, with a lookup corresponding to the class containing foo,
-      with ``+'' as string and a MethodType corresponding to the descriptor ``(Ljava/lang/Object;I)Ljava/lang/Object;''.% (cf. \ref{FOOBSM}).
+      with ``+'' as string and a MethodType corresponding to the descriptor\\ ``(Ljava/lang/Object;I)Ljava/lang/Object;''.% (cf. \ref{FOOBSM}).
 
       \input{figures/snip_foo_bsm}
 
       Moreover, invokedynamic comes with an API that allow to create several data pattern
       dynamically and lazily like by example a tree of if ... instanceof branches.
 
-    \subsection{Package java.lang.invoke}
-      The \JSR has created a new package named ``java.lang.invoke''.
-      It contains several classes to ease the implementation of dynamic languages support.
-      These classes are directly understood by the \JVM.
-      It is composed of classes MethodType, MethodHandle, CallSite and SwitchPoint.
-      All classes answer to one or more problems coming from dynamic languages optimizations or implementations.
+    \subsection{MethodType}
 
-      \subsubsection{MethodType}
-        A method type represents the arguments and return type accepted and returned by a method handle,
-        or the arguments and return type passed and expected by a method handle caller.
-        This class represents a method signature.
+      A method type represents the types of the arguments and the return value accepted and returned by a method handle,
+      or expected by a method handle caller.
+      This class represents a method signature.
 
-        \input{figures/snip_foo_mts}
+      \input{figures/snip_foo_mts}
 
-        A method type is immutable, so this type can be created only by factory methods.
-        In our example, we need three method types, one for each method we have to call:
-        the ``check'' method; and the two methods ``plus''.
+      All method types are immutable and interned.
+      It can be created only by factory methods.
+      In our example, we need three method types, one for each method we have to call:
+      the ``check'' method; and the two methods ``plus''.
 
-        \input{figures/snip_foo_methods}
+      \input{figures/snip_foo_methods}
 
-      \subsubsection{MethodHandle / MethodHandles}
-        \label{MH}
-        A method handle is a typed, directly executable reference to
-        an underlying method, constructor, field, or similar low-level operation,
-        with optional transformations of arguments or return values.
-        This class represents a function pointer.
-        A method handle can be create by different factory methods depending to the kind of method handle and accessibility.
+    \subsection{MethodHandle / MethodHandles}
+      \label{MH}
 
-        We can distinguish two kinds of method handle:
-        the one which do a direct call to a method or to a field access, this method handle is final;
-        and the one which manipulate arguments, they are called ``combinors''.
-        The combinors contains at least one final method handle and can be represent by a tree.
+      A method handle is a runtime type checked, directly executable reference to
+      either an underlying method, constructor, field, or similar low-level operation,
+      or to a combiner operation that takes one or more method handles as input and
+      applies an operation like an argument transformation, a function compositions, etc.
+      The former kind of method handle is called a direct method handle,
+      the later is called a combiner method handle.
 
-        In our example, we want to call a method which takes an Object and an integer and which returns an Object: (Object,I)Object.
-        We need to resolve which right method we have to call (addition or concatenation).
-        To do that, we write a method which will create the right method handle called ``change'' (detailed after).
+      To guarantee runtime type safety, any method handle embodies a method type (of type java.lang.invoke.MethodType)
+      that describe the parameter types and the return type that a method handle accept.
+      When a method handle is called, the method type is checked using different semantics depending on the
+      kind of call.
 
-        We need to adapt arguments to move from an Object and an integer to a CallSite and an array of Object.
-        So we convert arguments (asType), we collect them to form the array of Objects (asCollector) and we add the call site at first argument (bindTo).
+      There are two kind of method handle call semantics.
+      \begin{itemize}
+        \item the exact call semantics, in that case, the declared type of the arguments (and return value) at a call site
+              must be exactly the same as the types of the method type.
+        \item the generic call semantics, in that case, the arguments can be converted using widening primitive conversions,
+              boxing and unboxing conversions and varargs conversions as defined in the Java Language Specification.
+      \end{itemize}
+      None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
+      for classical Java method calls like invokestatic or invokevirtual
+      \footnote{There is also a minor difference between the generic call semantics and the call semantics of
+        the Java Language Specification if the method is a varargs and the call as the same number of parameters as the method.
+        The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.},
+      the exact call semantics is more strict, and the generic call semantics is more permissive.
 
-        \input{figures/snip_foo_callsite}
-
-        This adaptation form the method handles tree of the figure \ref{ast1}.
-
-        % graph 1
-        \begin{figure}[!h]
-          \centering \resizebox{.6\linewidth}{!}{\input{figures/tikz_ast_1}}
-          \caption{method handles tree: bootstrap method call}
-          \label{ast1}
-        \end{figure}
-
-        When the call site is created, the method handle tree is called, so the ``change'' method is called.
-
-        \input{figures/snip_foo_change}
-
-        The method “change” takes a look to the dynamic type of ’a’ (let say it’s an integer),
-        ﬁnds the corresponding implementation of the ``plus'' method,
-        re-links a method handle tree representing by a combinor called ``GuardWithTest''.
-        This combinor check the class of 'a',
-        if the type of ’a’ is an integer it will directly call the same implementation of ``plus'';
-        otherwise it uses the previous method handle tree.
-
-        To call the ``check'' method, we have to adapt arguments.
-        The stack contains an Object and an integer and we need an Object and a class.
-        So we have to drop the integer (dropArguments) and to insert the class (insertArguments).
-        This adaptation form the method handles tree of the figure \ref{ast2}.
-
-        % graph 2
-        \begin{figure}[!h]
-          \centering \resizebox{\linewidth}{!}{\input{figures/tikz_ast_2}}
-          \caption{method handles tree: first call (integer)}
-          \label{ast2}
-        \end{figure}
-
-        If ’a’ is a string, the method ``change'' is called again,
-        installing a new method handle tree testing if ’a’ is a string in order to call plus(String,int)Object.
-        This adaptation form the method handles tree of the figure \ref{ast3}.
-
-        % graph 3
-        \begin{figure*}
-          \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_ast_3}}
-          \caption{method handles tree: second call (string)}
-          \label{ast3}
-        \end{figure*}
-
-
-%         \begin{enumerate}
-%           \item \textbf{Kinds of MethodHandle}\\
-%             The MethodHandle class is composed of different types grouped into 4 kinds,
-%             ``constant'', ``bound'', ``invokers'' and ``others''.
-%             The three first have many specials paths in the \VM for each instruction.
-%             While ``others'' have a unique path.
-%           \item \textbf{Contents}\\
-%             It contains a type descriptor (methodtype).
-%             All instances of MethodHandle are immutable.
-%             It have a pair of special invoker methods called invokeExact and invoke.
-%             The invokeExact invoker accepts calls which exactly match the method handle's own type.
-%         \end{enumerate}
-
-      \subsubsection{CallSite}
-        A CallSite is a holder for a variable MethodHandle, which is called its target.
-        An invokedynamic instruction linked to a CallSite delegates all calls to the site's current target.
-        A CallSite may be associated with several invokedynamic instructions,
-        or it may be ``free floating'', associated with none.\\
-
-        It has three immediate, concrete subclasses that may be either instantiated or subclassed.
-        \begin{enumerate}
-          \item \textbf{ConstantCallSite} : If a mutable target is not required.
-          \item \textbf{MutableCallSite}  : If a mutable target is required
-          \item \textbf{VolatileCallSite} : If a mutable target is required which has volatile variable semantics.
-        \end{enumerate}
-        A non-constant call site may be relinked by changing its target.
-        The new target must have the same type as the previous target.
-
-      \subsubsection{SwitchPoint}
-        The Java bytecode is compiled and optimized on the fly by the JIT compiler.
-        However, it may be that the code need to be deoptimize.
-        The \JVM contains some ``flags'' which indicate a need to degrade a code.
-        So, it can ``drop'' a optimized code to optimize it again.
-        it is essential that all threads were aware of changes.
-        Using the safe-point (a mechanism of Garbage Collector) is recommended.
-
-        A SwitchPoint is an object allowing this mechanism.
-        It indicates that a code must be degraded and synchronizes threads.
-        The SavePoint is not necessarily available.
-        An alternative is to synchronize all threads with a volatile variable.
-        It contains a target method and a fallback method.
-%         http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/SwitchPoint.html
-        
-        
-%     \subsubsection{MethodHandle}
-%       \label{jsrMH}
 %       A method handle is a typed, directly executable reference to
 %       an underlying method, constructor, field, or similar low-level operation,
 %       with optional transformations of arguments or return values.
-% 
-% 
-%       \begin{enumerate}[A.]
-%         \item \textbf{Kinds of MethodHandle}\\
-%           The MethodHandle class is composed of different types grouped into 4 kinds,
-%           ``constant'', ``bound'', ``invokers'' and ``others''.
-%           The three first have many specials paths in the \VM for each instruction.
-%           While ``others'' have a unique path.
-% 
-%           \begin{enumerate}[1.]
-%             \item \textbf{Constant}\\
-%               The kind ``constant'' contains many instructions:\\
-% 
-%               \begin{tabular}{c c c}
-%                 \begin{minipage}{4cm}
-%                   \begin{itemize}
-%                     \item invokeVirtual
-%                     \item invokeInterface
-%                     \item invokeStatic
-%                     \item invokeSpecial
-%                   \end{itemize}
-%                 \end{minipage}
-%                 &
-%                 \begin{minipage}{4cm}
-%                   \begin{itemize}
-%                     \item getStatic
-%                     \item putStatic
-%                     \item getField
-%                     \item putField
-%                   \end{itemize}
-%                 \end{minipage}
-%                 &
-%                 \begin{minipage}{5cm}
-%                   \begin{itemize}
-%                     \item invokeDirect (\DALVIK)
-%                     \item newInvokeSpecial
-%                   \end{itemize}
-%                 \end{minipage}
-%               \end{tabular}
-% 
-%             \item \textbf{Bound}\\
-%               The kind ``bound'' contains an invoke-virtual \textit{un-virtualized}.
-%               It is a MethodHandle constant created with invoke-virtual or invoke-interface
-%               and a call to the ``bindTo'' function to bind the receiver.
-%               It is equivalent to calling the Dalvik instructions :
-%               \textit{invoke-direct} with a constant object on first parameter..
-% 
-%             \item \textbf{Invoker}
-%               \begin{itemize}
-%                 \item invoker
-%                 \item ExactInvoker
-%                 \item VarargCollectorInvoker (?)
-%               \end{itemize}
-% 
-%             \item \textbf{And the others}\\
-%               Those are MethodHandle adapters.
-%           \end{enumerate}
-% 
-%         \item \textbf{Contents}\\
-%           It contains a type descriptor (methodtype).
-%           All instances of MethodHandle are immutable.
-%           It have a pair of special invoker methods called invokeExact and invoke.
-%           The invokeExact invoker accepts calls which exactly match the method handle's own type.
-% 
-%           \begin{enumerate}[1.]
-%             \item \textbf{invokeExact method}\\
-%               The invokeExact method allows to call a method handle with an exact type match.
-%               The symbolic type descriptor at the call site of invokeExact
-%               must exactly match this method handle's type.
-%               No conversions are allowed on arguments or return values.
-%               A runtime exception is thrown otherwise.
-% 
-%             \item \textbf{invoke method}\\
-%               The invoke method allows to call a method handle
-%               and eventually performing conversions on arguments and return values.
-%               It's semantically equivalent to call a method named ``asType'' to convert the type descriptor.
-%               This method thrown an ``ClassCastException'' if the conversion is impossible.
-%               When the type descriptor and the method handle type descriptor correspond, it calls the invokeExact method.
-%           \end{enumerate}
-%       \end{enumerate}
+%       This class represents a function pointer.
+%       A method handle can be create by different factory methods depending to the kind of method handle.
 
+      We can distinguish two kinds of method handle:
+      the one which do a direct call to a method or to a field access, this method handle is direct;
+      and the one which manipulate arguments, they are called ``combiners''.
+      The combiners contains at least one direct method handle and can be represent by a tree.
 
-    \subsection{Instructions and constants}
-      With the \JSR, the \VM have to know new constants and new instructions.
-      Two new entries into the constant pool can be done, one for a method type and another for a method handle.
+      In our example, we want to call a method which takes an Object and an integer and which returns an Object: (Object,I)Object.
+      We need to resolve which right method we have to call (addition or concatenation).
+      To do that, we write a method which will create the right method handle called ``change'' (detailed after).
 
-      An only one instruction has been added on top of the \VM, ``invokedynamic''.
-      This instruction allows to do a late linker and allows to modify this link at runtime.
-      When the \VM reads an ``invokedynamic'' instruction, a bootstrap method, defined in the instruction, is called.
-      This method creates a call site for the actual call and the nexts.
-      A bootstrap method can take 0 to 251 arguments.
+      We need to adapt arguments to move from an Object and an integer to a CallSite and an array of Object.
+      So we convert arguments (asType), we collect them to form the array of Objects (asCollector) and we add the call site at first argument (bindTo).
 
-      Two other instructions has been added as native methods, ``invoke'' and ``invokeExact''.
-      These instructions handle function pointers (method handle),
-      this is why the compiler cannot find the real method to call and cannot find the signature.
-      So, the compiler creates the signature corresponding to the actual context
-      and assumes that the method (method handle) will be on the stack at runtime.
-      This process is called ``method with a polymorphic signature''.
+      \input{figures/snip_foo_callsite}
 
-\section{Related Work}
+      This adaptation form the method handles tree of the figure \ref{ast1}.
 
-  Currently only the desktop (HotSpot) and the server (J9) version of the JVM have a complete implementation of the JSR 292.
+      % graph 1
+      \begin{figure}[!h]
+        \centering \resizebox{.6\linewidth}{!}{\input{figures/tikz_ast_1}}
+        \caption{method handles tree: bootstrap method call}
+        \label{ast1}
+      \end{figure}
+
+      When the call site is created, the method handle tree is called, so the ``change'' method is called.
+
+      \input{figures/snip_foo_change}
+
+      The method ``change'' takes a look to the dynamic type of 'a' (let say it's an integer),
+      finds the corresponding implementation of the ``plus'' method,
+      re-links a method handle tree representing by a combiner called ``GuardWithTest''.
+      This combiner use the ``check'' method to verify the class of 'a',
+      if the type of 'a' is an integer it will directly call the same implementation of ``plus'';
+      otherwise it uses the previous method handle tree.
+
+      To call the ``check'' method, we have to adapt arguments.
+      The stack contains an Object and an integer and we need an Object and a java.lang.Class.
+      So we have to drop the integer (dropArguments) and to insert the class (insertArguments).
+      This adaptation form the method handles tree of the figure \ref{ast2}.
+
+      % graph 2
+      \begin{figure}[!h]
+        \centering \resizebox{\linewidth}{!}{\input{figures/tikz_ast_2}}
+        \caption{method handles tree: first call (integer)}
+        \label{ast2}
+      \end{figure}
+
+      If 'a' is a string, the method ``change'' is called again,
+      installing a new method handle tree testing if 'a' is a string in order to call plus(String,int)Object.
+      This adaptation form the method handles tree of the figure \ref{ast3}.
+
+      % graph 3
+      \begin{figure*}
+        \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_ast_3}}
+        \caption{method handles tree: second call (string)}
+        \label{ast3}
+      \end{figure*}
+
+    \subsection{CallSite}
+
+      A CallSite is a holder for a variable MethodHandle, which is called its target.
+      An invokedynamic instruction linked to a CallSite delegates all calls to the site's current target.
+      A CallSite may be associated with several invokedynamic instructions,
+      or it may be ``free floating'', associated with none.\\
+
+      It has three immediate, concrete subclasses that may be either instantiated or subclassed.
+      \begin{enumerate}
+        \item \textbf{ConstantCallSite} : If a mutable target is not required.
+        \item \textbf{MutableCallSite}  : If a mutable target is required
+        \item \textbf{VolatileCallSite} : If a mutable target is required which has volatile variable semantics.
+      \end{enumerate}
+      A non-constant call site may be relinked by changing its target, calling ``setTarget'' on the CallSite.
+      The new target must have the same type as the previous target.
+
+\section{FIXME}
+
+  {\color{red}
+    \begin{itemize}
+      \item new dex file / specification
+      \item implementation (correct, but not necessary fast)
+            \begin{itemize}
+              \item ``portable'' interpreter
+              \item MethodHandle interpreter in Java
+            \end{itemize}
+      \item resultat de la recherche
+    \end{itemize}%
+  }
+  Currently only the desktop and the server version (HotSpot, J9, \dots) of the JVM have a complete implementation of the JSR 292.
   These implementations use mechanisms that we cannot reuse with Dalvik (code generation, rewriting, \dots)
   because of the power costs and computing restrictions.
   So, Dalvik is seen like a specific virtual machine from language developers.
@@ -565,13 +456,15 @@ keyword1, keyword2
 \section{A new DEX format}
 
   New instructions and new constants imply a new format of the DEX file.
+  Each DEX file version have a version number, for our version we use the number 292.
   We enhance the opcode set, add constant-pools and change the header of classes.
-  But we have to maintained the compatibility with the pre-JSR 292 APK files.
+  But we have to maintained the compatibility with the DEX files created before our version.
 
   \subsection{opcodes / constants}
     The \JSR needs two new constants (``const-methodtype'' and ``const-methodhandle'') and a new instruction (``invoke-dynamic'').
     Regarding the two methods ``invoke'' and ``invokeExact'', we do the choice to add two new instructions:
-    ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method (that avoids all possible mix-ups with the reflection API).
+    ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method.
+    It's the program ``DX'' (fig. \ref{DTC}) which transforms virtual calls to ``invokeExact'' and ``invoke'' to instructions.
 
   \subsection{constant-pools}
 
@@ -594,21 +487,11 @@ keyword1, keyword2
     and a data block representing the arguments.
     Each argument is encoded with a tag
     followed by a constant pool index or the primitive value according to the tag.
-%    (fig. \ref{DVMstruct}).
 
-%    \begin{figure}[!h]
-%      \centering \input{figures/snip_dvm_struct_mt}
-%      \centering \input{figures/snip_dvm_struct_mh}
-%      \centering \input{figures/snip_dvm_struct_indy}
-%      \centering \input{figures/snip_dvm_struct_bsm}
-%      \caption{MethodType, MethodHandle, InvokeDynamic and Bootstrap arguments constant pool entries}
-%      \label{DVMstruct}
-%    \end{figure}
-
-      \input{figures/snip_dvm_struct_mt}
-      \input{figures/snip_dvm_struct_mh}
-      \input{figures/snip_dvm_struct_indy}
-      \input{figures/snip_dvm_struct_bsm}
+    \input{figures/snip_dvm_struct_mt}
+    \input{figures/snip_dvm_struct_mh}
+    \input{figures/snip_dvm_struct_indy}
+    \input{figures/snip_dvm_struct_bsm}
 
   \subsection{Class header}
 
@@ -621,11 +504,11 @@ keyword1, keyword2
     All methods are created when the class was created.
     So we take on the solution where a table is store in the header of each class.
 
-  \subsection{Pre-JSR compatibility}
+  \subsection{retro-compatibility}
     Our \ANDROID version understands post-invokedynamic APK.
     We need to modify the APK to add missing constant pools and CallSite tables.
     However an APK is read-only.
-    But the installation time does optimizations and has to modify the APK.
+    But the installation time does optimizations and has to modify the APK using ``DEXOPT'' (fig. \ref{DTC}).
     So we take advantage to the installation time to add our work.
     We just simulate an APK without MethodHandle, MethodType, CallSite, \dots
     Only the DEX header and classes header change, we add empty constant pools to the header
@@ -634,8 +517,8 @@ keyword1, keyword2
 
 \section{New constants}
 
-  We can create constant method handles only with a LDC instruction or in the arguments of a bootstrap method.
-  The method handle LDC instruction are rarely used and a bootstrap method is called once.
+  We can create constant method handles only with the ``const-methodhandle'' instruction or in the arguments of a bootstrap method.
+  The method handle instructions are rarely used and a bootstrap method is called once.
   So it's not necessary to have a cache for method handles resolved.
   Resolve a method handle consist of find its informations into the constant-pool and create it.
   This creation can only do in Java so an up call is necessary.
@@ -710,6 +593,7 @@ keyword1, keyword2
     \subsection{Implementation details}
 
       \subsubsection{bootstrap method caller}
+        \label{bsm}
 
         When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated.% (fig. \ref{bsm}).
         A bootstrap method needs at least three arguments:
@@ -718,11 +602,7 @@ keyword1, keyword2
         a method type (MethodType), that it's a reified object of the descriptor specified as parameter of the invoke-dynamic opcode;
         and any constant values specified as bootstrap arguments of the invoke-dynamic opcode.
 
-%      \begin{figure}[!h]
         \input{figures/snip_meth_bsm}
-%        \caption{Code of bootstrap method invoker}
-%        \label{bsm}
-%      \end{figure}
 
         At first, we have to create the lookup from the declaring class given.
         We treat the bootstrap method differently if arguments are given or not.
@@ -744,15 +624,11 @@ keyword1, keyword2
         We check if it or its target isn't null and if the target's type and the type given are the same.
         Because the target callsite could be uninitialized we have to check if the target contains a method handle or a method type.
 
-%      \begin{figure}[!h]
-%        \input{figures/snip_meth_iwa}
-%        \caption{Code of invokeWithArguments}
-%        \label{IWA}
-%      \end{figure}
+      \subsubsection{Method handle (combiner) interpreter}
 
-      \subsubsection{Method handle (combinor) interpreter}
+        \fixme{pourquoi un interpreter particulier ?}
 
-        The method handle interpreter written in Java% (fig. \ref{intepret})
+        The method handle interpreter written in Java
         is used to interpret method handle trees which start by a combiner.
         It is implemented using a continuation mechanism (context) to treat the return value.
         Each combiner execute its own code and can produce a 'context'.
@@ -769,20 +645,16 @@ keyword1, keyword2
         This implementation avoids to pile up a call in the stack for each method handle.
         We pile up only if we have a 'final' method handle, which is not a subtree.
 
-%    \begin{figure}[!h]
-%      \input{figures/snip_meth_interp}
-%      \caption{Code of method handles (combiners) interpreter}
-%      \label{intepret}
-%    \end{figure}
+\section{Result}
 
-\section{Conclusion}
+\section{Related Works}
 
 \appendix
 \section{Appendix Title}
 
 This is the text of the appendix, if you need one.
 
-\acks
+\section{Acknowledgments}
 
 Acknowledgments, if needed.
 
@@ -792,12 +664,12 @@ Acknowledgments, if needed.
   \def\@seccntformat#1{Appendix~\csname the#1\endcsname:\quad}
 \makeatother
 
-\bibliographystyle{abbrvnat}
+% \bibliographystyle{abbrvnat}
+\bibliographystyle{abbrv}
 
 % The bibliography should be embedded for final submission.
-
 \begin{thebibliography}{}
-  \softraggedright
+%   \softraggedright
 
   \bibitem{idc-website}
   IDC website (2013) - \\ \url{www.idc.com/getdoc.jsp?containerId=prUS24257413}
