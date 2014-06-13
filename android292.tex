@@ -145,7 +145,7 @@ keyword1, keyword2
     and it have to support ARM architecture and now Intel architecture.
     
     Even if hardwares supporting \ANDROID become more efficients,
-    devices can't be more powerful than desktop computer because of miniaturization.
+    devices cannot be more powerful than desktop computer because of miniaturization.
     Being a mobile device also requires a minimal energetic consumption.
     Moreover, \ANDROID is portable system and it have to be adaptable to different devices.
     Forcing it to abstract itself from hardware.
@@ -186,7 +186,7 @@ keyword1, keyword2
 
       At the opposite, \DEX format contains all the code of the application (Figure \ref{SJA}).
       It will be loaded in one piece.
-      It is a read-only format, the code can't be changed at runtime.
+      It is a read-only format, the code cannot be changed at runtime.
       Duplicate constants such as strings used in multiple class files
       are included only once in the \DEX file to save space.
       Unlike the \JVM, \DALVIK uses one constant-pool by type of constant
@@ -490,37 +490,37 @@ keyword1, keyword2
     A call site is bound to an instruction so it's not interresting to store them into a constant-pool.
     So we have to create a table that contains the call sites.
     We have three ways to store the call sites: in the DEX header; in the method which contains the instruction or in the class where the method is.
-    As a reminder, a DEX file contains the totally the classes from a program, and a class can contains at most 65535 methods (cf. jvms 4.11).
-    A method can contains a lot of instructions so the table of call sites can quickly overflow.
-    The best solution is to store the call sites in the method, but \DALVIK don't have a lazy mecanism to create methods.
+    As a reminder, a DEX file describes all the classes of a program, and a class can have at most 65535 methods (cf.~jvms 4.11).
+    A method can contains a lot of instructions and the table of call sites can quickly overflow.
+    The best solution is to store the call sites in the method, but \DALVIK does not have a lazy mecanism to create methods.
     All methods are created when the class was created.
-    So we take on the solution where a table is store in the header of each class.
+    Eventually, we store the table in the header of each class.
 
   \subsection{retro-compatibility}
     Our \ANDROID version understands post-invokedynamic APK.
     We need to modify the APK to add missing constant pools and CallSite tables.
     However an APK is read-only.
     But the installation time does optimizations and has to modify the APK using ``dexopt'' (Figure \ref{DTC}).
-    So we take advantage to the installation time to add our work.
-    We just simulate an APK without MethodHandle, MethodType, CallSite, \dots
+    We take advantage to the installation time to add our work.
+    We just simulate an APK without MethodHandle, MethodType, CallSite, \dots~%
     Only the DEX header and classes header change, we add empty constant pools to the header
-    and an empty table to each class representing the CallSite table.
-    No offset changes, just the size of header and classes.
+    and an empty table in each class representing the CallSite table.
+    No offset changes, just the size of the DEX header and classes.
 
 \section{New constants}
 
   We can create constant method handles only with the ``const-methodhandle'' instruction or in the arguments of a bootstrap method.
   The method handle instructions are rarely used and a bootstrap method is called once.
-  So it's not necessary to have a cache for method handles resolved.
-  Resolve a method handle consist of find its informations into the constant-pool and create it.
-  This creation can only do in Java so an up call is necessary.
+  Therefore it's not necessary to have a cache for method handles resolved.
+  Resolve a method handle consists to find its informations into the constant-pool and create it.
+  This creation can only do in Java, an up call is necessary.
 
   Comparing method types is common on the VM.
   To simplify and optimize these tests, we need to maintain a cache which make sure that two method types with the same signature are identicals.
-  A method type can be create in Java or by the VM so the cache run in Java and only Java can create a method type.
+  A method type can be create in Java or by the VM so the cache run in Java and only Java can create a method type (the VM does an up call).
   All method types are store in the cache and a test between two method types becomes a simply equality test.
-  Resolve a method type consist of find it prototype in the constant-pool and call Java to find it or create it.
-  We distinguish two types of method type: some are used by the VM (strong) and mustn't be freed by the GC; the others (weak) can be freed by the GC if necessary.
+  Resolve a method type consists to find its prototype in the constant-pool and call Java to find it or create it.
+  We distinguish two types of method type: some are used by the VM (strong) and must not be freed by the GC; the others (weak) can be freed by the GC if necessary.
 
   \begin{figure}[!h]
     \centering \input{figures/inst_mh_mt}
@@ -530,18 +530,18 @@ keyword1, keyword2
 
 \section{New invoke instructions}
   All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
-  It invokes the method, get or set a field or call the interpret depending to the kind of the method handle
-  and uses the interpreter mecanism to store the return value.
+  It invokes the method, gets or sets a field and calls the method handle interpreter depending to the kind of the method handle.
+  It also uses the interpreter mecanism to store the return value.
   This method is called ``invokeMethodHandle''.
   
-  Each instruction have two representation: a ``normal'' form and a ``range'' form.
+  Each instruction have two representations: a ``normal'' form and a ``range'' form.
   The ``normal'' form represents the instruction with at most 5 registers.
   And the ``range'' form can have at most 65535 registers.
   Each register is considered 32 bits wide.
 
   \subsection{invoke-exact}
 
-    invoke-exact is the instructions with the most simple implementation.
+    invoke-exact is the instruction with the most simple implementation.
     An invoke-exact contains a index in the constant-pool of method types.
     This method type represents the order and types of the arguments passed to the instruction, the first argument excluded.
     The first argument is the method handle we have to call.
@@ -614,7 +614,7 @@ keyword1, keyword2
         \input{figures/snip_meth_iwa}
 
         When the callsite is returned, we verify the integrity of the callsite.
-        We check if it or its target isn't null and if the target's type and the type given are the same.
+        We check if it or its target is not null and if the target's type and the type given are the same.
         Because the target callsite could be uninitialized we have to check if the target contains a method handle or a method type.
 
       \subsubsection{Method handle (combiner) interpreter}
@@ -651,7 +651,7 @@ keyword1, keyword2
   \end{figure}
 
   Figure \ref{Rinvoke} shows results for 10000, 100000 and 1000000.
-  Below these values, we can't see strictly differences between each kind of execution.
+  Below these values, we cannot see strictly differences between each kind of execution.
   We notice that calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are more faster than the others.
   ``invoke-dynamic'' takes a little more time because it have to get a volatile method handle.
   Regarding ``invoke-generic'' with a method type different to the final call, the execution time increase.
