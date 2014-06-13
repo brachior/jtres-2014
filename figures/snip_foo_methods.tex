@@ -1,4 +1,6 @@
-{\tiny \begin{verbatim}
+{\scriptsize \begin{verbatim}
+import static java.lang.invoke.MetodType.*;
+
 public class RT {
     ...
   private static Object plus(int a, int b) {
@@ -19,14 +21,20 @@ public class RT {
 
   static {
     try {
-      MethodType mti = MethodType.methodType(Object.class, int.class, int.class);
-      TARGET_INT = lookup.findStatic(BootStraps.class, "plus", mti);
+      MethodType mti =
+        methodType(Object.class, int.class, int.class);
+      TARGET_INT =
+        lookup.findStatic(BootStraps.class, "plus", mti);
 
-      MethodType mts = MethodType.methodType(Object.class, String.class, int.class);
-      TARGET_STRING = lookup.findStatic(BootStraps.class, "plus", mts);
+      MethodType mts =
+        methodType(Object.class, String.class, int.class);
+      TARGET_STRING =
+        lookup.findStatic(BootStraps.class, "plus", mts);
 
-      MethodType mtc = MethodType.methodType(boolean.class, Object.class, Class.class);
-      TARGET_CHECK = lookup.findStatic(BootStraps.class, "check", mtc);
+      MethodType mtc =
+        methodType(boolean.class, Object.class, Class.class);
+      TARGET_CHECK =
+        lookup.findStatic(BootStraps.class, "check", mtc);
     } catch (NoSuchMethodException|IllegalAccessException e) {
       throw new AssertionError(e);
     }

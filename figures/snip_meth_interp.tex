@@ -1,5 +1,6 @@
-{\tiny \begin{verbatim}
-private static Object invokeCombiner(MethodHandle mh, Object[] arguments) throws Throwable {
+{\scriptsize \begin{verbatim}
+private static Object invokeCombiner(
+      MethodHandle mh, Object[] arguments) throws Throwable {
   ContextInterpret contexts = null;
   main_loop: for (;;) {
     if (mh.getClass() == MethodHandle.class) {

@@ -364,7 +364,7 @@ keyword1, keyword2
 
       % graph 1
       \begin{figure}[!h]
-        \centering \resizebox{.6\linewidth}{!}{\input{figures/tikz_ast_1}}
+        \centering \resizebox{.7\linewidth}{!}{\input{figures/tikz_ast_1}}
         \caption{Method handles tree - bootstrap method.}
         \label{ast1}
       \end{figure}
@@ -387,7 +387,7 @@ keyword1, keyword2
 
       % graph 2
       \begin{figure}[!h]
-        \centering \resizebox{\linewidth}{!}{\input{figures/tikz_ast_2}}
+		\hspace{-.6in} \resizebox{1.3\linewidth}{!}{\input{figures/tikz_ast_2}}
         \caption{Method handles tree - first call (integer).}
         \label{ast2}
       \end{figure}
@@ -398,7 +398,7 @@ keyword1, keyword2
 
       % graph 3
       \begin{figure*}
-        \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_ast_3}}
+        \centering \resizebox{.9\linewidth}{!}{\input{figures/tikz_ast_3}}
         \caption{Method handles tree - second call (string).}
         \label{ast3}
       \end{figure*}
@@ -591,7 +591,7 @@ keyword1, keyword2
         When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated.% (Figure \ref{bsm}).
         A bootstrap method needs at least three arguments:
         a lookup (Lookup), that it's a security token object encapsulating access rigths of class containing the invoke-dynamic opcode;
-        an arbitrary name (String) specified as parameter of the invoke-dynamic opcode;
+        an arbitrary name (String) specified as parameter of the invokedynamic opcode;
         a method type (MethodType), that it's a reified object of the descriptor specified as parameter of the invoke-dynamic opcode;
         and any constant values specified as bootstrap arguments of the invoke-dynamic opcode.
 
