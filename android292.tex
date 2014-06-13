@@ -1,6 +1,7 @@
 \documentclass{sig-alternate}
 
 \usepackage{tikz}
+\usetikzlibrary{plotmarks}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xspace}
@@ -74,14 +75,13 @@
 
 \begin{document}
 
-\conferenceinfo{WOODSTOCK}{'97 El Paso, Texas USA}
+\conferenceinfo{JTRES}{2014 Niagara Falls, New York USA}
 %\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 % --- End of Author Metadata ---
 
-\title{Alternate {\ttlit ACM} SIG Proceedings Paper in LaTeX Format \titlenote{(Produces the permission block, and copyright information). For use with SIG-ALTERNATE.CLS. Supported by ACM.}}
-\subtitle{[Extended Abstract]
-\titlenote{A full version of this paper is available as \textit{Author's Guide to Preparing ACM SIG Proceedings Using \LaTeX$2_\epsilon$\ and BibTeX} at \texttt{www.acm.org/eaddress.htm}}}
+\title{Title}
+\subtitle{subtitle}
 
 \numberofauthors{3}
 \author{
@@ -134,66 +134,64 @@ keyword1, keyword2
 
   \section{Android}
 
-    \ANDROID is the mobile operating system of Google.
+    \ANDROID is the mobile operating system created by Google.
     It's an open-source project called ``\ANDROID Open-Source Project'' (AOSP).
     In Q2 2013, \ANDROID occupies almost 80\% of the market share with more than 187 million units shipped \cite{idc-website}.
-    The success of \ANDROID can be explain by an open project and an open market
+    The success of \ANDROID can be explained by an open project and an open market
     which are very attractive for devices producers, service providers and application developers \cite{ieee-butler-android-landscape}.
 
     \ANDROID mainly run on embedded environments like smartphones and tablets.
     Therefore, strong constraints apply to \ANDROID
     and it have to support ARM architecture and now Intel architecture.
     
-    Even if hardware of devices which supports \ANDROID becomes more efficient,
-    devices can't be as efficient as a desktop computer because of miniaturization of devices.
-    Being a mobile device requires a minimal energetic consumption.
-    Moreover, \ANDROID is portable and it must be adaptable to different devices.
+    Even if hardwares supporting \ANDROID become more efficients,
+    devices can't be more powerful than desktop computer because of miniaturization.
+    Being a mobile device also requires a minimal energetic consumption.
+    Moreover, \ANDROID is portable system and it have to be adaptable to different devices.
     Forcing it to abstract itself from hardware.
 
-    The \ANDROID architecture is described like a ``software stack'' (fig. \ref{ASA}).
-    It's composed to:
+    The \ANDROID architecture is described like a ``software stack'' (Figure \ref{ASA}).
+    It's composed of:
     \begin{itemize}
       \item a modified version of the Linux kernel.
-        It offers an hardware abstraction,
-        an existing memory and process managements
-        and a security and networking models;
+        It offers an hardware abstraction, an existing memory, process managements and a security and networking models;
       \item native libraries (C/C++)
-        which provide most of features of the \ANDROID system;
-      \item a virtual machine called ``\DALVIK''. \DALVIK is a important component of \ANDROID.
-        It runs applications converted into the \DEX format.
+        which provide most of features in the \ANDROID system;
+      \item a virtual machine called ``\DALVIK''.
+        It is a important component of \ANDROID.
+        It runs applications converted to the \DEX format.
         \DALVIK uses a core API written from scratch in Java
-        which can be assimilate to the version 5 or 6 of the Java API;
+        which can be assimilated to the version 5 or 6 of the Java API;
       \item an application framework to enable the making of \ANDROID applications;
       \item and some default applications.
     \end{itemize}
 
-    \subsection{Differences between the JVM and Dalvik}
+    \subsection{Differences between the JVM and \DALVIK}
 
-      The main difference between these two machines is that \DALVIK is a register based machine while the \JVM is stack based.
-      A stack based VM uses more instructions to manipulate data and to implement Java code than a register based VM.
-      But the register based VM instructions tends to be larger \cite{ieee-paul-kundu-energy-perspective}
+      The main difference between these two machines is that \DALVIK is register based while the \JVM is stack based.
+      A stack based virutal machine (VM) uses more instructions to manipulate data and to implement Java code than a register based VM.
+      But the register based VM instructions tends to be larger in terms of code size\cite{ieee-paul-kundu-energy-perspective}.
 
-      The bytecode Java is given in a ``.class'' file and only contains the code of one class (fig. \ref{SJA}).
-      The file is made of a series of tables, which contains various information, the code of the class and some other things.
-      The code contains references to these tables.
-      Among these tables, one is the table of constants (constant-pool).
-      This table stores most of the constant values of the class (numbers or texts)
-      and more evolved elements (data types, class names, attribute names, \dots).
-
-      \begin{figure}[h]
+      \begin{figure}[!h]
         \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
         \caption{structure of JAR and APK files}
         \label{SJA}
       \end{figure}
 
-      Whereas, \DEX format contains all the code of the application (fig. \ref{SJA}).
+      The bytecode Java is given in a ``.class'' file and contains the code of a unique class (Figure \ref{SJA}).
+      The file is made of a series of tables which describes various informations, the code of the class and some other things.
+      The code contains references to these tables.
+      Among these tables, the constant-pool stores most of the constant values of the class (numbers or texts)
+      and more evolved elements (data types, class names, attribute names, \dots).
+
+      At the opposite, \DEX format contains all the code of the application (Figure \ref{SJA}).
       It will be loaded in one piece.
-      It is a read-only format, so the code can't be changed at runtime.
+      It is a read-only format, the code can't be changed at runtime.
       Duplicate constants such as strings used in multiple class files
       are included only once in the \DEX file to save space.
       Unlike the \JVM, \DALVIK uses one constant-pool by type of constant
       except for the primitive types which are directly encoded with the opcode.
-      It means more smaller indexes for instructions.\\
+      It leads more smaller indexes for instructions.\\
 
       \begin{figure}[!h]
         \centering \includegraphics[width=\columnwidth]{dex-tools-chain.png}
@@ -202,9 +200,8 @@ keyword1, keyword2
       \end{figure}
 
       \DALVIK cannot directly execute Java bytecode.
-      It have first to translate the Java byte code to a \DALVIK specific bytecode called \DEX
-      and It cans optimize its bytecode (\mbox{ODEX}) to save space (fig. \ref{DTC}).
-
+      It first have to translate the Java bytecode to the \DALVIK specific one called \DEX
+      which can then be optimized (\mbox{ODEX}) to save space (Figure \ref{DTC}).
 
     \begin{figure}[!h]
       \centering \def\svgwidth{\columnwidth} \includesvg{android-system-architecture}
@@ -214,95 +211,92 @@ keyword1, keyword2
 
   \section{Java Specification Request 292}
 
-    The \JSR is a request from \JCP and led by \SUN in 2006.
+    The \JSR is a request from \JCP and led by \SUN from 2006 to 2011.
     It had been integrated in 2011 in the version 7 of Java,
     modifying both the Java language specification and the \JVM specification.
 
     Since late 90's, a lot of language
     implementors have chosen the JVM as their target platform \cite{wiki-jvm-lang},
-    for several reasons among the size of the ecosystem,
-    the presence of mature GCs and Just In Time compilers. 
+    for several reasons such as the size of the ecosystem,
+    the presence of mature GCs and Just In Time compilers (JIT).
 
     The aim of this \Jsr is to ease the implementation of dynamically typed languages
     by providing a new way to do function calls that allows language implementors
-    to specify a specific semantics, independantly of the semantics of the language Java.
-    
-    This \Jsr is composed of two parts, the first part, specifies the semantics of
-    new opcodes. The second part defined an API, java.lang.invoke that allows
-    to create runtime typesafe function pointers (java.lang.invoke.MethodHandle) and
-    methods to combine those function pointers to do thing like function composition,
-    function argument permutation, etc.
+    to describe a specific semantics, independantly of the semantics of the Java language.
 
-    The next sections will present the new API and new instructions but before
+    This \Jsr is composed of two parts, the first part, specifying the semantics of
+    new opcodes and the second part defining an API: java.lang.invoke.
+    This API allows to create runtime typesafe function pointers (java.lang.invoke.MethodHandle)
+    and methods to combine those pointers to do things like composition, argument permutation, \dots.
+
+    The next sections will present the new API and the new instructions but before that,
     we want to introduce an example that we will use for the rest of the paper.
 
     \subsection{Example}
-      Let suppose we have the following code in Groovy \cite{lang-groovy}
+      Let suppose we have the following code in Groovy \cite{lang-groovy}:
 
       \input{figures/snip_foo_groovy}
 
-      It prints 11 and test2. For the fist call to foo, 'a' is an integer so the function + refers
-      to the function +(int,int) while for the second call to foo, 'a' is a string, so the
-      function + refers to the function +(String,String).
+      It prints {\it '11'} and {\it 'test2'}.
+      For the first call to {\bf foo}, {\bf a} is an integer so the symbol {\bf +} refers
+      to the function {\it +(int,int)} while for the second call to {\bf foo}, {\bf a} is a string, {\bf +} refers to the function {\it +(String,String)}.
 
-      If one try to translate that code in Java bytecode, it will be something like
+      If one try to translate this code in Java bytecode, it would be something like:
 
       \input{figures/snip_foo_bytecode}
 
       As you can see, the Java bytecode is typed, each instruction is prefixed 
       by the type of the operand ('a' for object, 'i' for integer, etc)
-      and the method call (invokevirtual) specify the type of the receiver and its parameter ;
+      and the method call (invokevirtual) specifies the type of the receiver and its parameters;
       an object (java/lang/Object) followed by an integer (I) ; and its return type
       which is also an object in the example.
 
-      The code above doesn't work because invokevirtual is an existing Java bytecode that call
+      The code above does not work because invokevirtual is an existing Java bytecode that calls
       a virtual method using the Java semantics so the Virtual Machine or more precisely
-      the bytecode verifier will check that there is a method '+' on java.lang.Object
-      that takes an integer and returns an Object. If you have used Java, you already know
-      that this method doesn't exist. So the bytecode verification will fail.
+      the bytecode verifier will check that there exists a method '+' on java.lang.Object
+      that takes an integer and returns an Object. If you have already used Java, you know
+      that this method does not exist. The bytecode verification will then fail.
 
       Another possible translation is to use a cascade of if ... instanceof.
 
       \input{figures/snip_foo_java}
 
-      While this code works, it supposes that all possible variations of + are known at compile time,
+      While this code works, it supposes that all the potentials variations of + are known at compile time,
       something which is not true in most dynamic languages (Ruby, Groovy, Dart by example).
-      This code can also be slow because for real languages, the number of if ... instanceof branches
+      This code can also be slow because in real languages, the number of if ... instanceof branches
       can be greater than a dozen. 
 
       To solve these issues, the \Jsr introduces a new bytecode named invokedynamic with no predefined
-      linking semantics and a mechanism that allows to specify the linking semantics in Java
+      linking semantics. It introduces also a mechanism that allows to specify the linking semantics in Java
       or any languages that can be compiled to bytecodes.
-      Invokedynamic is a function call so it can simulate every other existing Java calls that delegate
-      its linking semantics to an external Java method, the bootstrap method, and returns
-      a CallSite object which is a box that contains a function pointer (java/lang/MethodHandle).
+      Invokedynamic is a function call so it can simulate every other existing Java calls.
+      It delegates its linking semantics to an external Java method, the bootstrap method.
+      This method returns a CallSite object which is a box that contains a function pointer (MethodHandle).
 
       The \JSR has created a new package named\\ ``java.lang.invoke''.
-      It contains several classes to ease the implementation of dynamic languages support.
+      It is composed of classes MethodType, MethodHandle and CallSite.
       These classes are directly understood by the \JVM.
-      It is composed of classes MethodType, MethodHandle, CallSite and SwitchPoint.
       All classes answer to one or more problems coming from dynamic languages optimizations or implementations.
 
     \subsection{invoke-dynamic and MethodHandle}
 
-      The bootstrap method is called the first time the invokedynamic opcode is encounter by the interpreter,
-      with the context where the opcode is located i.e.
-      the declaring class (encapsulated in a java/lang/invoke/Lookup object), a symbolic name,
-      the declared parameter types as a\\ java/lang/invoke/MethodType.
+      The bootstrap method is called the first time the invokedynamic opcode is encountered by the interpreter,
+      with the context where the opcode is located i.e.~the declaring class (encapsulated in a Lookup object),
+      a symbolic name and the declared parameter types as a MethodType.
       Any subsequent execution of the invokedynamic opcode will call the function pointer
       stored inside the callsite object returned by the bootstrap method.
       
-      For our example, the code of foo with invokedynamic is
+      For our example, the code of {\bf foo} with invokedynamic is
 
       \input{figures/snip_foo_indy}
 
-      The first time that foo is executed, the method bootstrap of the class RT will be called, with a lookup corresponding to the class containing foo,
-      with ``+'' as string and a MethodType corresponding to the descriptor\\ ``(Ljava/lang/Object;I)Ljava/lang/Object;''.% (cf. \ref{FOOBSM}).
+      The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called, with a lookup corresponding to the class containing {\bf foo},
+      the string {\bf ``+''} and a MethodType corresponding to the descriptor ``(LObject;I)LObject;''.% (cf. \ref{FOOBSM}).
 
       \input{figures/snip_foo_bsm}
 
-      Moreover, invokedynamic comes with an API that allow to create several data pattern
-      dynamically and lazily like by example a tree of if ... instanceof branches.
+      Moreover, invokedynamic comes with an API that allows to create several data patterns
+      dynamically and lazily like for example a tree of if ... instanceof branches.
 
     \subsection{MethodType}
 
@@ -310,38 +304,36 @@ keyword1, keyword2
       or expected by a method handle caller.
       This class represents a method signature.
 
-      \input{figures/snip_foo_mts}
+      \input{figures/snip_foo_methods}
 
       All method types are immutable and interned.
-      It can be created only by factory methods.
-      In our example, we need three method types, one for each method we have to call:
+      It can only be created by factory methods.
+      In our example, we need three method types, one for each method that we have to call:
       the ``check'' method; and the two methods ``plus''.
-
-      \input{figures/snip_foo_methods}
 
     \subsection{MethodHandle / MethodHandles}
       \label{MH}
 
       A method handle is a runtime type checked, directly executable reference to
-      either an underlying method, constructor, field, or similar low-level operation,
-      or to a combiner operation that takes one or more method handles as input and
+      either an underlying method, constructor, field, or similar low-level operation.
+      It also represents a combiner operation that takes one or more method handles as input and
       applies an operation like an argument transformation, a function compositions, etc.
-      The former kind of method handle is called a direct method handle,
-      the later is called a combiner method handle.
+      The former kind of method handle is called {\it direct method handle},
+      the later is called a {\it combiner method handle}.
 
-      To guarantee runtime type safety, any method handle embodies a method type (of type java.lang.invoke.MethodType)
-      that describe the parameter types and the return type that a method handle accept.
+      To guarantee runtime type safety, each method handle embodies a method type (of type MethodType)
+      that describes the parameter types and the return type that a method handle accepts.
       When a method handle is called, the method type is checked using different semantics depending on the
-      kind of call.
+      type of call.
 
-      There are two kind of method handle call semantics.
+      There are two kinds of method handle call semantics:
       \begin{itemize}
         \item the exact call semantics, in that case, the declared type of the arguments (and return value) at a call site
               must be exactly the same as the types of the method type.
         \item the generic call semantics, in that case, the arguments can be converted using widening primitive conversions,
               boxing and unboxing conversions and varargs conversions as defined in the Java Language Specification.
       \end{itemize}
-      None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
+      None of these semantics implements the calling semantics as defined by the Java Virtual Machine Specification
       for classical Java method calls like invokestatic or invokevirtual
       \footnote{There is also a minor difference between the generic call semantics and the call semantics of
         the Java Language Specification if the method is a varargs and the call as the same number of parameters as the method.
@@ -356,58 +348,58 @@ keyword1, keyword2
 
       We can distinguish two kinds of method handle:
       the one which do a direct call to a method or to a field access, this method handle is direct;
-      and the one which manipulate arguments, they are called ``combiners''.
-      The combiners contains at least one direct method handle and can be represent by a tree.
+      and the one which manipulates arguments called ``combiners''.
+      The combiners contain at least one direct method handle and can be represented by a tree.
 
-      In our example, we want to call a method which takes an Object and an integer and which returns an Object: (Object,I)Object.
-      We need to resolve which right method we have to call (addition or concatenation).
-      To do that, we write a method which will create the right method handle called ``change'' (detailed after).
+      In our example, we want to call a method which takes an Object and an integer and returns an Object.
+      We need to resolve the right method to call (addition or concatenation).
+      In order to do that, we write a method which will create the right method handle called {\bf change} (detailed after).
 
-      We need to adapt arguments to move from an Object and an integer to a CallSite and an array of Object.
-      So we convert arguments (asType), we collect them to form the array of Objects (asCollector) and we add the call site at first argument (bindTo).
+      We need to adapt the arguments to move from an Object and an integer to a CallSite and an array of Object.
+      To do this we convert arguments (asType), we collect them to form the array of Objects (asCollector) and we add the call site at first argument (bindTo).
 
       \input{figures/snip_foo_callsite}
 
-      This adaptation form the method handles tree of the figure \ref{ast1}.
+      \noindent This adaptation forms the tree of the Figure \ref{ast1}.
 
       % graph 1
       \begin{figure}[!h]
         \centering \resizebox{.6\linewidth}{!}{\input{figures/tikz_ast_1}}
-        \caption{method handles tree: bootstrap method call}
+        \caption{Method handles tree - bootstrap method.}
         \label{ast1}
       \end{figure}
 
-      When the call site is created, the method handle tree is called, so the ``change'' method is called.
+      When the call site is created, the method handle tree is called, so the {\bf change} method is called.
 
       \input{figures/snip_foo_change}
 
-      The method ``change'' takes a look to the dynamic type of 'a' (let say it's an integer),
-      finds the corresponding implementation of the ``plus'' method,
-      re-links a method handle tree representing by a combiner called ``GuardWithTest''.
-      This combiner use the ``check'' method to verify the class of 'a',
-      if the type of 'a' is an integer it will directly call the same implementation of ``plus'';
+      The method {\bf change} takes a look at the dynamic type of {\bf a} (let say an integer),
+      finds the corresponding implementation of the {\bf plus} method
+      and then re-links a method handles tree represented by a combiner called {\bf GuardWithTest}.
+      This combiner uses the {\bf check} method to verify the class of {\bf a}.
+      If the type of {\bf a} is an integer it will directly call the same implementation of {\bf plus};
       otherwise it uses the previous method handle tree.
 
-      To call the ``check'' method, we have to adapt arguments.
-      The stack contains an Object and an integer and we need an Object and a java.lang.Class.
-      So we have to drop the integer (dropArguments) and to insert the class (insertArguments).
-      This adaptation form the method handles tree of the figure \ref{ast2}.
+      To call the {\bf check} method, we have to adapt arguments.
+      The stack contains an Object and an integer, we need an Object and a java.lang.Class.
+      So we have to drop the integer (dropArguments) and insert the class (insertArguments).
+      This adaptation forms the tree of the Figure \ref{ast2}.
 
       % graph 2
       \begin{figure}[!h]
         \centering \resizebox{\linewidth}{!}{\input{figures/tikz_ast_2}}
-        \caption{method handles tree: first call (integer)}
+        \caption{Method handles tree - first call (integer).}
         \label{ast2}
       \end{figure}
 
-      If 'a' is a string, the method ``change'' is called again,
-      installing a new method handle tree testing if 'a' is a string in order to call plus(String,int)Object.
-      This adaptation form the method handles tree of the figure \ref{ast3}.
+      If 'a' is a string, the method {\bf change} is called again,
+      installing a new method handle tree testing if 'a' is a string in order to call {\it plus(String,int)Object}.
+      This adaptation form the tree of the Figure \ref{ast3}.
 
       % graph 3
       \begin{figure*}
         \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_ast_3}}
-        \caption{method handles tree: second call (string)}
+        \caption{Method handles tree - second call (string).}
         \label{ast3}
       \end{figure*}
 
@@ -418,14 +410,14 @@ keyword1, keyword2
       A CallSite may be associated with several invokedynamic instructions,
       or it may be ``free floating'', associated with none.\\
 
-      It has three immediate, concrete subclasses that may be either instantiated or subclassed.
+      It has three immediate, concrete subclasses that may be either instantiated or subclassed:
       \begin{enumerate}
         \item \textbf{ConstantCallSite} : If a mutable target is not required.
-        \item \textbf{MutableCallSite}  : If a mutable target is required
+        \item \textbf{MutableCallSite}  : If a mutable target is required.
         \item \textbf{VolatileCallSite} : If a mutable target is required which has volatile variable semantics.
       \end{enumerate}
       A non-constant call site may be relinked by changing its target, calling ``setTarget'' on the CallSite.
-      The new target must have the same type as the previous target.
+      The new target must have the same type as the previous one.
 
 \section{FIXME}
 
@@ -441,36 +433,36 @@ keyword1, keyword2
     \end{itemize}%
   }
   Currently only the desktop and the server version (HotSpot, J9, \dots) of the JVM have a complete implementation of the JSR 292.
-  These implementations use mechanisms that we cannot reuse with Dalvik (code generation, rewriting, \dots)
+  These implementations use mechanisms that we cannot reuse with \DALVIK (code generation, rewriting, \dots)
   because of the power costs and computing restrictions.
-  So, Dalvik is seen like a specific virtual machine from language developers.
+  For this reason, \DALVIK is seen like a specific virtual machine from language developers.
     
-  Our solution is to make an implementation of the JSR 292 for Android.
-  But, because Android have many constraints from its environment,
+  Our solution is to make an implementation of the JSR 292 for Android but,
+  because Android have many constraints from its environment,
   we have to reinterpret the JSR.
-  The API is the same, but not the VM specification.
+  The API statys the same, but the VM specification does not.
     
-  To do this, we made a new DEX format with new instructions, new constants, \dots
-  And we made an specific interpreter, written in Java, which execute method handle trees (combiners).
+  To do this, we created a new DEX format with new instructions, new constants,
+  \dots~And we made an specific interpreter, written in Java, which executes method handle trees (combiners).
 
 \section{A new DEX format}
 
-  New instructions and new constants imply a new format of the DEX file.
-  Each DEX file version have a version number, for our version we use the number 292.
+  New instructions and new constants imply a new format of DEX file.
+  Each DEX file version have a version number, our one is number 292.
   We enhance the opcode set, add constant-pools and change the header of classes.
-  But we have to maintained the compatibility with the DEX files created before our version.
+  But we have to maintain the compatibility with the DEX files created before our version.
 
   \subsection{opcodes / constants}
     The \JSR needs two new constants (``const-methodtype'' and ``const-methodhandle'') and a new instruction (``invoke-dynamic'').
-    Regarding the two methods ``invoke'' and ``invokeExact'', we do the choice to add two new instructions:
+    Regarding the two methods ``invoke'' and ``invokeExact'', we made the choice to add two new instructions:
     ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method.
-    It's the program ``DX'' (fig. \ref{DTC}) which transforms virtual calls to ``invokeExact'' and ``invoke'' to instructions.
+    It is the program ``dx'' (Figure \ref{DTC}) which transforms virtual calls to ``invokeExact'' and ``invoke'' to instructions.
 
   \subsection{constant-pools}
 
-    Dalvik have a constant pool for each entry type.
-    So we have to add four constant pools (fig. \ref{SNA}), one for each entry we need
-    (MethodType, MethodHandle, InvokeDynamic and Bootstrap Arguments).
+    \DALVIK have a constant pool for each entry type.
+    We have to add constant pool for each entry we need:
+    MethodType, MethodHandle, InvokeDynamic and Bootstrap Arguments (Figure \ref{SNA}).
 
     \begin{figure}[!h]
       \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
@@ -479,9 +471,9 @@ keyword1, keyword2
     \end{figure}
 
     The MethodType entry contains an index into the prototype constant pool.
-    The MethodHandle entry contains the method handle kind (cf. \ref{MH})
+    The MethodHandle entry contains the method handle kind (cf.~\ref{MH})
     and an index into the method or the field constant pool, according to the kind.
-    The InvokeDynamic entry contains indexes into the string, the prototype,
+    The InvokeDynamic entry contains indexes into the strings, the prototype,
     the method handle and the bootstrap arguments constant pools.
     And the Bootstrap arguments entry contains its arguments number
     and a data block representing the arguments.
@@ -498,9 +490,9 @@ keyword1, keyword2
     A call site is bound to an instruction so it's not interresting to store them into a constant-pool.
     So we have to create a table that contains the call sites.
     We have three ways to store the call sites: in the DEX header; in the method which contains the instruction or in the class where the method is.
-    As a reminder, a DEX file contains whole the classes from a program, and a class can contains at most 65535 methods (cf. jvms 4.11).
+    As a reminder, a DEX file contains the totally the classes from a program, and a class can contains at most 65535 methods (cf. jvms 4.11).
     A method can contains a lot of instructions so the table of call sites can quickly overflow.
-    The best solution is to store the call sites in the method, but Dalvik don't have a lazy mecanism to create methods.
+    The best solution is to store the call sites in the method, but \DALVIK don't have a lazy mecanism to create methods.
     All methods are created when the class was created.
     So we take on the solution where a table is store in the header of each class.
 
@@ -508,7 +500,7 @@ keyword1, keyword2
     Our \ANDROID version understands post-invokedynamic APK.
     We need to modify the APK to add missing constant pools and CallSite tables.
     However an APK is read-only.
-    But the installation time does optimizations and has to modify the APK using ``DEXOPT'' (fig. \ref{DTC}).
+    But the installation time does optimizations and has to modify the APK using ``dexopt'' (Figure \ref{DTC}).
     So we take advantage to the installation time to add our work.
     We just simulate an APK without MethodHandle, MethodType, CallSite, \dots
     Only the DEX header and classes header change, we add empty constant pools to the header
@@ -532,13 +524,14 @@ keyword1, keyword2
 
   \begin{figure}[!h]
     \centering \input{figures/inst_mh_mt}
-    \caption{methodtype and methodhandle ldc (load constant)}
+    \caption{methodtype and methodhandle constant}
     \label{MTMHldc}
   \end{figure}
 
 \section{New invoke instructions}
-  All new instructions work with a method handle so we made a method which treats a method handle.
-  It invokes the method, get or set a field or call the interpret depending to the kind of the method handle.
+  All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
+  It invokes the method, get or set a field or call the interpret depending to the kind of the method handle
+  and uses the interpreter mecanism to store the return value.
   This method is called ``invokeMethodHandle''.
   
   Each instruction have two representation: a ``normal'' form and a ``range'' form.
@@ -582,7 +575,7 @@ keyword1, keyword2
 
     The call site is found in the current class but if it's the first time we read this instruction, the call site is not created.
     So we need to call the bootstrap method associated to the instruction first.
-    So we decode the arguments of the bootstrap method and do an up call to a method called ``callBootstrapMethod'' (fig. \ref{bsm}).
+    So we decode the arguments of the bootstrap method and do an up call to a method called ``callBootstrapMethod'' (Figure \ref{bsm}).
     This method will be detailed after.
     It returns a call site that we store in the class.
     Because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mecanism to store the call site.
@@ -595,7 +588,7 @@ keyword1, keyword2
       \subsubsection{bootstrap method caller}
         \label{bsm}
 
-        When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated.% (fig. \ref{bsm}).
+        When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated.% (Figure \ref{bsm}).
         A bootstrap method needs at least three arguments:
         a lookup (Lookup), that it's a security token object encapsulating access rigths of class containing the invoke-dynamic opcode;
         an arbitrary name (String) specified as parameter of the invoke-dynamic opcode;
@@ -614,7 +607,7 @@ keyword1, keyword2
         we have to call the ``invoke'' method.
         The ``invoke'' method needs the true signature when we call it,
         so we have to dispatch arguments to create the real signature.
-        To do that, we call the method ``invokeWithArguments''% (fig. \ref{IWA})
+        To do that, we call the method ``invokeWithArguments''% (Figure \ref{IWA})
         which call the method invoke according to the number of arguments.
         ``invokeWithArguments'' is separated on many functions to allow optimizations by the JIT.
 
@@ -646,6 +639,38 @@ keyword1, keyword2
         We pile up only if we have a 'final' method handle, which is not a subtree.
 
 \section{Result}
+
+  To compare performances of new instructions and the reflection API,
+  we have wrote a test which call N times a method using differents ways (instructions and reflection).
+  This test is executed using \DALVIK without graphical.
+
+  \begin{figure}[!h]
+    \resizebox{\linewidth}{!}{\input{figures/tikz_res_invokes}}
+    \caption{JSR 292 instructions vs reflection API}
+    \label{Rinvoke}
+  \end{figure}
+
+  Figure \ref{Rinvoke} shows results for 10000, 100000 and 1000000.
+  Below these values, we can't see strictly differences between each kind of execution.
+  We notice that calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are more faster than the others.
+  ``invoke-dynamic'' takes a little more time because it have to get a volatile method handle.
+  Regarding ``invoke-generic'' with a method type different to the final call, the execution time increase.
+  This difference is due to conversions, more specifically, the (un)boxing mecanism which creates new objects.
+  However, ``invoke-generic'' remains more faster than the reflection API which boxes all arguments.\\
+  
+  An other test consist to execute the example describes in this article.
+  We call N times a method which takes an Object and calls the right method according to the dynamic type of the argument.
+  We compare the example using the instanceof mecanism, the reflection API and the method handle interpreter.
+
+  \begin{figure}[!h]
+    \resizebox{\linewidth}{!}{\input{figures/tikz_res_mutable}}
+    \caption{Method handle interpreter vs instanceof vs reflection API}
+    \label{Rmutable}
+  \end{figure}
+
+  We notice on the Figure \ref{Rmutable} our method handle interpreter is really slow.
+  The method handle interpreter manipulates arguments.
+  So it have to create an array each time it have to reduce or to increase the number of arguments.
 
 \section{Related Works}
 
@@ -702,7 +727,7 @@ Acknowledgments, if needed.
 %   title={Android on Mobile Devices: An Energy Perspective}, 
 %   year={2010}, 
 %   pages={2421-2426}, 
-%   keywords={Java;Linux;energy consumption;mobile handsets;operating system kernels;program compilers;public domain software;Android;Angstrom linux;Dalvik JVM;Google;HTC;JAVA applications;Motorola;OHA;Sun;dynamic compiler;embedded devices;energy consumption;energy perspective;linux kernel;mobile devices;open handset alliance;open source platform;power management framework;Computers;Conferences;Information technology;Android Energy;Dalvik JVM}, 
+%   keywords={Java;Linux;energy consumption;mobile handsets;operating system kernels;program compilers;public domain software;Android;Angstrom linux;\DALVIK JVM;Google;HTC;JAVA applications;Motorola;OHA;Sun;dynamic compiler;embedded devices;energy consumption;energy perspective;linux kernel;mobile devices;open handset alliance;open source platform;power management framework;Computers;Conferences;Information technology;Android Energy;\DALVIK JVM}, 
 %   doi={10.1109/CIT.2010.416},}
   \bibitem{ieee-paul-kundu-energy-perspective}
   Paul, K.; Kundu, T.K., ``Android on Mobile Devices: An Energy Perspective,'' Computer and Information Technology (CIT), 2010 IEEE 10th International Conference on , vol., no., pp.2421,2426, June 29 2010-July 1 2010
