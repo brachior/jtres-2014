@@ -2,6 +2,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{plotmarks}
+% \usetikzlibrary{plotmarks,matrix,positioning,fit,calc}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xspace}
@@ -132,7 +133,9 @@ term1, term2
 \keywords
 keyword1, keyword2
 
-  \section{Android}
+\section{Overview}
+
+  \subsection{Android}
 
     \ANDROID is the mobile operating system created by Google.
     It's an open-source project called ``\ANDROID Open-Source Project'' (AOSP).
@@ -166,7 +169,7 @@ keyword1, keyword2
       \item and some default applications.
     \end{itemize}
 
-    \subsection{Differences between the JVM and \DALVIK}
+    \subsubsection{Differences between the JVM and \DALVIK}
 
       The main difference between these two machines is that \DALVIK is register based while the \JVM is stack based.
       A stack based virutal machine (VM) uses more instructions to manipulate data and to implement Java code than a register based VM.
@@ -209,7 +212,7 @@ keyword1, keyword2
       \label{ASA}
     \end{figure}
 
-  \section{Java Specification Request 292}
+  \subsection{Java Specification Request 292}
 
     The \JSR is a request from \JCP and led by \SUN from 2006 to 2011.
     It had been integrated in 2011 in the version 7 of Java,
@@ -232,7 +235,7 @@ keyword1, keyword2
     The next sections will present the new API and the new instructions but before that,
     we want to introduce an example that we will use for the rest of the paper.
 
-    \subsection{Example}
+    \subsubsection{Example}
       Let suppose we have the following code in Groovy \cite{lang-groovy}:
 
       \input{figures/snip_foo_groovy}
@@ -278,7 +281,7 @@ keyword1, keyword2
       These classes are directly understood by the \JVM.
       All classes answer to one or more problems coming from dynamic languages optimizations or implementations.
 
-    \subsection{invoke-dynamic and MethodHandle}
+    \subsubsection{invoke-dynamic and MethodHandle}
 
       The bootstrap method is called the first time the invokedynamic opcode is encountered by the interpreter,
       with the context where the opcode is located i.e.~the declaring class (encapsulated in a Lookup object),
@@ -298,7 +301,7 @@ keyword1, keyword2
       Moreover, invokedynamic comes with an API that allows to create several data patterns
       dynamically and lazily like for example a tree of if ... instanceof branches.
 
-    \subsection{MethodType}
+    \subsubsection{MethodType}
 
       A method type represents the types of the arguments and the return value accepted and returned by a method handle,
       or expected by a method handle caller.
@@ -311,7 +314,7 @@ keyword1, keyword2
       In our example, we need three method types, one for each method that we have to call:
       the ``check'' method; and the two methods ``plus''.
 
-    \subsection{MethodHandle / MethodHandles}
+    \subsubsection{MethodHandle / MethodHandles}
       \label{MH}
 
       A method handle is a runtime type checked, directly executable reference to
@@ -387,7 +390,7 @@ keyword1, keyword2
 
       % graph 2
       \begin{figure}[!h]
-		\hspace{-.6in} \resizebox{1.3\linewidth}{!}{\input{figures/tikz_ast_2}}
+        \hspace{-.6in} \resizebox{1.3\linewidth}{!}{\input{figures/tikz_ast_2}}
         \caption{Method handles tree - first call (integer).}
         \label{ast2}
       \end{figure}
@@ -403,7 +406,7 @@ keyword1, keyword2
         \label{ast3}
       \end{figure*}
 
-    \subsection{CallSite}
+    \subsubsection{CallSite}
 
       A CallSite is a holder for a variable MethodHandle, which is called its target.
       An invokedynamic instruction linked to a CallSite delegates all calls to the site's current target.
@@ -419,7 +422,7 @@ keyword1, keyword2
       A non-constant call site may be relinked by changing its target, calling ``setTarget'' on the CallSite.
       The new target must have the same type as the previous one.
 
-\section{FIXME}
+\section{Android 292}
 
   {\color{red}
     \begin{itemize}
@@ -429,6 +432,7 @@ keyword1, keyword2
               \item ``portable'' interpreter
               \item MethodHandle interpreter in Java
             \end{itemize}
+      \item retro-compatibility
       \item resultat de la recherche
     \end{itemize}%
   }
@@ -440,12 +444,16 @@ keyword1, keyword2
   Our solution is to make an implementation of the JSR 292 for Android but,
   because Android have many constraints from its environment,
   we have to reinterpret the JSR.
-  The API statys the same, but the VM specification does not.
+  The API stays the same, but the VM specification does not.
     
-  To do this, we created a new DEX format with new instructions, new constants,
-  \dots~And we made an specific interpreter, written in Java, which executes method handle trees (combiners).
+  To do this, the section \ref{newDEX} explain our new DEX format with a new header, classes modification
+  \dots~and how we maintain compatibility with post-invokedynamic APKs.
+  The section \ref{newConst} decribes the new constants, new instructions
+  and .
+  And we made an specific interpreter, written in Java, which executes method handle trees (combiners).
 
 \section{A new DEX format}
+\label{newDEX}
 
   New instructions and new constants imply a new format of DEX file.
   Each DEX file version have a version number, our one is number 292.
@@ -507,86 +515,156 @@ keyword1, keyword2
     and an empty table in each class representing the CallSite table.
     No offset changes, just the size of the DEX header and classes.
 
-\section{New constants}
+\section{New opcodes}
+  \subsection{New constants}
 
-  We can create constant method handles only with the ``const-methodhandle'' instruction or in the arguments of a bootstrap method.
-  The method handle instructions are rarely used and a bootstrap method is called once.
-  Therefore it's not necessary to have a cache for method handles resolved.
-  Resolve a method handle consists to find its informations into the constant-pool and create it.
-  This creation can only do in Java, an up call is necessary.
+    We can create constant method handles only with the ``const-methodhandle'' instruction or in the arguments of a bootstrap method.
+    The method handle instructions are rarely used and a bootstrap method is called once.
+    Therefore it's not necessary to have a cache for method handles resolved.
+    Resolve a method handle consists to find its informations into the constant-pool and create it.
+    This creation can only do in Java, an up call is necessary.
 
-  Comparing method types is common on the VM.
-  To simplify and optimize these tests, we need to maintain a cache which make sure that two method types with the same signature are identicals.
-  A method type can be create in Java or by the VM so the cache run in Java and only Java can create a method type (the VM does an up call).
-  All method types are store in the cache and a test between two method types becomes a simply equality test.
-  Resolve a method type consists to find its prototype in the constant-pool and call Java to find it or create it.
-  We distinguish two types of method type: some are used by the VM (strong) and must not be freed by the GC; the others (weak) can be freed by the GC if necessary.
+    Comparing method types is common on the VM.
+    To simplify and optimize these tests, we need to maintain a cache which make sure that two method types with the same signature are identicals.
+    A method type can be create in Java or by the VM so the cache run in Java and only Java can create a method type (the VM does an up call).
+    All method types are store in the cache and a test between two method types becomes a simply equality test.
+    Resolve a method type consists to find its prototype in the constant-pool and call Java to find it or create it.
+    We distinguish two types of method type: some are used by the VM (strong) and must not be freed by the GC; the others (weak) can be freed by the GC if necessary.
 
-  \begin{figure}[!h]
-    \centering \input{figures/inst_mh_mt}
-    \caption{methodtype and methodhandle constant}
-    \label{MTMHldc}
-  \end{figure}
+    \begin{figure}[!h]
+      \centering \input{figures/inst_mh_mt}
+      \caption{methodtype and methodhandle constant}
+      \label{MTMHldc}
+    \end{figure}
 
-\section{New invoke instructions}
-  All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
-  It invokes the method, gets or sets a field and calls the method handle interpreter depending to the kind of the method handle.
-  It also uses the interpreter mecanism to store the return value.
-  This method is called ``invokeMethodHandle''.
+  \subsection{New invoke instructions}
+    All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
+    It invokes the method, gets or sets a field and calls the method handle interpreter depending to the kind of the method handle.
+    It also uses the interpreter mecanism to store the return value.
+    This method is called ``invokeMethodHandle''.
+    
+    Each instruction have two representations: a ``normal'' form and a ``range'' form.
+    The ``normal'' form represents the instruction with at most 5 registers.
+    And the ``range'' form can have at most 65535 registers.
+    Each register is considered 32 bits wide.
+
+    \subsubsection{invoke-exact and invoke-generic}
+
+      invoke-exact is the instruction with the most simple implementation.
+      An invoke-exact contains a index in the constant-pool of method types.
+      This method type represents the order and types of the arguments passed to the instruction, the first argument excluded.
+      The first argument is the method handle we have to call.
+      If the two method types (contained in the instruction and in the method handle) are equals, we call the method handle.
+      Else an exception is thrown.\\
+
+      invoke-generic works like an invoke-exact but if the method types differ, we try to adapt arguments.
+      Differents treatment can be done:
+      if the number of arguments is the same between the two method types, we try to convert arguments;
+      else if we have a variadic signature, we collect and convert arguments to match the method type of the method handle.
+      else an exception is thrown.
+      When the arguments match the method signature, we call the method handle.
+
+      \begin{figure}[!h]
+        \centering \input{figures/inst_gen_exa}
+        \caption{invoke-generic/exact instruction}
+        \label{INGEins}
+      \end{figure}
+
+    \subsubsection{invoke-dynamic}
+
+      An invoke-dynamic contains a index in the constant-pool of invoke-dynamic and un integer corresponding to the call site number.
+
+      \begin{figure}[!h]
+        \centering \input{figures/inst_indy}
+        \caption{invoke-dynamic instruction}
+        \label{INDYins}
+      \end{figure}
+
+      The call site is found in the current class but if it's the first time we read this instruction, the call site is not created.
+      So we need to call the bootstrap method associated to the instruction first.
+      So we decode the arguments of the bootstrap method and do an up call to a method called ``callBootstrapMethod'' (Figure \ref{bsm}).
+      This method will be detailed after.
+      It returns a call site that we store in the class.
+      Because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mecanism to store the call site.
+      When we have the call site, we get the method handle contains in the call site.
+      All method handles are volatiles so we have to get it atomically.
+      At the end, we call the method handle.
+
+\section{Implementation details}
+
+    \subsection{MethodHandle}
+      \begin{itemize}
+        \item kind (mask)
+        \item hierarchy
+      \end{itemize}
+
+      \begin{figure}[!h]
+        \centering \resizebox{.7\linewidth}{!}{\input{figures/tikz_mh_hierarchy}}
+        \caption{Method handles hierarchy.}
+        \label{mhHier}
+      \end{figure}
+
+%       \begin{figure}[!h]
+% \centering \resizebox{.7\linewidth}{!}{
+% \begin{tikzpicture}[
+%   node distance=7mm,
+%   title/.style={font=\fontsize{6}{6}\color{black!50}\ttfamily},
+%   typetag/.style={rectangle, draw=black!50, font=\scriptsize\ttfamily, anchor=west}
+% ]
+%   \node (jar) [title] { .jar };
+% 
+%   \node (class) [title, below=of jar.west, typetag, xshift=2mm] { .class };
+%   \node (jar_header) [below=of class.west, typetag] { Header };
+% %   \node (dnc) [below=of jar_header.west, typetag] { DivideAndConquer };
+% 
+%   \node (class2) [below=of class.west, typetag] { .class };
+% 
+%   \node [draw=black!50, fit={(jar) (class) (class2) (jar_header)}] {};
+% %   \node [draw=black!50, fit={(jar) (class) (class2) (jar_header) (dnc)}] {};
+% 
+% %   \node (dep) at (3cm, 0) [title] { Dependency };
+% % 
+% %   \node (da) [below=of dep.west, typetag, xshift=2mm] { Atomic };
+% %   \node (jar_header) [below=of da.west, typetag] { Range };
+% % 
+% %   \node [draw=black!50, fit={(dep) (jar_header) (da)}] {};
+% \end{tikzpicture}
+% }
+%         \caption{}
+%       \end{figure}
+% 
+% 
+%       \begin{figure}[!h]
+% \centering \resizebox{.7\linewidth}{!}{
+% \begin{tikzpicture}[font=\ttfamily,
+%   mymatrix/.style={matrix of nodes, nodes=typetag, row sep=1em},
+%   mycontainer/.style={draw=gray, inner sep=1ex},
+%   typetag/.style={draw=gray, inner sep=1ex, anchor=west},
+%   title/.style={draw=none, color=gray, inner sep=0pt}
+%   ]
+%   \matrix[mymatrix] (mx1) {
+%     |[title]|Decomposition \\
+%     Independent \\
+%     Reduction \\
+%     DivideAndConquer \\
+%   };
+%   \matrix[mymatrix, right=of mx1.north east, matrix anchor=north west] (mx2) {
+%     |[title]|Dependency \\
+%     Atomic \\
+%     Range \\
+%   };
+%   \node[mycontainer, fit=(mx1)] {};
+%   \node[mycontainer, fit=(mx2)] {};
+% \end{tikzpicture}
+% }
+%         \caption{}
+%       \end{figure}
+
+    \subsection{invoke-exact and invoke-generic}
   
-  Each instruction have two representations: a ``normal'' form and a ``range'' form.
-  The ``normal'' form represents the instruction with at most 5 registers.
-  And the ``range'' form can have at most 65535 registers.
-  Each register is considered 32 bits wide.
-
-  \subsection{invoke-exact}
-
-    invoke-exact is the instruction with the most simple implementation.
-    An invoke-exact contains a index in the constant-pool of method types.
-    This method type represents the order and types of the arguments passed to the instruction, the first argument excluded.
-    The first argument is the method handle we have to call.
-    If the two method types (contained in the instruction and in the method handle) are equals, we call the method handle.
-    Else an exception is thrown.
-
-  \subsection{invoke-generic}
-
-    invoke-generic works like an invoke-exact but if the method types differ, we try to adapt arguments.
-    Differents treatment can be done:
-    if the number of arguments is the same between the two method types, we try to convert arguments;
-    else if we have a variadic signature, we collect and convert arguments to match the method type of the method handle.
-    else an exception is thrown.
-    When the arguments match the method signature, we call the method handle.
-
-    \begin{figure}[!h]
-      \centering \input{figures/inst_gen_exa}
-      \caption{invoke-generic/exact instruction}
-      \label{INGEins}
-    \end{figure}
-
-  \subsection{invoke-dynamic}
-
-    An invoke-dynamic contains a index in the constant-pool of invoke-dynamic and un integer corresponding to the call site number.
-
-    \begin{figure}[!h]
-      \centering \input{figures/inst_indy}
-      \caption{invoke-dynamic instruction}
-      \label{INDYins}
-    \end{figure}
-
-    The call site is found in the current class but if it's the first time we read this instruction, the call site is not created.
-    So we need to call the bootstrap method associated to the instruction first.
-    So we decode the arguments of the bootstrap method and do an up call to a method called ``callBootstrapMethod'' (Figure \ref{bsm}).
-    This method will be detailed after.
-    It returns a call site that we store in the class.
-    Because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mecanism to store the call site.
-    When we have the call site, we get the method handle contains in the call site.
-    All method handles are volatiles so we have to get it atomically.
-    At the end, we call the method handle.
-
-    \subsection{Implementation details}
-
+    \subsection{invoke-dynamic}
       \subsubsection{bootstrap method caller}
-        \label{bsm}
+      \label{bsm}
 
         When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated.% (Figure \ref{bsm}).
         A bootstrap method needs at least three arguments:
@@ -617,6 +695,7 @@ keyword1, keyword2
         We check if it or its target is not null and if the target's type and the type given are the same.
         Because the target callsite could be uninitialized we have to check if the target contains a method handle or a method type.
 
+    \subsection{Combiners}
       \subsubsection{Method handle (combiner) interpreter}
 
         \fixme{pourquoi un interpreter particulier ?}
@@ -638,6 +717,8 @@ keyword1, keyword2
         This implementation avoids to pile up a call in the stack for each method handle.
         We pile up only if we have a 'final' method handle, which is not a subtree.
 
+    \subsection{Invokers}
+
 \section{Result}
 
   To compare performances of new instructions and the reflection API,
@@ -655,12 +736,12 @@ keyword1, keyword2
   We notice that calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are more faster than the others.
   ``invoke-dynamic'' takes a little more time because it have to get a volatile method handle.
   Regarding ``invoke-generic'' with a method type different to the final call, the execution time increase.
-  This difference is due to conversions, more specifically, the (un)boxing mecanism which creates new objects.
-  However, ``invoke-generic'' remains more faster than the reflection API which boxes all arguments.\\
+  This difference is due to conversions, more specifically, the boxing mecanism which creates new objects.
+  However, ``invoke-generic'' remains more faster than the reflection API which requires to box all arguments and create an array of Object.\\
   
-  An other test consist to execute the example describes in this article.
+  An other test executes the example describes in this article.
   We call N times a method which takes an Object and calls the right method according to the dynamic type of the argument.
-  We compare the example using the instanceof mecanism, the reflection API and the method handle interpreter.
+  We compare the execution time of the example using the instanceof mecanism, the reflection API and the method handle interpreter.
 
   \begin{figure}[!h]
     \resizebox{\linewidth}{!}{\input{figures/tikz_res_mutable}}
