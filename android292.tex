@@ -1,8 +1,8 @@
 \documentclass{sig-alternate}
 
 \usepackage{tikz}
-\usetikzlibrary{plotmarks}
-% \usetikzlibrary{plotmarks,matrix,positioning,fit,calc}
+%\usetikzlibrary{plotmarks}
+\usetikzlibrary{plotmarks,matrix,positioning,fit,calc}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xspace}
@@ -176,7 +176,8 @@ keyword1, keyword2
       But the register based VM instructions tends to be larger in terms of code size\cite{ieee-paul-kundu-energy-perspective}.
 
       \begin{figure}[!h]
-        \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
+%         \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
+        \centering \resizebox{1\linewidth}{!}{\input{figures/tikz_struct_jar_apk}}
         \caption{structure of JAR and APK files}
         \label{SJA}
       \end{figure}
@@ -473,7 +474,8 @@ keyword1, keyword2
     MethodType, MethodHandle, InvokeDynamic and Bootstrap Arguments (Figure \ref{SNA}).
 
     \begin{figure}[!h]
-      \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
+%       \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
+      \centering \resizebox{.55\linewidth}{!}{\input{figures/tikz_struct_new_apk}}
       \caption{structure of new APK files}
       \label{SNA}
     \end{figure}
@@ -603,62 +605,6 @@ keyword1, keyword2
         \caption{Method handles hierarchy.}
         \label{mhHier}
       \end{figure}
-
-%       \begin{figure}[!h]
-% \centering \resizebox{.7\linewidth}{!}{
-% \begin{tikzpicture}[
-%   node distance=7mm,
-%   title/.style={font=\fontsize{6}{6}\color{black!50}\ttfamily},
-%   typetag/.style={rectangle, draw=black!50, font=\scriptsize\ttfamily, anchor=west}
-% ]
-%   \node (jar) [title] { .jar };
-% 
-%   \node (class) [title, below=of jar.west, typetag, xshift=2mm] { .class };
-%   \node (jar_header) [below=of class.west, typetag] { Header };
-% %   \node (dnc) [below=of jar_header.west, typetag] { DivideAndConquer };
-% 
-%   \node (class2) [below=of class.west, typetag] { .class };
-% 
-%   \node [draw=black!50, fit={(jar) (class) (class2) (jar_header)}] {};
-% %   \node [draw=black!50, fit={(jar) (class) (class2) (jar_header) (dnc)}] {};
-% 
-% %   \node (dep) at (3cm, 0) [title] { Dependency };
-% % 
-% %   \node (da) [below=of dep.west, typetag, xshift=2mm] { Atomic };
-% %   \node (jar_header) [below=of da.west, typetag] { Range };
-% % 
-% %   \node [draw=black!50, fit={(dep) (jar_header) (da)}] {};
-% \end{tikzpicture}
-% }
-%         \caption{}
-%       \end{figure}
-% 
-% 
-%       \begin{figure}[!h]
-% \centering \resizebox{.7\linewidth}{!}{
-% \begin{tikzpicture}[font=\ttfamily,
-%   mymatrix/.style={matrix of nodes, nodes=typetag, row sep=1em},
-%   mycontainer/.style={draw=gray, inner sep=1ex},
-%   typetag/.style={draw=gray, inner sep=1ex, anchor=west},
-%   title/.style={draw=none, color=gray, inner sep=0pt}
-%   ]
-%   \matrix[mymatrix] (mx1) {
-%     |[title]|Decomposition \\
-%     Independent \\
-%     Reduction \\
-%     DivideAndConquer \\
-%   };
-%   \matrix[mymatrix, right=of mx1.north east, matrix anchor=north west] (mx2) {
-%     |[title]|Dependency \\
-%     Atomic \\
-%     Range \\
-%   };
-%   \node[mycontainer, fit=(mx1)] {};
-%   \node[mycontainer, fit=(mx2)] {};
-% \end{tikzpicture}
-% }
-%         \caption{}
-%       \end{figure}
 
     \subsection{invoke-exact and invoke-generic}
   
