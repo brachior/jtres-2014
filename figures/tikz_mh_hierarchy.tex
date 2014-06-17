@@ -1,8 +1,10 @@
 \begin{tikzpicture}[scale=2]
   \node[rectangle, draw=black, align=center, text width=1in](A1) at (0,0){MethodHandle};
-  \node[rectangle, draw=black, align=center, text width=1in](A2) at (-1,-1){Invokers};
-  \node[rectangle, draw=black, align=center, text width=1in](A3) at (1,-1){Combiners};
+  \node[rectangle, draw=black, align=center, text width=1in, inner ysep=.7in](A2) at (-1.5,-1.4){Direct};
+  \node[rectangle, draw=black, align=center, text width=1in, inner ysep=.7in](A3) at (   0,-1.4){Combiners};
+  \node[rectangle, draw=black, align=center, text width=1in, inner ysep=.7in](A4) at ( 1.5,-1.4){Invokers};
 
   \draw[thick,<-](A1) -- ++(0,-0.3) -| (A2);
   \draw[thick,<-](A1) -- ++(0,-0.3) -| (A3);
+  \draw[thick,<-](A1) -- ++(0,-0.3) -| (A4);
 \end{tikzpicture}

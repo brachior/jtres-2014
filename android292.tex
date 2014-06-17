@@ -295,9 +295,13 @@ keyword1, keyword2
       \input{figures/snip_foo_indy}
 
       The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called, with a lookup corresponding to the class containing {\bf foo},
-      the string {\bf ``+''} and a MethodType corresponding to the descriptor ``(LObject;I)LObject;''.% (cf. \ref{FOOBSM}).
+      the string {\bf ``+''} and a MethodType corresponding to the descriptor ``(LObject;I)LObject;'' (Figure \ref{fooBSM}).
 
-      \input{figures/snip_foo_bsm}
+      \begin{figure}[!h]
+        \centering \input{figures/snip_foo_bsm}
+        \caption{Example - bootstrap method.}
+        \label{fooBSM}
+      \end{figure}
 
       Moreover, invokedynamic comes with an API that allows to create several data patterns
       dynamically and lazily like for example a tree of if ... instanceof branches.
@@ -308,11 +312,15 @@ keyword1, keyword2
       or expected by a method handle caller.
       This class represents a method signature.
 
-      \input{figures/snip_foo_methods}
+      \begin{figure}[!h]
+        \centering \input{figures/snip_foo_methods}
+        \caption{Example - methods with method types.}
+        \label{fooMTS}
+      \end{figure}
 
       All method types are immutable and interned.
       It can only be created by factory methods.
-      In our example, we need three method types, one for each method that we have to call:
+      In our example, we need three method types (Figure \ref{fooMTS}), one for each method that we have to call:
       the ``check'' method; and the two methods ``plus''.
 
     \subsubsection{MethodHandle / MethodHandles}
@@ -344,12 +352,6 @@ keyword1, keyword2
         The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.},
       the exact call semantics is more strict, and the generic call semantics is more permissive.
 
-%       A method handle is a typed, directly executable reference to
-%       an underlying method, constructor, field, or similar low-level operation,
-%       with optional transformations of arguments or return values.
-%       This class represents a function pointer.
-%       A method handle can be create by different factory methods depending to the kind of method handle.
-
       We can distinguish two kinds of method handle:
       the one which do a direct call to a method or to a field access, this method handle is direct;
       and the one which manipulates arguments called ``combiners''.
@@ -359,10 +361,14 @@ keyword1, keyword2
       We need to resolve the right method to call (addition or concatenation).
       In order to do that, we write a method which will create the right method handle called {\bf change} (detailed after).
 
-      We need to adapt the arguments to move from an Object and an integer to a CallSite and an array of Object.
-      To do this we convert arguments (asType), we collect them to form the array of Objects (asCollector) and we add the call site at first argument (bindTo).
+      \begin{figure}[!h]
+        \centering \input{figures/snip_foo_callsite}
+        \caption{Example - mutable call site.}
+        \label{fooMCS}
+      \end{figure}
 
-      \input{figures/snip_foo_callsite}
+      We need to adapt the arguments to move from an Object and an integer to a CallSite and an array of Object.
+      To do this we convert arguments (asType), we collect them to form the array of Objects (asCollector) and we add the call site at first argument (bindTo) (Figure \ref{fooMCS}).
 
       \noindent This adaptation forms the tree of the Figure \ref{ast1}.
 
@@ -373,16 +379,19 @@ keyword1, keyword2
         \label{ast1}
       \end{figure}
 
-      When the call site is created, the method handle tree is called, so the {\bf change} method is called.
-
-      \input{figures/snip_foo_change}
-
-      The method {\bf change} takes a look at the dynamic type of {\bf a} (let say an integer),
+      When the call site is created, the method handle tree is called, so the {\bf change} method (Figure \ref{fooCHANGE}) is called.
+      This method takes a look at the dynamic type of {\bf a} (let say an integer),
       finds the corresponding implementation of the {\bf plus} method
       and then re-links a method handles tree represented by a combiner called {\bf GuardWithTest}.
       This combiner uses the {\bf check} method to verify the class of {\bf a}.
       If the type of {\bf a} is an integer it will directly call the same implementation of {\bf plus};
       otherwise it uses the previous method handle tree.
+
+      \begin{figure}[!h]
+        \centering \input{figures/snip_foo_change}
+        \caption{Example - ``change'' method.}
+        \label{fooCHANGE}
+      \end{figure}
 
       To call the {\bf check} method, we have to adapt arguments.
       The stack contains an Object and an integer, we need an Object and a java.lang.Class.
@@ -424,19 +433,6 @@ keyword1, keyword2
       The new target must have the same type as the previous one.
 
 \section{Android 292}
-
-  {\color{red}
-    \begin{itemize}
-      \item new dex file / specification
-      \item implementation (correct, but not necessary fast)
-            \begin{itemize}
-              \item ``portable'' interpreter
-              \item MethodHandle interpreter in Java
-            \end{itemize}
-      \item retro-compatibility
-      \item resultat de la recherche
-    \end{itemize}%
-  }
   Currently only the desktop and the server version (HotSpot, J9, \dots) of the JVM have a complete implementation of the JSR 292.
   These implementations use mechanisms that we cannot reuse with \DALVIK (code generation, rewriting, \dots)
   because of the power costs and computing restrictions.
@@ -446,13 +442,17 @@ keyword1, keyword2
   because Android have many constraints from its environment,
   we have to reinterpret the JSR.
   The API stays the same, but the VM specification does not.
-    
-  To do this, the section \ref{newDEX} explain our new DEX format with a new header, classes modification
-  \dots~and how we maintain compatibility with post-invokedynamic APKs.
-  The section \ref{newConst} decribes the new constants, new instructions
-  and .
-  And we made an specific interpreter, written in Java, which executes method handle trees (combiners).
 
+  The next sections talk about how we made this solution.
+  We will explain our new DEX format with a new header, classes modification
+  \dots~and how we maintain compatibility with post-invokedynamic APKs (cf.~\ref{newDEX}).
+  How we represent the new constants and new instructions (cf.~\ref{newConst}).
+  And we will detail most important implementation parts: method handles, invoke instructions, \dots~(cf.~\ref{implD}).
+  At the end, we will descibe our results in terms of execution time and code size.\\
+
+  Our solution is not necessary fast, we have focussed on the conformance of the \JSR.
+  And to simplify the implementation, we have just integrated our solution in the ``portable'' interpreter written in C and not in assembly code.
+  
 \section{A new DEX format}
 \label{newDEX}
 
@@ -468,6 +468,7 @@ keyword1, keyword2
     It is the program ``dx'' (Figure \ref{DTC}) which transforms virtual calls to ``invokeExact'' and ``invoke'' to instructions.
 
   \subsection{constant-pools}
+    \label{CP}
 
     \DALVIK have a constant pool for each entry type.
     We have to add constant pool for each entry we need:
@@ -488,12 +489,16 @@ keyword1, keyword2
     And the Bootstrap arguments entry contains its arguments number
     and a data block representing the arguments.
     Each argument is encoded with a tag
-    followed by a constant pool index or the primitive value according to the tag.
+    followed by a constant pool index or the primitive value according to the tag (Figure \ref{CPentries}).
 
-    \input{figures/snip_dvm_struct_mt}
-    \input{figures/snip_dvm_struct_mh}
-    \input{figures/snip_dvm_struct_indy}
-    \input{figures/snip_dvm_struct_bsm}
+    \begin{figure}[!h]
+      \centering \input{figures/snip_dvm_struct_mt}
+      \centering \input{figures/snip_dvm_struct_mh}
+      \centering \input{figures/snip_dvm_struct_indy}
+      \centering \input{figures/snip_dvm_struct_bsm}
+      \caption{Constant pool entries.}
+      \label{CPentries}
+    \end{figure}
 
   \subsection{Class header}
 
@@ -518,9 +523,10 @@ keyword1, keyword2
     No offset changes, just the size of the DEX header and classes.
 
 \section{New opcodes}
+\label{newConst}
   \subsection{New constants}
 
-    We can create constant method handles only with the ``const-methodhandle'' instruction or in the arguments of a bootstrap method.
+    We can create constant method handles only with the ``const-methodhandle'' instruction (Figure \ref{MTMHldc}) or in the arguments of a bootstrap method.
     The method handle instructions are rarely used and a bootstrap method is called once.
     Therefore it's not necessary to have a cache for method handles resolved.
     Resolve a method handle consists to find its informations into the constant-pool and create it.
@@ -540,11 +546,6 @@ keyword1, keyword2
     \end{figure}
 
   \subsection{New invoke instructions}
-    All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
-    It invokes the method, gets or sets a field and calls the method handle interpreter depending to the kind of the method handle.
-    It also uses the interpreter mecanism to store the return value.
-    This method is called ``invokeMethodHandle''.
-    
     Each instruction have two representations: a ``normal'' form and a ``range'' form.
     The ``normal'' form represents the instruction with at most 5 registers.
     And the ``range'' form can have at most 65535 registers.
@@ -552,19 +553,9 @@ keyword1, keyword2
 
     \subsubsection{invoke-exact and invoke-generic}
 
-      invoke-exact is the instruction with the most simple implementation.
-      An invoke-exact contains a index in the constant-pool of method types.
+      invoke-exact and invoke-generic (Figure \ref{INGEins}) contain an index in the constant-pool of method types.
       This method type represents the order and types of the arguments passed to the instruction, the first argument excluded.
-      The first argument is the method handle we have to call.
-      If the two method types (contained in the instruction and in the method handle) are equals, we call the method handle.
-      Else an exception is thrown.\\
-
-      invoke-generic works like an invoke-exact but if the method types differ, we try to adapt arguments.
-      Differents treatment can be done:
-      if the number of arguments is the same between the two method types, we try to convert arguments;
-      else if we have a variadic signature, we collect and convert arguments to match the method type of the method handle.
-      else an exception is thrown.
-      When the arguments match the method signature, we call the method handle.
+      The first argument is the method handle we have to call.\\
 
       \begin{figure}[!h]
         \centering \input{figures/inst_gen_exa}
@@ -574,7 +565,9 @@ keyword1, keyword2
 
     \subsubsection{invoke-dynamic}
 
-      An invoke-dynamic contains a index in the constant-pool of invoke-dynamic and un integer corresponding to the call site number.
+      An invoke-dynamic (Figure \ref{INDYins}) contains an integer corresponding to the call site number and an index in the constant-pool of invoke-dynamic.
+      This entry in the invoke-dynamic constant pool have all informations we need to treat this instruction: bootstrap method, arguments, \dots (cf.~\ref{CP}).
+      A new opcode format has been added.
 
       \begin{figure}[!h]
         \centering \input{figures/inst_indy}
@@ -582,23 +575,14 @@ keyword1, keyword2
         \label{INDYins}
       \end{figure}
 
-      The call site is found in the current class but if it's the first time we read this instruction, the call site is not created.
-      So we need to call the bootstrap method associated to the instruction first.
-      So we decode the arguments of the bootstrap method and do an up call to a method called ``callBootstrapMethod'' (Figure \ref{bsm}).
-      This method will be detailed after.
-      It returns a call site that we store in the class.
-      Because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mecanism to store the call site.
-      When we have the call site, we get the method handle contains in the call site.
-      All method handles are volatiles so we have to get it atomically.
-      At the end, we call the method handle.
-
 \section{Implementation details}
+\label{implD}
 
     \subsection{MethodHandle}
-      \begin{itemize}
-        \item kind (mask)
-        \item hierarchy
-      \end{itemize}
+      Method handles can be divide in three parts (Figure \ref{mhHier}):
+      direct method handles which are treated by a call to the method {\bf invoke} or {\bf invokeExact};
+      combiners which require specific treatments;
+      and invokers which simulate an ``invoke'' or ``invokeExact'' call.
 
       \begin{figure}[!h]
         \centering \resizebox{.7\linewidth}{!}{\input{figures/tikz_mh_hierarchy}}
@@ -606,40 +590,80 @@ keyword1, keyword2
         \label{mhHier}
       \end{figure}
 
-    \subsection{invoke-exact and invoke-generic}
+      Each part gathers together different kinds of method handle.
+      The ``direct'' part contains all method handles which do an invoke (virtual, direct, static, \dots)
+      and a field access (get, put) with a possible ``static'' and ``volatile'' form.
+      The ``combiner'' part
+      We need to differentiate all kinds of direct method
+
+      And we made a specific interpreter, written in Java, which executes method handle trees (combiners).
+
+    \subsection{invoke instructions}
+      All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
+      It invokes the method, gets or sets a field and calls the method handle interpreter depending to the kind of the method handle.
+      It also uses the interpreter mecanism to store the return value.
+      This method is called ``invokeMethodHandle''.
+
+    \subsubsection{invoke-exact and invoke-generic}
+      invoke-exact is the instruction with the most simple implementation.
+      If the two method types (contained in the instruction and in the method handle) are equals, we call the method handle.
+      Else an exception is thrown.\\
+      
+      invoke-generic works like an invoke-exact but if the method types differ, we try to adapt arguments.
+      Differents treatment can be done:
+      if the number of arguments is the same between the two method types, we try to convert arguments;
+      else if we have a variadic signature, we collect and convert arguments to match the method type of the method handle.
+      else an exception is thrown.
+      When the arguments match the method signature, we call the method handle.
   
-    \subsection{invoke-dynamic}
-      \subsubsection{bootstrap method caller}
-      \label{bsm}
+    \subsubsection{invoke-dynamic}
+      The call site is found in the current class but if it's the first time we read this instruction, the call site is not created.
+      So we need to call the bootstrap method associated to the instruction first.
+      So we decode the arguments of the bootstrap method and do an up call to a method called ``callBootstrapMethod'' (Figure \ref{implBSM}).
+      It returns a call site that we store in the class.
 
-        When an ``invoke-dynamic'' is treated, the \JVM call the bootstrap method associated.% (Figure \ref{bsm}).
-        A bootstrap method needs at least three arguments:
-        a lookup (Lookup), that it's a security token object encapsulating access rigths of class containing the invoke-dynamic opcode;
-        an arbitrary name (String) specified as parameter of the invokedynamic opcode;
-        a method type (MethodType), that it's a reified object of the descriptor specified as parameter of the invoke-dynamic opcode;
-        and any constant values specified as bootstrap arguments of the invoke-dynamic opcode.
+      A bootstrap method needs at least three arguments:
+      a lookup (Lookup), that it's a security token object encapsulating access rigths of class containing the invoke-dynamic opcode;
+      an arbitrary name (String) specified as parameter of the invokedynamic opcode;
+      a method type (MethodType), that it's a reified object of the descriptor specified as parameter of the invoke-dynamic opcode;
+      and any constant values specified as bootstrap arguments of the invoke-dynamic opcode.
 
-        \input{figures/snip_meth_bsm}
+      \begin{figure}[!h]
+        \centering \input{figures/snip_meth_bsm}
+        \caption{Implementation of ``callBootstrapMethod''.}
+        \label{implBSM}
+      \end{figure}
 
-        At first, we have to create the lookup from the declaring class given.
-        We treat the bootstrap method differently if arguments are given or not.
-        If no arguments are given, we call directly the bootstrap method
-        with an ``invokeExact'' and the basic arguments (types are known).
+      At first, we have to create the lookup from the declaring class given.
+      We treat the bootstrap method differently if arguments are given or not.
+      If no arguments are given, we call directly the bootstrap method
+      with an ``invokeExact'' and the basic arguments (types are known).
+      Else, we add the basic arguments into the other arguments.
+      We don't want strong method types into the bootstrap arguments,
+      so they are represented by strings which are translated to method types.
+      And because arguments are seen like an array of Object,
+      we have to call the ``invoke'' method.
+      The ``invoke'' method needs the true signature when we call it,
+      so we have to dispatch arguments to create the real signature.
+      To do that, we call the method ``invokeWithArguments'' (Figure \ref{implIWA})
+      which call the method invoke according to the number of arguments.
+      ``invokeWithArguments'' is separated on many functions to allow optimizations by the JIT.
 
-        Else, we add the basic arguments into the other arguments
-        and because arguments are seen like an array of Object,
-        we have to call the ``invoke'' method.
-        The ``invoke'' method needs the true signature when we call it,
-        so we have to dispatch arguments to create the real signature.
-        To do that, we call the method ``invokeWithArguments''% (Figure \ref{IWA})
-        which call the method invoke according to the number of arguments.
-        ``invokeWithArguments'' is separated on many functions to allow optimizations by the JIT.
+      \begin{figure}[!h]
+        \centering \input{figures/snip_meth_iwa}
+        \caption{Implementation of ``invokeWithArguments''.}
+        \label{implIWA}
+      \end{figure}
 
-        \input{figures/snip_meth_iwa}
+      When the callsite is returned, we verify the integrity of the callsite.
+      We check if it or its target is not null and if the target's type and the type given are the same.
+      Because the target callsite could be uninitialized we have to check if the target contains a method handle or a method type.
 
-        When the callsite is returned, we verify the integrity of the callsite.
-        We check if it or its target is not null and if the target's type and the type given are the same.
-        Because the target callsite could be uninitialized we have to check if the target contains a method handle or a method type.
+      When the bootstrap method returns its value, we have to store the call site.
+      And because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mecanism.
+      When we have the call site, we get the method handle contains in the call site.
+      All method handles are volatiles so we have to get it atomically.
+      At the end, we call the method handle.
 
     \subsection{Combiners}
       \subsubsection{Method handle (combiner) interpreter}
@@ -651,17 +675,21 @@ keyword1, keyword2
         It is implemented using a continuation mechanism (context) to treat the return value.
         Each combiner execute its own code and can produce a 'context'.
         For example, AsType converts arguments and produces a context if it has to convert the return value.
-        So when the interpreter treats a 'final' method handle,
+        So when the interpreter treats a direct method handle,
         which means a method handle produced by a call to 'lookup.findXXX(\dots)' (instance, static, getter, \dots),
         it does an invoke-generic and check if a context exist.
         If there is a context, the interpreter execute the second part of the method handle,
         convert the return value in the case of AsType.
         Afterwards, the interpreter repeats the loop.
 
-        \input{figures/snip_meth_interp}
+        \begin{figure}[!h]
+          \centering \input{figures/snip_meth_interp}
+          \caption{Implementation of ``invokeCombiner''.}
+          \label{implINTERP}
+        \end{figure}
     
         This implementation avoids to pile up a call in the stack for each method handle.
-        We pile up only if we have a 'final' method handle, which is not a subtree.
+        We pile up only if we have a direct method handle, which is not a subtree.
 
     \subsection{Invokers}
 
