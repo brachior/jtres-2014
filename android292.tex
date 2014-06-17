@@ -2,7 +2,7 @@
 
 \usepackage{tikz}
 %\usetikzlibrary{plotmarks}
-\usetikzlibrary{plotmarks,matrix,positioning,fit,calc}
+\usetikzlibrary{plotmarks,arrows,matrix,positioning,fit,calc}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xspace}
@@ -177,7 +177,7 @@ keyword1, keyword2
 
       \begin{figure}[!h]
 %         \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
-        \centering \resizebox{1\linewidth}{!}{\input{figures/tikz_struct_jar_apk}}
+        \centering \resizebox{\linewidth}{!}{\input{figures/tikz_struct_jar_apk}}
         \caption{structure of JAR and APK files}
         \label{SJA}
       \end{figure}
@@ -196,6 +196,34 @@ keyword1, keyword2
       Unlike the \JVM, \DALVIK uses one constant-pool by type of constant
       except for the primitive types which are directly encoded with the opcode.
       It leads more smaller indexes for instructions.\\
+
+%      \begin{figure}[!h]
+%        \centering \resizebox{\linewidth}{!}{
+%\begin{tikzpicture}[node distance=1cm, auto,]
+%\tikzset{
+%    %Define standard arrow tip
+%    >=stealth',
+%    %Define style for boxes
+%    punkt/.style={rectangle,rounded corners,draw=black, very thick,text width=6.5em,minimum height=2em,text centered},
+%    % Define arrow style
+%    pil/.style={->,thick,shorten <=2pt,shorten >=2pt,align=center}}
+% %nodes
+% \node[punkt] (market) {.java};
+%% \node[punkt, inner sep=5pt,below=0.5cm of market]
+%% (formidler) {Intermediaries (c)};
+% % We make a dummy figure to make everything look nice.
+% \node[above=of market] (dummy) {};
+% \node[punkt,right=of dummy] (t) {Ultimate borrower}
+%   edge[pil,bend left=45] (market.east); % edges are used to connect two nodes
+%%   edge[pil, bend left=45] (formidler.east); % .east since we want
+%                                             % consistent style
+% \node[punkt,left=of dummy] (g) {Ultimate lender}
+%   %edge[pil, bend right=45] (market.west)
+%%   edge[pil, bend right=45] (formidler.west)
+%   edge[pil,<->, bend right=45] node[auto] {Java Compiler} (t);
+%\end{tikzpicture}
+%        }
+%      \end{figure}
 
       \begin{figure}[!h]
         \centering \includegraphics[width=\columnwidth]{dex-tools-chain.png}
@@ -585,7 +613,7 @@ keyword1, keyword2
       and invokers which simulate an ``invoke'' or ``invokeExact'' call.
 
       \begin{figure}[!h]
-        \centering \resizebox{.7\linewidth}{!}{\input{figures/tikz_mh_hierarchy}}
+        \centering \resizebox{\linewidth}{!}{\input{figures/tikz_mh_hierarchy}}
         \caption{Method handles hierarchy.}
         \label{mhHier}
       \end{figure}
@@ -593,10 +621,12 @@ keyword1, keyword2
       Each part gathers together different kinds of method handle.
       The ``direct'' part contains all method handles which do an invoke (virtual, direct, static, \dots)
       and a field access (get, put) with a possible ``static'' and ``volatile'' form.
-      The ``combiner'' part
-      We need to differentiate all kinds of direct method
+      The ``combiner'' part aggregates all method handles that we cannot call directly.
+      We treat these method handles with a specific interpreter detailed in section \ref{combiners}.
+      And the last part ("invoker") is formed by special method handles which need a specific manipulation in the Dalvik interpreter.
 
-      And we made a specific interpreter, written in Java, which executes method handle trees (combiners).
+      We distinguish all kinds of method handle with several binary masks.
+      \fixme{detailler completement ? genre montrer les masques ?}
 
     \subsection{invoke instructions}
       All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
@@ -666,6 +696,10 @@ keyword1, keyword2
       At the end, we call the method handle.
 
     \subsection{Combiners}
+    \label{combiners}
+
+      And we made a specific interpreter, written in Java, which executes method handle trees (combiners).
+
       \subsubsection{Method handle (combiner) interpreter}
 
         \fixme{pourquoi un interpreter particulier ?}
