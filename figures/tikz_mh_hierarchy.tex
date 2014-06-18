@@ -19,7 +19,7 @@
   \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=3em] (invoke) at ([yshift=-3em,xshift=4em]A1.south east){};
   \node[below right] at (invoke.north west) {Invokers};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.8in, inner ysep=.055in] at ([xshift=2.9em,yshift=.3em]invoke.west){exactInvoker};
-  \node[rectangle, rounded corners, draw=black, align=center, text width=.8in] at ([xshift=2.9em,yshift=-.7em]invoke.west){genericInvoker};
+  \node[rectangle, rounded corners, draw=black, align=center, text width=.8in] at ([xshift=2.9em,yshift=-.7em]invoke.west){invoker};
   
   \draw[thick,<-](A1) -- ++(0,-0.3) -| (direct);
   \draw[thick,<-](A1) -- ++(0,-0.3) -| (comb);

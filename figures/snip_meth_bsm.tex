@@ -3,23 +3,22 @@
   import static java.lang.invoke.MethodHandles.Lookup.PRIVATE;
     ...
   private static CallSite callBootstrapMethod(
-        MethodHandle methodHandle, Class<?> lookupClass,
-        String indyName, MethodType indyType, Object[] bsmArgs)
+        MethodHandle mh, Class<?> lookupClass, String indyName,
+        MethodType indyType, ClassLoader loader, Object[] bsmArgs)
       throws Throwable {
     Lookup lookup = new Lookup(PRIVATE, lookupClass);
     CallSite callSite;
     try {
       if (bsmArgs == null) {  // fast path
         callSite = (CallSite)
-          methodHandle.invokeExact(lookup, indyName, indyType);
+          mh.invokeExact(lookup, indyName, indyType);
       } else {
         Object[] args = new Object[3 + bsmArgs.length];
         args[0] = lookup;
         args[1] = indyName;
         args[2] = indyType;
         System.arraycopy(bsmArgs, 0, args, 3, bsmArgs.length);
-        callSite =
-          (CallSite) methodHandle.invokeWithArguments(args);
+        callSite = (CallSite) mh.invokeWithArguments(args);
       }
     } catch (WrongMethodTypeException e) {
       throw new BootstrapMethodError(e);

@@ -1,0 +1,13 @@
+\begin{tikzpicture}[node distance=1cm, auto,]
+  \tikzset{>=stealth', punkt/.style={rectangle,rounded corners,draw=black, very thick,text width=6.5em,minimum height=2em,text centered}, pil/.style={->,thick,shorten <=2pt,shorten >=2pt,align=center}}
+  \node[punkt] (a) at (0,0) {\bf .java};
+  \node[punkt, fill=gray!30] (b) at (3,0) {\bf .class}
+    edge[double,<-] node[auto] {} (a)
+    edge[pil,<-, bend left=45] node[auto] {\bf javac} (a);
+  \node[punkt, fill=gray!30] (c) at (6,0) {\bf .dex}
+    edge[double,<-] node[auto] {} (b)
+    edge[pil,<-, bend left=45] node[auto] {\bf dx} (b);
+  \node[punkt, fill=gray!30] (d) at (9,0) {\bf .odex}
+    edge[double,<-] node[auto] {} (c)
+    edge[pil,<-, bend left=45] node[auto] {\bf dxopt} (c);
+\end{tikzpicture}

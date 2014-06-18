@@ -14,15 +14,15 @@
 
   %plots
   \draw plot[mark=*] 
-    file {exact.data};
+    file {datas/exact.data};
   \draw plot[mark=triangle*] 
-    file {generic.data};
+    file {datas/generic.data};
   \draw plot[mark=triangle*, mark options={fill=white}]
-    file {genexact.data};
+    file {datas/genexact.data};
   \draw plot[mark=square*, mark options={fill=white}]
-    file {dynamic.data};  
+    file {datas/dynamic.data};  
   \draw plot[mark=square*] 
-    file {reflection.data};  
+    file {datas/reflection.data};  
 
   %legend
   \begin{scope}[shift={(2.2,2)}] 

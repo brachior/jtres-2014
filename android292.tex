@@ -197,36 +197,8 @@ keyword1, keyword2
       except for the primitive types which are directly encoded with the opcode.
       It leads more smaller indexes for instructions.\\
 
-%      \begin{figure}[!h]
-%        \centering \resizebox{\linewidth}{!}{
-%\begin{tikzpicture}[node distance=1cm, auto,]
-%\tikzset{
-%    %Define standard arrow tip
-%    >=stealth',
-%    %Define style for boxes
-%    punkt/.style={rectangle,rounded corners,draw=black, very thick,text width=6.5em,minimum height=2em,text centered},
-%    % Define arrow style
-%    pil/.style={->,thick,shorten <=2pt,shorten >=2pt,align=center}}
-% %nodes
-% \node[punkt] (market) {.java};
-%% \node[punkt, inner sep=5pt,below=0.5cm of market]
-%% (formidler) {Intermediaries (c)};
-% % We make a dummy figure to make everything look nice.
-% \node[above=of market] (dummy) {};
-% \node[punkt,right=of dummy] (t) {Ultimate borrower}
-%   edge[pil,bend left=45] (market.east); % edges are used to connect two nodes
-%%   edge[pil, bend left=45] (formidler.east); % .east since we want
-%                                             % consistent style
-% \node[punkt,left=of dummy] (g) {Ultimate lender}
-%   %edge[pil, bend right=45] (market.west)
-%%   edge[pil, bend right=45] (formidler.west)
-%   edge[pil,<->, bend right=45] node[auto] {Java Compiler} (t);
-%\end{tikzpicture}
-%        }
-%      \end{figure}
-
       \begin{figure}[!h]
-        \centering \includegraphics[width=\columnwidth]{dex-tools-chain.png}
+        \centering \resizebox{\linewidth}{!}{\input{figures/tikz_dex_toolschain}}
         \caption{\ANDROID application tools-chain}
         \label{DTC}
       \end{figure}
@@ -236,7 +208,7 @@ keyword1, keyword2
       which can then be optimized (\mbox{ODEX}) to save space (Figure \ref{DTC}).
 
     \begin{figure}[!h]
-      \centering \def\svgwidth{\columnwidth} \includesvg{android-system-architecture}
+      \centering \resizebox{\linewidth}{!}{\input{figures/tikz_struct_android}}
       \caption{android system architecture \cite{wiki-android}}
       \label{ASA}
     \end{figure}
@@ -624,9 +596,11 @@ keyword1, keyword2
       The ``combiner'' part aggregates all method handles that we cannot call directly.
       We treat these method handles with a specific interpreter detailed in section \ref{combiners}.
       And the last part ("invoker") is formed by special method handles which need a specific manipulation in the Dalvik interpreter.
+      Each part is treated differently by the Dalvik interpreter.
 
       We distinguish all kinds of method handle with several binary masks.
-      \fixme{detailler completement ? genre montrer les masques ?}
+
+%       \fixme{detailler completement ? genre montrer les masques ?\\Parler du SlotAccessor ? et des slot/info ?}
 
     \subsection{invoke instructions}
       All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
@@ -652,17 +626,17 @@ keyword1, keyword2
       So we decode the arguments of the bootstrap method and do an up call to a method called ``callBootstrapMethod'' (Figure \ref{implBSM}).
       It returns a call site that we store in the class.
 
+      \begin{figure}[!h]
+        \centering \input{figures/snip_meth_bsm}
+        \caption{snippet - ``callBootstrapMethod''.}
+        \label{implBSM}
+      \end{figure}
+
       A bootstrap method needs at least three arguments:
       a lookup (Lookup), that it's a security token object encapsulating access rigths of class containing the invoke-dynamic opcode;
       an arbitrary name (String) specified as parameter of the invokedynamic opcode;
       a method type (MethodType), that it's a reified object of the descriptor specified as parameter of the invoke-dynamic opcode;
       and any constant values specified as bootstrap arguments of the invoke-dynamic opcode.
-
-      \begin{figure}[!h]
-        \centering \input{figures/snip_meth_bsm}
-        \caption{Implementation of ``callBootstrapMethod''.}
-        \label{implBSM}
-      \end{figure}
 
       At first, we have to create the lookup from the declaring class given.
       We treat the bootstrap method differently if arguments are given or not.
@@ -681,7 +655,7 @@ keyword1, keyword2
 
       \begin{figure}[!h]
         \centering \input{figures/snip_meth_iwa}
-        \caption{Implementation of ``invokeWithArguments''.}
+        \caption{snippet - ``invokeWithArguments''.}
         \label{implIWA}
       \end{figure}
 
@@ -698,34 +672,74 @@ keyword1, keyword2
     \subsection{Combiners}
     \label{combiners}
 
-      And we made a specific interpreter, written in Java, which executes method handle trees (combiners).
+      A part of method handles allows to manipulate arguments, we call them: ``combiners''.
+      Combiners can contain several method handles and at least one direct method handle.
+      Thereby, we can represent them by trees, reffered to here as method handles trees.
+%       Une partie des method handles permet la manipulation des arguments, on les appelle: ``combiners''.
+%       Le combiners possèdent d'autres method handles et au moins un method handle direct.
+%       De ce fait, on peut les repr\'esenter sous forme d'arbres, on parlera ici d'arbres de method handles.
 
-      \subsubsection{Method handle (combiner) interpreter}
+      Execute a combiner is often equivalent to execute many.
+      Given that combiners cannot be final calls,
+      It is not interresting to do real calls, ie.~put on the execution stack,
+      each combiner and at the end call the direct method handle, which needs a real call.
+%       Ex\'ecuter un combiner est donc souvent \'equivalent \`a en ex\'ecuter plusieurs.
+%       Étant donn\'e que les combiners ne peuvent pas \circ{e}tre des appels finaux,
+%       il n'est donc pas interressant de faire des appels r\'eels, c'est \`a dire mettre sur la pile d'ex\'ecution,
+%       chaque combiner pour enfin appeller le method handle direct, qui lui est un appel r\'eel.
 
-        \fixme{pourquoi un interpreter particulier ?}
+      To execute direct method handles, we have to use the ``invoke-exact'' and ``invoke-generic'' instructions.
+      But we cannot call them through the interpreter, we can only do in Java.
+      To avoid a java up call for each combiner, we have chosen to write an interpreter,
+      specific to execution of combiners, in Java (Figure \ref{implINTERP}).
+%       Pour ex\'ecuter les method handles directs, nous devons utiliser les instructions ``invoke-exact'' et ``invoke-generic''.
+%       Mais elles ne sont pas accessibles via l'interpreter, nous devons donc remonter en Java pour les appeller.
+%       Pour \'eviter de passer de l'interpreteur en C \`a une m\'ethode Java pour chaque combiner,
+%       nous avons donc choisi de faire un interpreteur, r\'eserv\'e \`a l'ex\'ecution des combiners, \'ecrit en Java (Figure \ref{implINTERP}).
 
-        The method handle interpreter written in Java
-        is used to interpret method handle trees which start by a combiner.
-        It is implemented using a continuation mechanism (context) to treat the return value.
-        Each combiner execute its own code and can produce a 'context'.
-        For example, AsType converts arguments and produces a context if it has to convert the return value.
-        So when the interpreter treats a direct method handle,
-        which means a method handle produced by a call to 'lookup.findXXX(\dots)' (instance, static, getter, \dots),
-        it does an invoke-generic and check if a context exist.
-        If there is a context, the interpreter execute the second part of the method handle,
-        convert the return value in the case of AsType.
-        Afterwards, the interpreter repeats the loop.
+%       The method handle interpreter written in Java
+%       is used to interpret method handle trees which start by a combiner.
+%       It is implemented using a continuation mechanism (context) to treat the return value.
+      This interpreter is implemented using a continuation mechanism (context) to treat the return value.
+      Each combiner execute its own code and can produce a 'context'.
+      For example, AsType converts arguments and produces a context if it has to convert the return value.
+      So when the interpreter treats a direct method handle,
+      which means a method handle produced by a call to 'lookup.findXXX(\dots)' (instance, static, getter, \dots),
+      it does an invoke-generic and check if a context exist.
+      If there is a context, the interpreter execute the second part of the method handle,
+      convert the return value in the case of AsType.
+      Afterwards, the interpreter repeats the loop.
 
-        \begin{figure}[!h]
-          \centering \input{figures/snip_meth_interp}
-          \caption{Implementation of ``invokeCombiner''.}
-          \label{implINTERP}
-        \end{figure}
-    
-        This implementation avoids to pile up a call in the stack for each method handle.
-        We pile up only if we have a direct method handle, which is not a subtree.
+      \begin{figure}[!h]
+        \centering \input{figures/snip_meth_interp}
+        \caption{snippet - ``invokeCombiner''.}
+        \label{implINTERP}
+      \end{figure}
+
+      This implementation avoids to pile up a call in the stack for each method handle.
+      We pile up only if we have a direct method handle, which is not a subtree.
 
     \subsection{Invokers}
+
+      Parmis les method handles, on appelle ``invoker'' ceux qui appliquent un appel particulier \`a un method handle pass\'e en param\`etre.
+      Cet appel peut correspondre \`a un combiner mais aussi \`a un ``invoke'' (``exactInvoker'' et ``invoker'').
+      Les appels \`a un combiner peuvent \^etre simul\'es par un method handle.
+      Et en ce qui concerne les appels \`a un ``invoke'', ils simulent un appel \`a la m\'ethode ``invoke'' ou \`a la m\'ethode ``invokeExact''.
+      Il faut traiter ces deux cas de fa\c{c}on particuli\`ere.
+      Nous devons intervenir au niveau de l'interpreteur, quatre possibilit\'es s'offrent \`a nous:
+      \begin{itemize}
+        \item invoke/exactInvoker - on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-exact''.
+              Comme l'instruction ``invoke-generic'' se comporte comme celle d'``invoke-exact'' si le method type correspond, 
+              on peut adapter les arguments (changer le method handle courant, d\'ecaller les arguments, \dots)
+              et remonter dans l'instruction, tout en pr\'ecisant qu'on ne peut pas convertir les arguments.
+        \item invokeExact/exactInvoker - on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-exact''.
+              Ici, on peut adapter les arguments et remonter dans l'instruction car les instructions sont identiques.
+        \item invoke/invoker - on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-generic''.
+              Pour la m\^eme raison que pr\'ecedemment, on peut directement adapter les arguments et remonter.
+        \item invokeExact/invoker - on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-generic''.
+              Ce cas est un peu plus compliqu\'e. En effet, l'instruction ``invoke-exact'' n'a pas toutes les fonctionnalit\'es de l'instruction ``invoke-generic''.
+              La solution ici est d'adapter les arguments et de remonter en Java en appelant la m\'ethode ``invokeWithArguments'' qui se chargera d'appeler l'instruction ``invoke-generic''.
+      \end{itemize}
 
 \section{Result}
 
