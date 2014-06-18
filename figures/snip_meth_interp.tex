@@ -13,7 +13,7 @@ private static Object invokeCombiner(
           switch (context.kind) {
             case AS_TYPE: { ... }
             case GWT: { ... }
-            case FOLD_ARGUMENTS: { ... }
+              ...
             default:
               throw new InternalError("shouldn't happen !");
           }
@@ -29,9 +29,6 @@ private static Object invokeCombiner(
       case AS_COLLECTOR: { ... }
       case AS_SPREADER: { ... }
       case GWT: { ... }
-      case DROP_ARGUMENTS: { ... }
-      case INSERT_ARGUMENTS: { ... }
-      case FOLD_ARGUMENTS: { ... }
         ...
       default:
         throw new InternalError("shouldn't happen !");

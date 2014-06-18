@@ -1,8 +1,7 @@
 \documentclass{sig-alternate}
 
 \usepackage{tikz}
-%\usetikzlibrary{plotmarks}
-\usetikzlibrary{plotmarks,arrows,matrix,positioning,fit,calc}
+\usetikzlibrary{plotmarks,arrows,positioning}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xspace}
@@ -41,16 +40,6 @@
 \def \VM{VM\xspace}
 \def \BSM{BSM\xspace}
 
-\newcommand{\executeiffilenewer}[3]{%
-  \ifnum\pdfstrcmp{\pdffilemoddate{#1}}{\pdffilemoddate{#2}}>0%
-  {\immediate\write18{#3}}\fi%
-}
-
-\newcommand{\includesvg}[1]{%
-  \executeiffilenewer{#1.svg}{#1.pdf}{inkscape -z -D --file=#1.svg --export-pdf=#1.pdf --export-latex}%
-  \input{#1.pdf_tex}%
-}
-
 \newcommand{\tinyline}[3]{
   \tiny #1 &
   \tiny #2 &
@@ -72,17 +61,12 @@
 }%
 { \\ \end{list} \end{minipage} }
 
-\newcommand{\fixme}[1]{{\color{red} // FIXME #1}\\}
+\newcommand{\fixme}[1]{{\color{red}FIXME #1}}
 
 \begin{document}
 
-\conferenceinfo{JTRES}{2014 Niagara Falls, New York USA}
-%\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
-%\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
-% --- End of Author Metadata ---
-
-\title{Title}
-\subtitle{subtitle}
+\title{Android 292}
+\subtitle{invokedynamic in Android}
 
 \numberofauthors{3}
 \author{
@@ -97,13 +81,21 @@
     \email{pilliet@univ-mlv.fr}
 }
 
-\setlength{\pdfpageheight}{\paperheight}
-\setlength{\pdfpagewidth}{\paperwidth}
+\conferenceinfo{JTRES}{2014 Niagara Falls, New York USA}
+%\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
+%\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
+% --- End of Author Metadata ---
 
 \maketitle
 
 \begin{abstract}
-This is the text of the abstract.
+\fixme{bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
 
 bla bla bla bla bla bla bla bla bla
 bla bla bla bla bla bla bla bla bla
@@ -112,15 +104,7 @@ bla bla bla bla bla bla bla bla bla
 bla bla bla bla bla bla bla bla bla
 bla bla bla bla bla bla bla bla bla
 bla bla bla bla bla bla bla bla bla
-
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-\dots
+\dots}
 \end{abstract}
 
 \category{CR-number}{subcategory}{third-level}
@@ -131,7 +115,7 @@ bla bla bla bla bla bla bla bla bla
 term1, term2
 
 \keywords
-keyword1, keyword2
+android, java, jsr 292, invokedynamic, embedded, dalvik
 
 \section{Overview}
 
@@ -476,7 +460,7 @@ keyword1, keyword2
 
     \begin{figure}[!h]
 %       \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
-      \centering \resizebox{.55\linewidth}{!}{\input{figures/tikz_struct_new_apk}}
+      \centering \resizebox{.45\linewidth}{!}{\input{figures/tikz_struct_new_apk}}
       \caption{structure of new APK files}
       \label{SNA}
     \end{figure}
@@ -540,7 +524,7 @@ keyword1, keyword2
     We distinguish two types of method type: some are used by the VM (strong) and must not be freed by the GC; the others (weak) can be freed by the GC if necessary.
 
     \begin{figure}[!h]
-      \centering \input{figures/inst_mh_mt}
+      \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_mh_mt}}
       \caption{methodtype and methodhandle constant}
       \label{MTMHldc}
     \end{figure}
@@ -558,7 +542,7 @@ keyword1, keyword2
       The first argument is the method handle we have to call.\\
 
       \begin{figure}[!h]
-        \centering \input{figures/inst_gen_exa}
+        \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_gen_exa}}
         \caption{invoke-generic/exact instruction}
         \label{INGEins}
       \end{figure}
@@ -570,7 +554,7 @@ keyword1, keyword2
       A new opcode format has been added.
 
       \begin{figure}[!h]
-        \centering \input{figures/inst_indy}
+        \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_indy}}
         \caption{invoke-dynamic instruction}
         \label{INDYins}
       \end{figure}
@@ -600,7 +584,9 @@ keyword1, keyword2
 
       We distinguish all kinds of method handle with several binary masks.
 
-%       \fixme{detailler completement ? genre montrer les masques ?\\Parler du SlotAccessor ? et des slot/info ?}
+      \noindent \fixme{detailler completement (masks) ?}\\
+      \fixme{SlotAccessor ?}\\
+      \fixme{vminfo (field/method) ?}
 
     \subsection{invoke instructions}
       All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
@@ -697,6 +683,12 @@ keyword1, keyword2
 %       Pour \'eviter de passer de l'interpreteur en C \`a une m\'ethode Java pour chaque combiner,
 %       nous avons donc choisi de faire un interpreteur, r\'eserv\'e \`a l'ex\'ecution des combiners, \'ecrit en Java (Figure \ref{implINTERP}).
 
+      \begin{figure}[!h]
+        \centering \input{figures/snip_meth_interp}
+        \caption{snippet - ``invokeCombiner''.}
+        \label{implINTERP}
+      \end{figure}
+
 %       The method handle interpreter written in Java
 %       is used to interpret method handle trees which start by a combiner.
 %       It is implemented using a continuation mechanism (context) to treat the return value.
@@ -710,38 +702,56 @@ keyword1, keyword2
       convert the return value in the case of AsType.
       Afterwards, the interpreter repeats the loop.
 
-      \begin{figure}[!h]
-        \centering \input{figures/snip_meth_interp}
-        \caption{snippet - ``invokeCombiner''.}
-        \label{implINTERP}
-      \end{figure}
 
       This implementation avoids to pile up a call in the stack for each method handle.
       We pile up only if we have a direct method handle, which is not a subtree.
 
     \subsection{Invokers}
 
-      Parmis les method handles, on appelle ``invoker'' ceux qui appliquent un appel particulier \`a un method handle pass\'e en param\`etre.
-      Cet appel peut correspondre \`a un combiner mais aussi \`a un ``invoke'' (``exactInvoker'' et ``invoker'').
-      Les appels \`a un combiner peuvent \^etre simul\'es par un method handle.
-      Et en ce qui concerne les appels \`a un ``invoke'', ils simulent un appel \`a la m\'ethode ``invoke'' ou \`a la m\'ethode ``invokeExact''.
-      Il faut traiter ces deux cas de fa\c{c}on particuli\`ere.
-      Nous devons intervenir au niveau de l'interpreteur, quatre possibilit\'es s'offrent \`a nous:
-      \begin{itemize}
-        \item invoke/exactInvoker - on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-exact''.
-              Comme l'instruction ``invoke-generic'' se comporte comme celle d'``invoke-exact'' si le method type correspond, 
-              on peut adapter les arguments (changer le method handle courant, d\'ecaller les arguments, \dots)
-              et remonter dans l'instruction, tout en pr\'ecisant qu'on ne peut pas convertir les arguments.
-        \item invokeExact/exactInvoker - on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-exact''.
-              Ici, on peut adapter les arguments et remonter dans l'instruction car les instructions sont identiques.
-        \item invoke/invoker - on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-generic''.
-              Pour la m\^eme raison que pr\'ecedemment, on peut directement adapter les arguments et remonter.
-        \item invokeExact/invoker - on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-generic''.
-              Ce cas est un peu plus compliqu\'e. En effet, l'instruction ``invoke-exact'' n'a pas toutes les fonctionnalit\'es de l'instruction ``invoke-generic''.
-              La solution ici est d'adapter les arguments et de remonter en Java en appelant la m\'ethode ``invokeWithArguments'' qui se chargera d'appeler l'instruction ``invoke-generic''.
-      \end{itemize}
+      Among method handles, we call "invoker" those which apply a specific call to a method handle passed as a parameter.
+      This call can be a combiner (``spreadInvoker'' \fixme{c'est le seul ?}) and also an ``invoke'' (``exactInvoker'' and ``invoker'').
+      The ``spreadInvoker'' is simulated by a method handle \fixme{lequel ?}.
+      Concerning the ``exactInvoker'' and the ``invoker'', they simulate respectively a call to the method ``invokeExact'' and ``invoke''.
+      We treat these two invoker directly in the Dalvik interpreter, there are four cases:
+%       Parmi les method handles, on appelle ``invoker'' ceux qui appliquent un appel particulier \`a un method handle pass\'e en param\`etre.
+%       Cet appel peut correspondre \`a un combiner mais aussi \`a un ``invoke'' (``exactInvoker'' et ``invoker'').
+%       Les appels \`a un combiner peuvent \^etre simul\'es par un method handle.
+%       Et en ce qui concerne les appels \`a un ``invoke'', ils simulent un appel \`a la m\'ethode ``invoke'' ou \`a la m\'ethode ``invokeExact''.
+%       Il faut traiter ces deux cas de fa\c{c}on particuli\`ere.
+%       Nous devons intervenir au niveau de l'interpreteur, quatre possibilit\'es s'offrent \`a nous:
+      \begin{enumerate}
+        \item invoke $\rightarrow$ exactInvoker: an ``invoke-generic'' have to simulate an ``invoke-exact''.
+              Because ``invoke-generic'' have the same behaviour than ``invoke-exact'',
+              we can adapt the arguments (change current method handle, shift arguments, \dots) and back in the instruction code.
+        \item invokeExact $\rightarrow$ exactInvoker: an ``invoke-exact'' have to simulate an ``invoke-generic''.
+              The instructions are identicals so we can adapt arguments and back in the instruction code.
+        \item invoke $\rightarrow$ invoker: an ``invoke-generic'' have to simulate an ``invoke-generic''.
+              It is the same idea than previously.
+        \item invokeExact $\rightarrow$ invoker: an ``invoke-exact'' have to simulate an ``invoke-exact''.
+              This case is more difficult because an ``invoke-exact'' cannot do the ``invoke-generic'' work.
+              We adapt the arguments and if the method type is correct, we do an ``invoke-exact''
+              else we call the Java method ``invokeWithArguments'' which will call the ``invoke-generic'' instruction.
+      \end{enumerate}
+%       \begin{itemize}
+%         \item invoke $\rightarrow$ exactInvoker: on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-exact''.
+%               Comme l'instruction ``invoke-generic'' se comporte comme celle d'``invoke-exact'' si le method type correspond, 
+%               on peut adapter les arguments (changer le method handle courant, d\'ecaller les arguments, \dots)
+%               et remonter dans l'instruction, tout en pr\'ecisant qu'on ne peut pas convertir les arguments.
+%         \item invokeExact $\rightarrow$ exactInvoker: on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-exact''.
+%               Ici, on peut adapter les arguments et remonter dans l'instruction car les instructions sont identiques.
+%         \item invoke $\rightarrow$ invoker: on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-generic''.
+%               Pour la m\^eme raison que pr\'ecedemment, on peut directement adapter les arguments et remonter.
+%         \item invokeExact $\rightarrow$ invoker: on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-generic''.
+%               Ce cas est un peu plus compliqu\'e. En effet, l'instruction ``invoke-exact'' n'a pas toutes les fonctionnalit\'es de l'instruction ``invoke-generic''.
+%               La solution ici est d'adapter les arguments et de remonter en Java en appelant la m\'ethode ``invokeWithArguments'' qui se chargera d'appeler l'instruction ``invoke-generic''.
+%       \end{itemize}
+
+      \fixme{autre chose a dire ?}
 
 \section{Result}
+
+  \noindent \fixme{impact sur le code source (dalvik/libcore)}\\
+  \fixme{impact sur le binaire (dvm/dex)}
 
   To compare performances of new instructions and the reflection API,
   we have wrote a test which call N times a method using differents ways (instructions and reflection).
@@ -776,15 +786,32 @@ keyword1, keyword2
   So it have to create an array each time it have to reduce or to increase the number of arguments.
 
 \section{Related Works}
+\fixme{\\bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+bla bla bla bla bla bla bla bla bla
+\dots}
 
 \appendix
 \section{Appendix Title}
 
-This is the text of the appendix, if you need one.
+\noindent \fixme{lien vers bitbucket}\\
+\fixme{expliquer comment compiler}
 
 \section{Acknowledgments}
 
-Acknowledgments, if needed.
+\noindent \fixme{Acknowledgments, if needed.}
 
 % We recommend abbrvnat bibliography style.
 
@@ -793,7 +820,7 @@ Acknowledgments, if needed.
 \makeatother
 
 % \bibliographystyle{abbrvnat}
-\bibliographystyle{abbrv}
+\bibliographystyle{abbrvnat}
 
 % The bibliography should be embedded for final submission.
 \begin{thebibliography}{}
@@ -809,7 +836,7 @@ Acknowledgments, if needed.
   \ANDROID (Wikipedia) - \\ \url{en.wikipedia.org/wiki/Android\_(operating\_system)#Linux}
 
   \bibitem{wiki-jvm-lang}
-  \JVM languages (Wikipedia) - \\ \url{https://en.wikipedia.org/wiki/List\_of\_JVM\_languages}
+  \JVM languages (Wikipedia) - \\ \url{en.wikipedia.org/wiki/List\_of\_JVM\_languages}
 %   @ARTICLE{5676144, 
 %   author={Butler, M.}, 
 %   journal={Pervasive Computing, IEEE}, 
