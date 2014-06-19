@@ -65,8 +65,7 @@
 
 \begin{document}
 
-\title{Android 292}
-\subtitle{invokedynamic in Android}
+\title{Android 292: implementing invokedynamic in Android}
 
 \numberofauthors{3}
 \author{
@@ -115,7 +114,8 @@ bla bla bla bla bla bla bla bla bla
 term1, term2
 
 \keywords
-android, java, jsr 292, invokedynamic, embedded, dalvik
+Bytecode, method invocation, invokedynamic, JSR 292,\\
+method handles, method handle adapters, Android, Dalvik, embedded system
 
 \section{Overview}
 
@@ -125,7 +125,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
     It's an open-source project called ``\ANDROID Open-Source Project'' (AOSP).
     In Q2 2013, \ANDROID occupies almost 80\% of the market share with more than 187 million units shipped \cite{idc-website}.
     The success of \ANDROID can be explained by an open project and an open market
-    which are very attractive for devices producers, service providers and application developers \cite{ieee-butler-android-landscape}.
+    which are very attractive for devices producers, service providers and application developers \cite{ieee-butler-android-landscape}\cite{ieee-paulson-shift-dynamic-languages}.
 
     \ANDROID mainly run on embedded environments like smartphones and tablets.
     Therefore, strong constraints apply to \ANDROID
@@ -160,7 +160,6 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       But the register based VM instructions tends to be larger in terms of code size\cite{ieee-paul-kundu-energy-perspective}.
 
       \begin{figure}[!h]
-%         \centering \includegraphics[width=\columnwidth]{structure-jar-apk.png}
         \centering \resizebox{\linewidth}{!}{\input{figures/tikz_struct_jar_apk}}
         \caption{structure of JAR and APK files}
         \label{SJA}
@@ -282,7 +281,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       the string {\bf ``+''} and a MethodType corresponding to the descriptor ``(LObject;I)LObject;'' (Figure \ref{fooBSM}).
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_foo_bsm}
+        \centering \input{figures/snip_foo_bsm}\vspace{-1.5em}
         \caption{Example - bootstrap method.}
         \label{fooBSM}
       \end{figure}
@@ -297,7 +296,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       This class represents a method signature.
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_foo_methods}
+        \centering \input{figures/snip_foo_methods}\vspace{-1.5em}
         \caption{Example - methods with method types.}
         \label{fooMTS}
       \end{figure}
@@ -346,7 +345,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       In order to do that, we write a method which will create the right method handle called {\bf change} (detailed after).
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_foo_callsite}
+        \centering \input{figures/snip_foo_callsite}\vspace{-1.5em}
         \caption{Example - mutable call site.}
         \label{fooMCS}
       \end{figure}
@@ -372,7 +371,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       otherwise it uses the previous method handle tree.
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_foo_change}
+        \centering \input{figures/snip_foo_change}\vspace{-1.5em}
         \caption{Example - ``change'' method.}
         \label{fooCHANGE}
       \end{figure}
@@ -418,7 +417,8 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
 
 \section{Android 292}
   Currently only the desktop and the server version (HotSpot, J9, \dots) of the JVM have a complete implementation of the JSR 292.
-  These implementations use mechanisms that we cannot reuse with \DALVIK (code generation, rewriting, \dots)
+  These implementations use mechanisms that we cannot reuse with \DALVIK (code generation, rewriting,
+  \dots~\cite{jvmsummit-heidinga-mhimpl-2010}\cite{jvmsummit-heidinga-mhimpl-2011}\cite{jvmsummit-rose-mhimpl-2011})
   because of the power costs and computing restrictions.
   For this reason, \DALVIK is seen like a specific virtual machine from language developers.
     
@@ -459,7 +459,6 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
     MethodType, MethodHandle, InvokeDynamic and Bootstrap Arguments (Figure \ref{SNA}).
 
     \begin{figure}[!h]
-%       \centering \includegraphics[width=.5\columnwidth]{structure-apk-292.png}
       \centering \resizebox{.45\linewidth}{!}{\input{figures/tikz_struct_new_apk}}
       \caption{structure of new APK files}
       \label{SNA}
@@ -479,7 +478,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       \centering \input{figures/snip_dvm_struct_mt}
       \centering \input{figures/snip_dvm_struct_mh}
       \centering \input{figures/snip_dvm_struct_indy}
-      \centering \input{figures/snip_dvm_struct_bsm}
+      \centering \input{figures/snip_dvm_struct_bsm}\vspace{-1.5em}
       \caption{Constant pool entries.}
       \label{CPentries}
     \end{figure}
@@ -584,9 +583,13 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
 
       We distinguish all kinds of method handle with several binary masks.
 
-      \noindent \fixme{detailler completement (masks) ?}\\
-      \fixme{SlotAccessor ?}\\
-      \fixme{vminfo (field/method) ?}
+      \begin{figure}[!h]
+        \centering \input{figures/snip_methodhandle}\vspace{-1.5em}
+        \caption{Method handle fields.}
+        \label{mhFields}
+      \end{figure}
+
+      \fixme{decrire la classe}
 
     \subsection{invoke instructions}
       All new instructions work with a method handle so we made a method, inside the interpreter, which treats a method handle.
@@ -613,7 +616,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       It returns a call site that we store in the class.
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_meth_bsm}
+        \centering \input{figures/snip_meth_bsm}\vspace{-1.5em}
         \caption{snippet - ``callBootstrapMethod''.}
         \label{implBSM}
       \end{figure}
@@ -640,7 +643,7 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       ``invokeWithArguments'' is separated on many functions to allow optimizations by the JIT.
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_meth_iwa}
+        \centering \input{figures/snip_meth_iwa}\vspace{-1.5em}
         \caption{snippet - ``invokeWithArguments''.}
         \label{implIWA}
       \end{figure}
@@ -661,37 +664,23 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
       A part of method handles allows to manipulate arguments, we call them: ``combiners''.
       Combiners can contain several method handles and at least one direct method handle.
       Thereby, we can represent them by trees, reffered to here as method handles trees.
-%       Une partie des method handles permet la manipulation des arguments, on les appelle: ``combiners''.
-%       Le combiners possèdent d'autres method handles et au moins un method handle direct.
-%       De ce fait, on peut les repr\'esenter sous forme d'arbres, on parlera ici d'arbres de method handles.
 
       Execute a combiner is often equivalent to execute many.
       Given that combiners cannot be final calls,
       It is not interresting to do real calls, ie.~put on the execution stack,
       each combiner and at the end call the direct method handle, which needs a real call.
-%       Ex\'ecuter un combiner est donc souvent \'equivalent \`a en ex\'ecuter plusieurs.
-%       Étant donn\'e que les combiners ne peuvent pas \circ{e}tre des appels finaux,
-%       il n'est donc pas interressant de faire des appels r\'eels, c'est \`a dire mettre sur la pile d'ex\'ecution,
-%       chaque combiner pour enfin appeller le method handle direct, qui lui est un appel r\'eel.
 
       To execute direct method handles, we have to use the ``invoke-exact'' and ``invoke-generic'' instructions.
       But we cannot call them through the interpreter, we can only do in Java.
       To avoid a java up call for each combiner, we have chosen to write an interpreter,
       specific to execution of combiners, in Java (Figure \ref{implINTERP}).
-%       Pour ex\'ecuter les method handles directs, nous devons utiliser les instructions ``invoke-exact'' et ``invoke-generic''.
-%       Mais elles ne sont pas accessibles via l'interpreter, nous devons donc remonter en Java pour les appeller.
-%       Pour \'eviter de passer de l'interpreteur en C \`a une m\'ethode Java pour chaque combiner,
-%       nous avons donc choisi de faire un interpreteur, r\'eserv\'e \`a l'ex\'ecution des combiners, \'ecrit en Java (Figure \ref{implINTERP}).
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_meth_interp}
+        \centering \input{figures/snip_meth_interp}\vspace{-1.5em}
         \caption{snippet - ``invokeCombiner''.}
         \label{implINTERP}
       \end{figure}
 
-%       The method handle interpreter written in Java
-%       is used to interpret method handle trees which start by a combiner.
-%       It is implemented using a continuation mechanism (context) to treat the return value.
       This interpreter is implemented using a continuation mechanism (context) to treat the return value.
       Each combiner execute its own code and can produce a 'context'.
       For example, AsType converts arguments and produces a context if it has to convert the return value.
@@ -708,45 +697,31 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
 
     \subsection{Invokers}
 
-      Among method handles, we call "invoker" those which apply a specific call to a method handle passed as a parameter.
-      This call can be a combiner (``spreadInvoker'' \fixme{c'est le seul ?}) and also an ``invoke'' (``exactInvoker'' and ``invoker'').
-      The ``spreadInvoker'' is simulated by a method handle \fixme{lequel ?}.
-      Concerning the ``exactInvoker'' and the ``invoker'', they simulate respectively a call to the method ``invokeExact'' and ``invoke''.
-      We treat these two invoker directly in the Dalvik interpreter, there are four cases:
-%       Parmi les method handles, on appelle ``invoker'' ceux qui appliquent un appel particulier \`a un method handle pass\'e en param\`etre.
-%       Cet appel peut correspondre \`a un combiner mais aussi \`a un ``invoke'' (``exactInvoker'' et ``invoker'').
-%       Les appels \`a un combiner peuvent \^etre simul\'es par un method handle.
-%       Et en ce qui concerne les appels \`a un ``invoke'', ils simulent un appel \`a la m\'ethode ``invoke'' ou \`a la m\'ethode ``invokeExact''.
-%       Il faut traiter ces deux cas de fa\c{c}on particuli\`ere.
-%       Nous devons intervenir au niveau de l'interpreteur, quatre possibilit\'es s'offrent \`a nous:
-      \begin{enumerate}
-        \item invoke $\rightarrow$ exactInvoker: an ``invoke-generic'' have to simulate an ``invoke-exact''.
-              Because ``invoke-generic'' have the same behaviour than ``invoke-exact'',
-              we can adapt the arguments (change current method handle, shift arguments, \dots) and back in the instruction code.
-        \item invokeExact $\rightarrow$ exactInvoker: an ``invoke-exact'' have to simulate an ``invoke-generic''.
-              The instructions are identicals so we can adapt arguments and back in the instruction code.
-        \item invoke $\rightarrow$ invoker: an ``invoke-generic'' have to simulate an ``invoke-generic''.
-              It is the same idea than previously.
-        \item invokeExact $\rightarrow$ invoker: an ``invoke-exact'' have to simulate an ``invoke-exact''.
-              This case is more difficult because an ``invoke-exact'' cannot do the ``invoke-generic'' work.
-              We adapt the arguments and if the method type is correct, we do an ``invoke-exact''
-              else we call the Java method ``invokeWithArguments'' which will call the ``invoke-generic'' instruction.
-      \end{enumerate}
-%       \begin{itemize}
-%         \item invoke $\rightarrow$ exactInvoker: on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-exact''.
-%               Comme l'instruction ``invoke-generic'' se comporte comme celle d'``invoke-exact'' si le method type correspond, 
-%               on peut adapter les arguments (changer le method handle courant, d\'ecaller les arguments, \dots)
-%               et remonter dans l'instruction, tout en pr\'ecisant qu'on ne peut pas convertir les arguments.
-%         \item invokeExact $\rightarrow$ exactInvoker: on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-exact''.
-%               Ici, on peut adapter les arguments et remonter dans l'instruction car les instructions sont identiques.
-%         \item invoke $\rightarrow$ invoker: on demande \`a l'instruction ``invoke-generic'' d'executer le method handle avec un ``invoke-generic''.
-%               Pour la m\^eme raison que pr\'ecedemment, on peut directement adapter les arguments et remonter.
-%         \item invokeExact $\rightarrow$ invoker: on demande \`a l'instruction ``invoke-exact'' d'executer le method handle avec un ``invoke-generic''.
-%               Ce cas est un peu plus compliqu\'e. En effet, l'instruction ``invoke-exact'' n'a pas toutes les fonctionnalit\'es de l'instruction ``invoke-generic''.
-%               La solution ici est d'adapter les arguments et de remonter en Java en appelant la m\'ethode ``invokeWithArguments'' qui se chargera d'appeler l'instruction ``invoke-generic''.
-%       \end{itemize}
+      Among method handles, we call "invoker" those which are high order method handles.
+      An invoker extracts the method handle passed as first pargument and calls it with the rest of arguments.
+      Its job is to simulate a call to the method ``invokeExact'' (exactInvoker) and ``invoke'' (invoker).
+      The method type of an invoker is the same as the method handle it have to call with a MethodHandle at first parameter.
 
-      \fixme{autre chose a dire ?}
+      Because we cannot simulate an ``invoke-exact'' in Java, we have to add support code in the Dalvik interpreter.
+      And to avoid unnecessary up calls, we treat the generic invoker in the interpreter too.
+      Each invoker can be execute either by the ``invoke'' method or by the ``invokeExact'' method, so we have four call semantics.
+
+      In the Dalvik interpreter, the execution of an invoker acts as an optimized tail call.
+      The method handle to call (invokee) is extracted from the first argument and the other arguments are shifted.
+      Then the interpreter re-executes itself using a goto.
+      In order to perform the second pointer check, we store the expected method type of the invokee as a field of the MHInvoker class (Figure \ref{invokeeFields}).
+
+      \begin{figure}[!h]
+        \centering \input{figures/snip_mh_invoker}\vspace{-1.5em}
+        \caption{Method handle invokee fields.}
+        \label{invokeeFields}
+      \end{figure}
+
+      A problem remains when we want to execute the generic invoker with the semantics of ``invoke-exact''.
+      Reproduce the ``invoke-generic'' behaviour require to copy a lot of code so,
+      we choose to do an up call to the method ``invokeWithArguments'' which calls the method ``invoke''.
+
+      Method handles contains also others invokers (``spreadInvoker'' and ``dynamicInvoker'') but we can treat them like combiners.
 
 \section{Result}
 
@@ -786,22 +761,15 @@ android, java, jsr 292, invokedynamic, embedded, dalvik
   So it have to create an array each time it have to reduce or to increase the number of arguments.
 
 \section{Related Works}
-\fixme{\\bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
 
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-bla bla bla bla bla bla bla bla bla
-\dots}
+  Currently, the OpenJDK is the only one open-source implementation of the \JSR.
+  As shown in several papers of John R. Rose and al. (JSR 292 spec leader), this JSR has often evolved.
+  In 2009, he describes an implementation of the \Jsr, now obsolete\cite{vmil-rose-indy-2009}.
+  In 2010, he publishes a paper presenting the implementation in the JDK 7\cite{pppj-rose-indy-2010}.
+  Today, no paper explains the LambdaForm-based implementation of the JDK 8.
+
+  We don't find any implementation of the \JSR on an embedded virtual machine.
+  Note also that the \Jsr 360 (describing the embedded part of the JDK) specify that the ``invokedynamic'' instruction is not included\cite{jcp-jsr-360}.
 
 \appendix
 \section{Appendix Title}
@@ -827,46 +795,43 @@ bla bla bla bla bla bla bla bla bla
 %   \softraggedright
 
   \bibitem{idc-website}
-  IDC website (2013) - \\ \url{www.idc.com/getdoc.jsp?containerId=prUS24257413}
+  IDC website (2013) - \\ \url{www.idc.com/getdoc.jsp?containerId=prUS24257413}.
 
-  \bibitem{lang-groovy}
-  Groovy website - \\ \url{http://groovy.codehaus.org/}
-  
-  \bibitem{wiki-android}
-  \ANDROID (Wikipedia) - \\ \url{en.wikipedia.org/wiki/Android\_(operating\_system)#Linux}
-
-  \bibitem{wiki-jvm-lang}
-  \JVM languages (Wikipedia) - \\ \url{en.wikipedia.org/wiki/List\_of\_JVM\_languages}
-%   @ARTICLE{5676144, 
-%   author={Butler, M.}, 
-%   journal={Pervasive Computing, IEEE}, 
-%   title={Android: Changing the Mobile Landscape}, 
-%   year={2011}, 
-%   volume={10}, 
-%   number={1}, 
-%   pages={4-7}, 
-%   keywords={mobile computing;mobile radio;operating systems (computers);Android phones;Google;iPhone market;mobile landscape;smart phones;Androids;Driver circuits;Marketing and sales;Mobile communication;Smart phones;Android;App Inventor for Android;Apple App Store;BlackBerry;Technovation;iPhone}, 
-%   doi={10.1109/MPRV.2011.1}, 
-%   ISSN={1536-1268},}
   \bibitem{ieee-butler-android-landscape}
-   Butler, M., ``Android: Changing the Mobile Landscape,'' Pervasive Computing, IEEE , vol.10, no.1, pp.4,7, Jan.-March 2011
-
-%   @INPROCEEDINGS{5578292, 
-%   author={Paul, K. and Kundu, T.K.}, 
-%   booktitle={Computer and Information Technology (CIT), 2010 IEEE 10th International Conference on}, 
-%   title={Android on Mobile Devices: An Energy Perspective}, 
-%   year={2010}, 
-%   pages={2421-2426}, 
-%   keywords={Java;Linux;energy consumption;mobile handsets;operating system kernels;program compilers;public domain software;Android;Angstrom linux;\DALVIK JVM;Google;HTC;JAVA applications;Motorola;OHA;Sun;dynamic compiler;embedded devices;energy consumption;energy perspective;linux kernel;mobile devices;open handset alliance;open source platform;power management framework;Computers;Conferences;Information technology;Android Energy;\DALVIK JVM}, 
-%   doi={10.1109/CIT.2010.416},}
-  \bibitem{ieee-paul-kundu-energy-perspective}
-  Paul, K.; Kundu, T.K., ``Android on Mobile Devices: An Energy Perspective,'' Computer and Information Technology (CIT), 2010 IEEE 10th International Conference on , vol., no., pp.2421,2426, June 29 2010-July 1 2010
+  Butler, M., ``Android: Changing the Mobile Landscape'', Pervasive Computing, IEEE , vol.10, no.1, pp.4,7, Jan.-March 2011.
 
   \bibitem{ieee-paulson-shift-dynamic-languages}
-  Paulson, L.D., ``Developers shift to dynamic programming languages,'' Computer , vol.40, no.2, pp.12,15, Feb. 2007
+  Paulson, L.D., ``Developers shift to dynamic programming languages'', Computer , vol.40, no.2, pp.12,15, Feb. 2007.
 
-%   \bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
-%   P. Q. Smith, and X. Y. Jones. ...reference text...
+  \bibitem{ieee-paul-kundu-energy-perspective}
+  Paul, K.; Kundu, T.K., ``Android on Mobile Devices: An Energy Perspective'', Computer and Information Technology (CIT), 2010 IEEE 10th International Conference on , vol., no., pp.2421,2426, June 29 2010-July 1 2010.
+
+  \bibitem{wiki-android}
+  \ANDROID (Wikipedia) - \\ \url{http://en.wikipedia.org/wiki/Android\_(operating\_system)#Linux}.
+
+  \bibitem{wiki-jvm-lang}
+  \JVM languages (Wikipedia) - \\ \url{http://en.wikipedia.org/wiki/List\_of\_JVM\_languages}.
+
+  \bibitem{lang-groovy}
+  Groovy website - \\ \url{http://groovy.codehaus.org/}.
+  
+  \bibitem{jvmsummit-heidinga-mhimpl-2010}
+  Heidinga, D., ``MethodHandles: An IBM Implementation'', In {\it JVM Summit}, 2010. \url{http://wiki.jvmlangsummit.com/images/a/ad/J9_MethodHandle_Impl.pdf}.
+
+  \bibitem{jvmsummit-heidinga-mhimpl-2011}
+  Heidinga, D., ``MethodHandle implemention tips and tricks'', In {\it JVM Summit}, 2011. \url{http://wiki.jvmlangsummit.com/images/6/6b/2011_Heidinga.pdf}.
+
+  \bibitem{jvmsummit-rose-mhimpl-2011}
+  Rose, J.R., ``Method Handles and Beyond\dots~Some basis vectors'', In {\it JVM Summit}, 2011. \url{http://wiki.jvmlangsummit.com/images/8/88/Rose-2011-FutureDirections.pdf}.
+
+  \bibitem{vmil-rose-indy-2009}
+  Rose, J.R., ``Bytecodes meet combinators: invokedynamic on the JVM''. In {\it Proceedings of the 3rd Workshop on Virtual Machines and Intermediate Languages (VMIL)}, 2009.
+
+  \bibitem{pppj-rose-indy-2010}
+  Thalinger, C.; Rose, J.R., ``Optimizing invokedynamic''. In {\it Proceedings of the 8th International Conference on the Principles and Practice of Programming in Java (PPPJ)}, 2010.
+
+  \bibitem{jcp-jsr-360}
+  Java Community Process, ``JSR 360: Connected Limited Device Configuration 8'' - \url{https://jcp.org/en/jsr/detail?id=360}.
 
 \end{thebibliography}
 
