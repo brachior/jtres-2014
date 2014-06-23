@@ -248,21 +248,20 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \input{figures/snip_foo_java}
 
       While this code works, it supposes that all the potentials variations of + are known at compile time,
-      something which is not true in most dynamic languages (Ruby, Groovy, Dart by example).
+      something which is not true in most dynamic languages (Ruby, Groovy or Dart allows users to add
+      new versions of any operations).
       This code can also be slow because in real languages, the number of if ... instanceof branches
       can be greater than a dozen. 
 
-      To solve these issues, the \Jsr introduces a new bytecode named invokedynamic with no predefined
-      linking semantics. It introduces also a mechanism that allows to specify the linking semantics in Java
-      or any languages that can be compiled to bytecodes.
-      Invokedynamic is a function call so it can simulate every other existing Java calls.
-      It delegates its linking semantics to an external Java method, the bootstrap method.
-      This method returns a CallSite object which is a box that contains a function pointer (MethodHandle).
+      To solve these issues, the \Jsr introduces a new bytecode named invokedynamic which has no predefined
+      linking semantics and let an external Java\footnote{or any languages that can be compiled to Java bytecode} code
+      named the bootstrap method to specify the linking semantics.
+      This method returns a CallSite object which is a box that contains a method handle (a function pointer)
+      that will be used for the subsequent calls.
 
-      The \JSR has created a new package named\\ ``java.lang.invoke''.
-      It is composed of classes MethodType, MethodHandle and CallSite.
-      These classes are directly understood by the \JVM.
-      All classes answer to one or more problems coming from dynamic languages optimizations or implementations.
+      The classes (MethodHandle, MethodType, CallSite, etc.) specified by the \Jsr are grouped into the
+      package ``java.lang.invoke'' and are directly understood by the \JVM.
+      These classes answer to one or more problems coming from dynamic languages optimizations or implementations.
 
     \subsubsection{invoke-dynamic and MethodHandle}
 
@@ -276,7 +275,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       \input{figures/snip_foo_indy}
 
-      The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called, with a lookup corresponding to the class containing {\bf foo},
+      The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called, with a lookup object corresponding to the class containing {\bf foo},
       the string {\bf ``+''} and a MethodType corresponding to the descriptor ``(LObject;I)LObject;'' (Figure \ref{fooBSM}).
 
       \begin{figure}[!h]
@@ -291,8 +290,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \subsubsection{MethodType}
 
       A method type represents the types of the arguments and the return value accepted and returned by a method handle,
-      or expected by a method handle caller.
-      This class represents a method signature.
+      or expected by a method handle caller, i.e. a method type represents a method signature.
 
       \begin{figure}[!h]
         \centering \input{figures/snip_foo_methods}\vspace{-1.5em}
@@ -300,8 +298,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{fooMTS}
       \end{figure}
 
-      All method types are immutable and interned.
-      It can only be created by factory methods.
+      All method types are immutable and can only be created by static factory methods,
+      allowing implementation to intern them when necessary. 
       In our example, we need three method types (Figure \ref{fooMTS}), one for each method that we have to call:
       the ``check'' method; and the two methods ``plus''.
 
@@ -309,10 +307,11 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \label{MH}
 
       A method handle is a runtime type checked, directly executable reference to
-      either an underlying method, constructor, field, or similar low-level operation.
-      It also represents a combiner operation that takes one or more method handles as input and
-      applies an operation like an argument transformation, a function compositions, etc.
-      The former kind of method handle is called {\it direct method handle},
+      either an underlying method, constructor, field, or similar low-level operations.
+      It can also represent a combiner operation that is the result of a high order function
+      that takes one or more method handles as input and applies operations like an argument transformation,
+      a function compositions, etc.
+      The former kind of method handle is called a {\it direct method handle},
       the later is called a {\it combiner method handle}.
 
       To guarantee runtime type safety, each method handle embodies a method type (of type MethodType)
@@ -324,24 +323,23 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \begin{itemize}
         \item the exact call semantics, in that case, the declared type of the arguments (and return value) at a call site
               must be exactly the same as the types of the method type.
-        \item the generic call semantics, in that case, the arguments can be converted using widening primitive conversions,
-              boxing and unboxing conversions and varargs conversions as defined in the Java Language Specification.
+        \item the generic call semantics, in that case, the arguments can be converted using subtyping cponversions,
+              widening primitive conversions, boxing and unboxing conversions and varargs conversions
+              as defined in the Java Language Specification.
       \end{itemize}
-      None of these semantics implements the calling semantics as defined by the Java Virtual Machine Specification
+      None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
       for classical Java method calls like invokestatic or invokevirtual
       \footnote{There is also a minor difference between the generic call semantics and the call semantics of
         the Java Language Specification if the method is a varargs and the call as the same number of parameters as the method.
-        The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.},
-      the exact call semantics is more strict, and the generic call semantics is more permissive.
+        The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.}.
+      The exact call semantics is more strict, and the generic call semantics is more permissive than the classical call semantics.
 
-      We can distinguish two kinds of method handle:
-      the one which do a direct call to a method or to a field access, this method handle is direct;
-      and the one which manipulates arguments called ``combiners''.
-      The combiners contain at least one direct method handle and can be represented by a tree.
-
-      In our example, we want to call a method which takes an Object and an integer and returns an Object.
-      We need to resolve the right method to call (addition or concatenation).
-      In order to do that, we write a method which will create the right method handle called {\bf change} (detailed after).
+      Now, back to our example, in order to find the right target method (addition or concatenation),
+      but for that we need to inspect the runtime type (the class exactly) of the argument of the call.
+      The values of the arguments are not available when the bootstrap method is called, at linking time,
+      so we use an intermediary method, named {\bf change} in the code below, that will be registered as
+      target method for the first call. When this method will be called, the argument are known, and
+      we can decide which target method to call.
 
       \begin{figure}[!h]
         \centering \input{figures/snip_foo_callsite}\vspace{-1.5em}
@@ -349,8 +347,18 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{fooMCS}
       \end{figure}
 
-      We need to adapt the arguments to move from an Object and an integer to a CallSite and an array of Object.
-      To do this we convert arguments (asType), we collect them to form the array of Objects (asCollector) and we add the call site at first argument (bindTo) (Figure \ref{fooMCS}).
+      Because the method {\bf change} can be called for any operations, neither the number of parameters nor the type
+      of the parameters are known before the bootstrap method is called. So the method {\bf change} takes an array of
+      Object as parameters, and the combiner asCollector and asType are used to do the argument transformations
+      that will takes all the arguments and wrap them in an array of Object.
+
+      Moreover, the semantics of invokedynamic allow to do a re-link at runtime, by calling the method setTarget
+      on a CallSite (see below). So the method {\bf change} takes a CallSite as first parameter, this parameter
+      will be curried using the combiner bindTo.
+       
+      Thus, in the example, we convert each arguments to an Object using asType,
+      we collect them to form the array of Objects with asCollector and
+      we add the call site at first argument with bindTo (Figure \ref{fooMCS}).
 
       \noindent This adaptation forms the tree of the Figure \ref{ast1}.
 
@@ -364,10 +372,17 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       When the call site is created, the method handle tree is called, so the {\bf change} method (Figure \ref{fooCHANGE}) is called.
       This method takes a look at the dynamic type of {\bf a} (let say an integer),
       finds the corresponding implementation of the {\bf plus} method
-      and then re-links a method handles tree represented by a combiner called {\bf GuardWithTest}.
-      This combiner uses the {\bf check} method to verify the class of {\bf a}.
+      and then re-links a method handles tree represented by a combiner called {\bf GuardWithTest}
+      which is quivalent to a test \bf{if .. then .. else}.
+
+      There is no existing method handle in the API that are able to do a class check,
+      but it's easy to construct one. The method named {\bf check}, check if an argument class
+      is identical to a class object taken as parameter and this parameter is curried
+      (using insertArguments) to the class we need to check.
+
+      The {\bf GuardWithTest} combiner uses the {\bf check} method to verify the class of {\bf a}.
       If the type of {\bf a} is an integer it will directly call the same implementation of {\bf plus};
-      otherwise it uses the previous method handle tree.
+      otherwise as a fallback, it will call the method {\bf change} to find a new target method.
 
       \begin{figure}[!h]
         \centering \input{figures/snip_foo_change}\vspace{-1.5em}
@@ -375,9 +390,10 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{fooCHANGE}
       \end{figure}
 
-      To call the {\bf check} method, we have to adapt arguments.
-      The stack contains an Object and an integer, we need an Object and a java.lang.Class.
-      So we have to drop the integer (dropArguments) and insert the class (insertArguments).
+      In the example, in order to call the method {\bf check}, we have to adapt the arguments,
+      the method is called with an Object and an integer, so we first need to drop the second
+      argument with dropArguments and then insert the java.lang.Class corresponding to an integer
+      (java.lang.Integer) with insertArguments.
       This adaptation forms the tree of the Figure \ref{ast2}.
 
       % graph 2
@@ -388,7 +404,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \end{figure}
 
       If 'a' is a string, the method {\bf change} is called again,
-      installing a new method handle tree testing if 'a' is a string in order to call {\it plus(String,int)Object}.
+      installing a new method handle tree testing if 'a' is a string in order to call {\it plus(String,int)Object}
+      delegating to the previous method handle tree otherwise.
       This adaptation form the tree of the Figure \ref{ast3}.
 
       % graph 3
@@ -400,42 +417,45 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
     \subsubsection{CallSite}
 
-      A CallSite is a holder for a variable MethodHandle, which is called its target.
+      As we have seen, a CallSite is a holder for a MethodHandle, which is called its target.
       An invokedynamic instruction linked to a CallSite delegates all calls to the site's current target.
-      A CallSite may be associated with several invokedynamic instructions,
-      or it may be ``free floating'', associated with none.\\
+      A same CallSite object may be associated with several invokedynamic
+      instructions\footnote{A callsite can also be ``free floating'', associated with no invokedynamic,
+      if you want to reuse the same mechanism to implement an interpreter in Java by example.}\\
 
       It has three immediate, concrete subclasses that may be either instantiated or subclassed:
       \begin{enumerate}
-        \item \textbf{ConstantCallSite} : If a mutable target is not required.
-        \item \textbf{MutableCallSite}  : If a mutable target is required.
-        \item \textbf{VolatileCallSite} : If a mutable target is required which has volatile variable semantics.
+        \item \textbf{ConstantCallSite} : If the target is constant.
+        \item \textbf{MutableCallSite}  : If the target change infrequently.
+        \item \textbf{VolatileCallSite} : If the target has the volatile variable semantics.
       \end{enumerate}
       A non-constant call site may be relinked by changing its target, calling ``setTarget'' on the CallSite.
       The new target must have the same type as the previous one.
 
 \section{Android 292}
-  Currently the desktop and the server version (HotSpot, J9, \dots) of the JVM are the only one having a complete implementation of the JSR 292.
-  These implementations use mechanisms that we cannot reuse with \DALVIK (code generation, rewriting,
+  There a few complete implementations of the \JSR, mostly two.
+  The OpenJDK Hotspot VM which is the reference implementation of Java and is also used in the Oracle JDK
+  and the IBM J9 implementation used in the IBM JDK.
+  These implementations use several mechanisms, bytecode generation, bytecode rewriting, assembly generation
   \dots~\cite{jvmsummit-heidinga-mhimpl-2010}\cite{jvmsummit-heidinga-mhimpl-2011}\cite{jvmsummit-rose-mhimpl-2011})
-  because of the power costs and computing restrictions.
-  For this reason, \DALVIK is seen like a specific virtual machine for language developers.
-    
-  Our solution is to make an implementation of the JSR 292 for Android but,
-  because Android have many constraints from its environment,
-  we have to reinterpret the JSR.
-  The API stays the same, but the VM specification does not.
+  that are not suitable to use in an embedded virtual machine like \DALVIK.
+  because of the computing power and the energy consumption required by such mechanisms.
 
-  The next sections talk about how we made this solution.
-  We will explain our new DEX format with a new header, classes modification
-  \dots~and how we maintain compatibility with post-invokedynamic APKs (cf.~\ref{newDEX}).
-  How we represent the new constants and new instructions (cf.~\ref{newConst}).
-  Also we will detail the most important implementation parts: method handles, invoke instructions, \dots~(cf.~\ref{implD}).
+  For this reason, we have developed a specific implementation of the \JSR for \DALVIK.
+
+  Specifically for Android, because Android does not use the Java class file format specification,
+  we have re-interpreted the part of the JSR 292 spec that describes the class file format
+  in order to translate it into the DEX file format.
+  This work is described in section~\ref{newConst}.
+
+  We have also implemented a way to execute all APKs previously created to run with our modified VM
+  (section~\ref{newDEX})
+  
+  The section~\ref{implD} describe in detail the most important implementation parts,
+  describing how an invokedynamic opcode or a method handle are executed by our modified VM.
+  
   At the end, we will describe our results in terms of execution time and code size.\\
 
-  Our solution is not necessary fast, we have focussed on the conformance of the \JSR.
-  To simplify the implementation, we have just integrated our solution in the ``portable'' interpreter written in C and not in assembler code.
-  
 \section{A new DEX format}
 \label{newDEX}
 
@@ -770,6 +790,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   We don't find any implementation of the \JSR on an embedded virtual machine.
   Note also that the \Jsr 360 (describing the embedded part of the JDK) specify that the ``invokedynamic'' instruction is not included\cite{jcp-jsr-360}.
+
+
+
+  At the time of the writing, our implementation is not fast enough to be used in production, we have focused on the conformance of the \JSR.
+  To simplify the implementation, we have just integrated our solution in the ``portable'' interpreter written in C and not in assembler code.
+  
 
 \appendix
 \section{Appendix Title}
