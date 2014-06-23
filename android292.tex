@@ -89,20 +89,22 @@
 
 \begin{abstract}
 Android OS uses for its applicative part, a Java-based virtual machine called Dalvik.
-Java 7 has a new API as well as a new instructions set introduced by the \JSR.
-This \Jsr simplifies the implementation of non-Java languages in the virtual machine.
-It is not implemented in Android neither in the other embedded JVMs.
-The difficulty is to produce the exact behaviour of the \JSR with strong constraints in terms of energy and computing power.
+Java 7 introduces a new instructions set as well as a new API  specified by the \JSR
+in order to improve and simplify the implementation of non-Java languages on top of the Java Virtual Machine.
+A far as we know, neither the JVMs that are compatible with Java ME 8 nor
+Android, while compatible at syntactical level with Java 7, implement this \Jsr.
+We believe this is due to the fact that current implementations for desktop and server rely
+on code generation at runtime which require too much computing power and energy.
 
 This paper describes our implementation of the \JSR in Dalvik.
-We explain our modifications of the interpreter, written in C, and of the Java API
-as well as our choice to adapt the opcodes specification in the Dalvik virtual machine.
-One of the important parts of the \JSR is the arguments manipulation through the ``combiners''.
-In order to treat them, our implementation includes a flexible interpreter, written in Java.
+First, we adapt the class format specification of the \JSR which is stack based and implicitly rely on the fact that the bytecode
+can be rewritten at runtime to the opcode specification of Dalvik wich is register based and read only. 
+Then we explain, how we represent the different kinds of method handles in Java, and how the method handles are interpreted,
+using either the C interpreter for the low level method handle or a Java flexible but slow interpreter for the ``combiner`` method handle.
 
-At the end, we do an execution time comparaison of the different kind of calls.
-This comparaison shows that the new instructions are faster than the reflection
-although the interpreter of combiners is slowed down by frequent objects creation.
+At the end, we present a comparison of the execution time of the different kind of calls.
+This comparison shows that the implementation of the new instructions are faster than the reflection
+although the Java interpreter of combiners is slowed down by frequent objects creation.
 \end{abstract}
 
 \category{CR-number}{subcategory}{third-level}
