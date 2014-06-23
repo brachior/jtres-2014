@@ -2,6 +2,9 @@
 
 \usepackage{tikz}
 \usetikzlibrary{plotmarks,arrows,positioning}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=newest}
+\usepackage{caption}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xspace}
@@ -725,8 +728,31 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
 \section{Result}
 
-  \noindent \fixme{impact sur le code source (dalvik/libcore)}\\
-  \fixme{impact sur le binaire (dvm/dex)}
+  The modifications made to run the \JSR have a cost in terms of code.
+  About 2600 lines of code were required to tell {\bf dx} how to translate new instructions.
+  Dalvik was given about 3200 lines of code excluding duplications of code for each interpreter.
+  And finally, the introduction of the package ``java/lang/invoke'' asked about 7000 lines of code in the Java API.
+
+%   \fixme{impact sur le binaire (4.4.3/4.4.3.292) libdvm(718992/739484) [20k]; android.jar(20522674/20533106) [20k]; dalvikvm(9500/9500)}
+
+  In terms of binary size, the library containing the interpreter (libdvm.so) increases by twenty kilo-bytes as well as the Java API in the SDK (android.jar).
+  A DEX file size increases proportionally in respect to the number of classes.
+  Figure \ref{Rsize} shows some DEX file sizes contained in Android.
+  We are able to note that the impact of our implementation is faint if the program does not use the \JSR.
+
+  \begin{figure}[h]
+    \pgfplotstableread{
+      %4.4.3    %4.4.3.292
+0     2056     2088
+1      696      732
+2      700      736
+3     5728     5764
+4     1444     1476
+    }\dataset
+    \resizebox{\linewidth}{!}{\input{figures/tikz_res_sizes}}
+    \caption{DEX file size comparison.}
+    \label{Rsize}
+  \end{figure}
 
   To compare performances of new instructions and the reflection API,
   we have written a test which calls N times a method using differents ways (instructions and reflection).
@@ -752,7 +778,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   \begin{figure}[!h]
     \resizebox{\linewidth}{!}{\input{figures/tikz_res_mutable}}
-    \caption{Method handle interpreter vs instanceof vs reflection API.}
+    \caption{Method handle interpreter vs classic Java calls.}
     \label{Rmutable}
   \end{figure}
 
@@ -772,10 +798,68 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   Note also that the \Jsr 360 (describing the embedded part of the JDK) specify that the ``invokedynamic'' instruction is not included\cite{jcp-jsr-360}.
 
 \appendix
-\section{Appendix Title}
+\section{Get and compile the project}
 
-\noindent \fixme{lien vers bitbucket}\\
-\fixme{expliquer comment compiler}
+  Our project is divided into several parts.
+  The main parts are the changes to the Java API (libcore-292\cite{bb-libcore}) and those of Dalvik and ``dx'' (dalvik-292\cite{bb-dalvik}).
+  To compile our project, you need to download each part and sources of Android.
+  To simplify this task, we put a project on BitBucket called ``Android 292''\cite{bb-android}.
+  Once recovered, a python script (aosp.py) allows to recover the entire project:
+%   Notre projet est divisé en plusieurs parties.
+%   Les principales étant les modifications de l'API Java (libcore-292\cite{bb-libcore}) et celles de Dalvik et de ``dx'' (dalvik-292\cite{bb-dalvik});
+%   Pour pouvoir compiler notre projet, il vous faut télécharger chaque partie ainsi que les sources d'Android.
+%   Pour simplifier cette tache, nous avons mis un projet sur BitBucket appelé ``Android 292''\cite{bb-android}.
+%   Une fois récupéré, un script python (aosp.py) vous permettra de récupérer l'intégralité du projet:
+
+  {\scriptsize \begin{verbatim}
+    python aosp.py
+  \end{verbatim}}\vspace{-.8em}
+
+  To compile the project, you must be on a GNU/Linux 64bits machine and initialize your environment to compile the AOSP\cite{android-sources}.
+  Once your environment ready, type the following commands:
+%   Pour compiler le projet, vous devez être sur une distribution GNU/Linux 64bits et initialiser votre environnement pour compiler l'AOSP\cite{android-sources}.
+%   Une fois votre environnement pret, tapez les commandes suivantes:
+ 
+  {\scriptsize \begin{verbatim}
+    export EXPERIMENTAL_USE_JAVA7=true
+    source build/envsetup.sh
+    lunch full-eng # see README.md for more details
+    make
+  \end{verbatim}}\vspace{-.8em}
+
+  Once the project is compiled, you can run the emulator by typing:
+%   Une fois le projet compilé, vous pouvez lancer l'émulateur en tapant:
+
+  {\scriptsize \begin{verbatim}
+    emulator
+  \end{verbatim}}\vspace{-.8em}
+
+  Be sure to use the ``portable'' interpreter:
+%   Assurez vous d'utiliser l'interpreteur ``portable'':
+
+  {\scriptsize \begin{verbatim}
+    adb shell stop
+    adb shell setprop dalvik.vm.execution-mode int:portable
+    adb shell start
+  \end{verbatim}}\vspace{-.8em}
+
+  Regarding the SDK, the commands are:
+%   En ce qui concerne le SDK, les commandes sont:
+
+  {\scriptsize \begin{verbatim}
+    export EXPERIMENTAL_USE_JAVA7=true
+    source build/envsetup.sh
+    lunch sdk-eng
+    make sdk
+  \end{verbatim}}\vspace{-.8em}
+
+  The compiled project will produce an archive named:\\
+%   Le projet compilé produira une archive nommée:\\
+  ``out/host/linux-x86/sdk/android-sdk\_eng.{\it XXX}\_linux-x86.zip''
+  ({\it XXX} fits your login).
+  Unzip it and add the SDK to your IDE as a classic Android SDK.
+%   {\bf XXX} correspond a votre login.
+%   Décompressez la et ajoutez le SDK à votre IDE comme pour un SDK classique.
 
 \section{Acknowledgments}
 
@@ -835,6 +919,18 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   \bibitem{jcp-jsr-360}
   Java Community Process, ``JSR 360: Connected Limited Device Configuration 8'' - \url{https://jcp.org/en/jsr/detail?id=360}.
+
+  \bibitem{bb-libcore}
+  BitBucket, ``Libcore 292'' - \url{https://bitbucket.org/jpilliet/libcore-292}.
+
+  \bibitem{bb-dalvik}
+  BitBucket, ``Libcore 292'' - \url{https://bitbucket.org/jpilliet/dalvik-292}.
+
+  \bibitem{bb-android}
+  BitBucket, ``Libcore 292'' - \url{https://bitbucket.org/jpilliet/android-292}.
+
+  \bibitem{android-sources}
+  Android, ``Initializing a Build Environment'' - \url{https://source.android.com/source/initializing.html}.
 
 \end{thebibliography}
 

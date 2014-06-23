@@ -1,0 +1,30 @@
+\begin{tikzpicture}
+  \begin{axis}[ybar,
+        width=12cm,
+        height=8cm,
+        ymin=0,
+        ymax=8000,        
+        ylabel={bytes},
+        xtick=data,
+        xticklabels = {
+            \strut ConnectivityTest,
+            \strut Fallback,
+            \strut InputDevices,
+            \strut HTMLViewer,
+            \strut Provision
+        },
+        major x tick style = {opacity=0},
+        minor x tick num = 1,
+        minor tick length=2ex,
+        every node near coord/.append style={
+                anchor=west,
+                rotate=90
+        },
+        legend entries={AOSP, AOSP with \JSR},
+        legend columns=2,
+        legend style={draw=none,nodes={inner sep=3pt}},
+        ]
+    \addplot[draw=black,fill=white!20, nodes near coords] table[x index=0,y index=1] \dataset; %4.4.3
+    \addplot[draw=black,fill=black!40, nodes near coords] table[x index=0,y index=2] \dataset; %4.4.3.292
+  \end{axis}
+\end{tikzpicture}
