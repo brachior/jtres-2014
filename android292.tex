@@ -438,7 +438,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
 \section{Android 292}
   There a few complete implementations of the \JSR, mostly two.
-  The OpenJDK Hotspot VM which is the reference implementation of Java and is also used in the Oracle JDK
+  The OpenJDK Hotspot which is the reference implementation of Java and is also used in the Oracle JDK
   and the IBM J9 implementation used in the IBM JDK.
   These implementations use several mechanisms, bytecode generation, bytecode rewriting, assembly generation
   \dots~\cite{jvmsummit-heidinga-mhimpl-2010}\cite{jvmsummit-heidinga-mhimpl-2011}\cite{jvmsummit-rose-mhimpl-2011})
@@ -537,7 +537,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     
     For that reason, the DEX format of a class has a supplementary field storing
     the number of all callsites for every methods of that class. 
-    This number is calculated when generating the DEX file by the programe ``dx''.
+    This number is calculated when generating the DEX file by the program ``dx''.
 
   \subsection{retro-compatibility}
     \label{retro}
@@ -561,18 +561,30 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 \label{newConst}
   \subsection{New constants}
 
-    We can create constant method handles only with the ``const-methodhandle'' instruction (Figure \ref{MTMHldc}) or in the arguments of a bootstrap method.
-    The method handle instructions are rarely used and a bootstrap method is called once.
-    Therefore it is not necessary to have a cache for method handles resolved.
-    Resolve a method handle consists to find its informations into the constant-pool and create it.
-    This creation can only do in Java, an up call is necessary.
+    There are two ways to create a constant method handle, either using the ``const-methodhandle''
+    instruction (Figure \ref{MTMHldc}) or as arguments of a bootstrap method.
+    Given that the ``const-methodhandle''instruction is rarely used and
+    a bootstrap method is called once, we have chosen to not implement a cache
+    of resolved method handle in the VM.
 
-    Comparing method types is common on the VM.
-    To simplify and optimize these tests, we need to maintain a cache which make sure that two method types with the same signature are identicals.
-    A method type can be create in Java or by the VM so the cache run in Java and only Java can create a method type (the VM does an up call).
-    All method types are store in the cache and a test between two method types becomes a simply equality test.
-    Resolve a method type consists to find its prototype in the constant-pool and call Java to find it or create it.
-    We distinguish two types of method type: some are used by the VM (strong) and must not be freed by the GC; the others (weak) can be freed by the GC if necessary.
+    Because we have chosen to create method handle in Java (see section~\ref{{implD}}),
+    resolving a constant method handle is done by resolving the corresponding information
+    in the constant pool and create it by an up call to the Java side.
+
+    While constant method handle are not interned by the VM, some of the constant method types,
+    are interned by the VM. Because we implement the runtime safety check of the invoke-exact
+    instruction by a pointer check on the method type, we need, a fast access to a method type object
+    from an invoke-exact instruction and a way to intern the method type.
+    The method type are interned in a cache in Java, again to avoid to do a VM native call
+    when creating a method type and the VM maintains  a table of the resolved method types
+    populated lazily the first time a reference to a method type by an invoke-exact instruction
+    is decoded.
+
+    Because the table of the resolved method type can be big and mostly empty if a program
+    uses only a part of a DEX classes, we have chosen to not iterate over this table when doing
+    the marking phase of a GC but instead to keep the method type referenced by an instruction
+    using a strong reference in the Java cache while a method type created by a user code in Java
+    is hold by a weak reference and reclaimed by the GC if not be used anymore.    
 
     \begin{figure}[!h]
       \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_mh_mt}}
@@ -581,14 +593,15 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \end{figure}
 
   \subsection{New invoke instructions}
-    Each instruction have two representations: a ``normal'' form and a ``range'' form.
-    The ``normal'' form represents the instruction with at most 5 registers.
-    And the ``range'' form can have at most 65535 registers.
-    Each register is considered 32 bits wide.
+    Like any other invoke instructions of the DEX format,
+    each invoke instruction has two representations: a ``normal'' form and a ``range'' form.
+    The ``normal'' form represents the instruction in a compact way with at most 5 registers as argument 
+    and the ``range'' form that can have at most 255 registers.
 
     \subsubsection{invoke-exact and invoke-generic}
 
-      invoke-exact and invoke-generic (Figure \ref{INGEins}) contain an index in the constant-pool of method types.
+      The instruction invoke-exact and invoke-generic (Figure \ref{INGEins}) contain an index
+      in the constant-pool of method types which are resolved lazily.
       This method type represents the order and types of the arguments passed to the instruction, the first argument excluded.
       The first argument is the method handle we have to call.\\
 
@@ -600,8 +613,9 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
     \subsubsection{invoke-dynamic}
 
-      An invoke-dynamic (Figure \ref{INDYins}) contains an integer corresponding to the call site number and an index in the constant-pool of invoke-dynamic.
-      This entry in the invoke-dynamic constant pool have all informations that we need to treat this instruction: bootstrap method, arguments,
+      An invoke-dynamic (Figure \ref{INDYins}) contains an integer corresponding to the call site number
+      and an index in the constant-pool of invoke-dynamic.
+      This entry in the invoke-dynamic constant pool contains the following information: bootstrap method, bootstrap arguments,
       \dots~A new opcode format has been added.
 
       \begin{figure}[!h]
@@ -643,7 +657,16 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{mhFields}
       \end{figure}
 
-      A MethodHandle is describe by: the declaring class; the method type; the kind and the slot corresponding to the method/field/\dots
+      A MethodHandle is described by: the declaring class; the method type; the kind and the slot corresponding to the method/field/\dots
+
+      We have decided to create the method handles in Java and not in the VM.
+      For a direct method handle created using the Lookup API, these methods first check
+      if the target method exist in the class using a native method and then create
+      the method handle in Java. As in our example, we suppose that these methods are
+      mostly stored inside static final fields thus their cost of creation is amortized.
+      For an other method handle, these method handles are usually created more frequently
+      (but usually in a slow path). Those method handle does not require any action by the VM
+      thus are fully created in Java.
 
     \subsection{invoke instructions}
       All new instructions work with a method handle so we have written a method, inside the interpreter, which treats a method handle.
