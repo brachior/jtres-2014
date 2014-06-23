@@ -446,36 +446,53 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   Specifically for Android, because Android does not use the Java class file format specification,
   we have re-interpreted the part of the JSR 292 spec that describes the class file format
   in order to translate it into the DEX file format.
+  We have also implemented a way to execute all APKs previously created to run with our modified VM.
   This work is described in section~\ref{newConst}.
-
-  We have also implemented a way to execute all APKs previously created to run with our modified VM
-  (section~\ref{newDEX})
   
-  The section~\ref{implD} describe in detail the most important implementation parts,
-  describing how an invokedynamic opcode or a method handle are executed by our modified VM.
+  The section~\ref{implD} describe in detail the most important implementation parts of our work,
+  the execution of an invokedynamic opcode, a direct method handle, a combiner method handle or
+  an invoker method handle by our modified VM.
   
-  At the end, we will describe our results in terms of execution time and code size.\\
+  At the end, we will describe our results in terms of execution time and code size of our changes
+  compared to a pristine Dalvik VM (section~\ref{result}).\\
 
 \section{A new DEX format}
 \label{newDEX}
 
-  New instructions and constants imply new format of DEX file.
-  Each DEX file version have a version number, our one is number 292.
-  We enhance the opcode set, add constant-pools and change the header of classes.
-  But we have to maintain the compatibility with the DEX files created before our version.
-
+  The main differences between the Java class file format and the Dalvik DEX format
+  are that
+  \begin{itemize}
+   \item There are several constant pools, one by type of constant.
+         all are shared by the whole applications
+   \item The DEX format is mmapped\footnote{loaded in memory using mmap unix operation.}
+    and read only at runtime.
+  \end{itemize}
+  
+  This implies that we need to introduce new constant pool to support the new opcodes.
+  Because constant pools are directly described in the header of the DEX,
+  this require a new header, making DEX file supporting the JSR 292 incompatible
+  with previous DEX file.
+  
   \subsection{opcodes / constants}
-    The \JSR needs two new constants (``const-methodtype'' and ``const-methodhandle'') and a new instruction (``invoke-dynamic'').
-    Regarding the two methods ``invoke'' and ``invokeExact'', we made the choice to add two new instructions:
-    ``invoke-exact'' for the ``invokeExact'' method and ``invoke-generic'' for the ``invoke'' method.
-    The program ``dx'' (Figure \ref{DTC}) transforms virtual calls to ``invokeExact'' and ``invoke'' to instructions.
+    The \JSR introduces 1 new opcode invokedynamic, change the semantics of ldc (load constant)
+    to support loading constant method types and constant method handles and enhances the semantics
+    of invokevirtual for the method MethodHandle.invokeExact and MethodHandle.invoke.
+
+    Instead of overloading the already existing semantics, in Dalvik, we introduces several new opcodes,
+    ``invoke-dynamic'' that does an invokedynamic,
+    ``const-methodtype'' and ``const-methodhandle'' that respectively load a constant method type
+    and a constant method handle and ``invokeExact'' and ``invoke'' that requires that the first parameter
+    is a MethodHandle.
+
+    The program ``dx'' (Figure \ref{DTC}) was modified to take Java bytecode and 
+    transforms the Java opcode or Java invokevirtual to the corresponding instructions.
 
   \subsection{constant-pools}
     \label{CP}
 
-    \DALVIK have a constant pool for each entry type.
-    We have to add constant pool for each entry we need:
-    MethodType, MethodHandle, InvokeDynamic and Bootstrap Arguments (Figure \ref{SNA}).
+    To support the newly introduced opcodes, we had to add 4 new constant pools,
+    one for constant method type, one form constant method handle, one for invokedynamic
+    and one for the bootstrap arguments. (Figure \ref{SNA}).
 
     \begin{figure}[!h]
       \centering \resizebox{.45\linewidth}{!}{\input{figures/tikz_struct_new_apk}}
@@ -490,8 +507,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     the method handle and the bootstrap arguments constant pools.
     And the BootstrapArguments entry contains its arguments number
     and a data block representing the arguments.
-    Each argument is encoded with a tag
-    followed by a constant pool index or the primitive value according to the tag (Figure \ref{CPentries}).
+    Each argument is encoded with a tag followed by a constant pool index or
+    an immediate primitive value according to the tag (Figure \ref{CPentries}).
 
     \begin{figure}[!h]
       \centering \input{figures/snip_dvm_struct_mt}
@@ -504,25 +521,37 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   \subsection{Class header}
 
-    A call site is bound to an instruction so it is not interresting to store them into a constant-pool.
-    So we have to create a table that contains the call sites.
-    We have three ways to store the call sites: in the DEX header; in the method which contains the instruction and in the class where the method is.
-    As a reminder, a DEX file describes all the classes of a program, and a class can have at most 65535 methods (cf.~jvms 4.11).
-    A method can contain a lot of instruction and the call sites table can quickly overflow.
-    The best solution is to store the call sites in the method, but \DALVIK does not have a lazy mecanism to create methods.
-    All methods are created on class creation.
-    Eventually, we store the table in the header of each class.
+    At runtime, we need to associate the Callsite object returned by the bootstrap method
+    to a live CallSite object. So in the VM we need a table that associate a CallSite
+    \footnote{As an optimization, the current implementation does not store the CallSite
+     but the target method handle, but the principle is the same.}
+    to a specific opcode of a specific method.
+
+    Given that in \DALVIK, the initialization of the Method structures is done when
+    the class is initialized (when the vtable is filled), instead of storing a CallSite
+    table in each Method, we have decided to store this table at the class level.
+    
+    For that reason, the DEX format of a class has a supplementary field storing
+    the number of all callsites for every methods of that class. 
+    This number is calculated when generating the DEX file by the programe ``dx''.
 
   \subsection{retro-compatibility}
-    Our \ANDROID version understands post-invokedynamic APK.
-    We need to modify the APK to add missing constant pools and CallSite tables.
-    However APK are read-only.
-    But the installation time optimizes and has to modify the APK using ``dexopt'' (Figure \ref{DTC}).
-    We take advantage to the installation time to add our work.
-    We just simulate an APK without MethodHandle, MethodType, CallSite, \dots~%
-    Only the DEX header and classes header change, we add empty constant pools to the header
-    and an empty table in each class representing the CallSite table.
-    The size of the DEX header and classes change but no offsets.
+    \label{retro}
+
+    As said previously, in order to introduce new constant pools, we had to change
+    the header of a DEX file in an incompatible way.
+    In order to support APK generated with an unaltered version of ``dx'',
+    the DEX file need to be re-written something that the VM can not do
+    because the DEX file is read only.
+
+    \ANDROID has a mechanism that optimize a DEX file at the installation of
+    an APK using a program named ``dexopt'' (Figure \ref{DTC}).
+    We take advantage of this mechanism to at instalation time rewrite the APK to use our DEX format.
+    This rewrite is fast, because we only can copy the previous DEX file and only insert the
+    i.e. the constant pools for the constant method type, method handle, invokedynamic and
+    bootstrap arguments with a size of zero and add a 0 in the header of a class at the
+    position corresponding to the callsite table.
+    The size of the DEX header and the classe headers change but no offsets inside each parts.
 
 \section{New opcodes}
 \label{newConst}
@@ -744,6 +773,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       Method handles contains also others invokers (``spreadInvoker'' and ``dynamicInvoker'') but we are able to treat them like combiners.
 
 \section{Result}
+ \label{result}
 
   \noindent \fixme{impact sur le code source (dalvik/libcore)}\\
   \fixme{impact sur le binaire (dvm/dex)}
