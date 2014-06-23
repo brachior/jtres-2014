@@ -674,22 +674,26 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       and those method handle does not require any action by the VM thus are fully created in Java.
 
     \subsection{invoke instructions}
-      All new instructions work with a method handle so we have written a method, inside the interpreter, which treats a method handle.
-      It invokes the method, gets or sets a field and calls the method handle interpreter depending to the kind of the method handle.
-      It also uses the interpreter mechanism to store the return value.
-      This method is called ``invokeMethodHandle''.
+      All new invoke instructions work the same way by first extracting the method handle
+      and then depending on the value field {\bf kind} calling a function inside the interpreter.
+      For invoke-exact and invoke-generic, the method handle is extracted from the stack and
+      the other arguments are shifted in order to be able to reuse the function already existing in the interpreter
+      to call a method or extract the value of a field.
+      For invoke-dynamic, the method handle is extracted from the callsite table (using a volatile read see below)
+      and the arguments are already at the right position.
 
     \subsubsection{invoke-exact and invoke-generic}
-      invoke-exact is the instruction with the most simple implementation.
-      If the two method types (contained in the instruction and in the method handle) are equals we call the method handle,
-      else an exception is thrown.\\
+      The instruction invoke-exact is the instruction with the most simple implementation.
+      If the reference of the two method types (the one contained in the instruction and the one inside the method handle)
+      are identical, we just call the shared code that invoke a method handle,
+      otherwise an exception WrongMethodTypeException is thrown.\\
       
-      invoke-generic works like an invoke-exact but if the method types differ, we try to adapt arguments.
-      Different treatments can be done:
-      if the number of arguments is the same between the two method types, we try to convert arguments;
+      invoke-generic works like an invoke-exact but if the method types differ, instead of throwing an exception,
+      we first try to adapt arguments.
+      If the number of arguments is the same between the two method types, we try to convert arguments;
       if we have a variadic signature, we collect and convert arguments to match the method type of the method handle;
-      else an exception is thrown.
-      When the arguments match the method signature, we call the method handle.
+      otherwise an exception is thrown.
+      If all the conversions works, we call the shared code that invoke the method handle.
   
     \subsubsection{invoke-dynamic}
       The call site is found in the current class but if it is the first time that we read this instruction, the call site is not created yet.
