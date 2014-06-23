@@ -121,6 +121,7 @@ although the Java interpreter of combiners is slowed down by frequent objects cr
 Bytecode, method invocation, invokedynamic, JSR 292,\\
 method handles, method handle adapters, Android, Dalvik, embedded system
 
+\newpage
 \section{Overview}
 
   \subsection{Android}
@@ -163,7 +164,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       \begin{figure}[!h]
         \centering \resizebox{\linewidth}{!}{\input{figures/tikz_struct_jar_apk}}
-        \caption{structure of JAR and APK files.}
+        \caption{structure of JAR and APK files.}\vspace{-1em}
         \label{SJA}
       \end{figure}
 
@@ -213,10 +214,10 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     to describe a specific semantics, independently of the semantics of the Java language.
 
     This \Jsr is composed of two parts, the first part, specifying the semantics of
-    newly introduced opcodes and the second part defining an API: java.lang.invoke.
+    newly introduced opcodes and the second part defining an API: java.lang.invoke.\\
     This API allows to create runtime typesafe function pointers (as java.lang.invoke.MethodHandle)
     and methods to combine those pointers to do things like composition, arguments conversion,
-    arguments permutation, \dots.
+    arguments permutation, \dots
 
     The next sections will present the new API and the new instructions but before that,
     we want to introduce an example that we will use for the rest of the paper.
@@ -262,8 +263,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       This method returns a CallSite object which is a box that contains a method handle (a function pointer)
       that will be used for the subsequent calls.
 
-      The classes (MethodHandle, MethodType, CallSite, etc.) specified by the \Jsr are grouped into the
-      package ``java.lang.invoke'' and are directly understood by the \JVM.
+      The classes (MethodHandle, MethodType, CallSite, etc.) specified by the \Jsr are grouped into a new
+      package called ``java.lang.invoke'' and are directly understood by the \JVM.
       These classes answer to one or more problems coming from dynamic languages optimizations or implementations.
 
     \subsubsection{invoke-dynamic and MethodHandle}
@@ -279,7 +280,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \input{figures/snip_foo_indy}
 
       The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called, with a lookup object corresponding to the class containing {\bf foo},
-      the string {\bf ``+''} and a MethodType corresponding to the descriptor ``(LObject;I)LObject;'' (Figure \ref{fooBSM}).
+      the string {\bf ``+''} and a MethodType corresponding to the descriptor:\\``(LObject;I)LObject;'' (Figure \ref{fooBSM}).
 
       \begin{figure}[!h]
         \centering \input{figures/snip_foo_bsm}\vspace{-1.5em}
@@ -368,7 +369,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       % graph 1
       \begin{figure}[!h]
         \centering \resizebox{.7\linewidth}{!}{\input{figures/tikz_ast_1}}
-        \caption{Method handles tree - bootstrap method.}
+        \caption{Method handles tree - bootstrap method.}\vspace{-1em}
         \label{ast1}
       \end{figure}
 
@@ -376,7 +377,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       This method takes a look at the dynamic type of {\bf a} (let say an integer),
       finds the corresponding implementation of the {\bf plus} method
       and then re-links a method handles tree represented by a combiner called {\bf GuardWithTest}
-      which is quivalent to a test \bf{if .. then .. else}.
+      which is quivalent to a test {\bf if .. then .. else}.
 
       There is no existing method handle in the API that are able to do a class check,
       but it's easy to construct one. The method named {\bf check}, check if an argument class
@@ -402,7 +403,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       % graph 2
       \begin{figure}[!h]
         \hspace{-.6in} \resizebox{1.3\linewidth}{!}{\input{figures/tikz_ast_2}}
-        \caption{Method handles tree - first call (integer).}
+        \caption{Method handles tree - first call (integer).}\vspace{-1em}
         \label{ast2}
       \end{figure}
 
@@ -413,8 +414,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       % graph 3
       \begin{figure*}
-        \centering \resizebox{.9\linewidth}{!}{\input{figures/tikz_ast_3}}
-        \caption{Method handles tree - second call (string).}
+        \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_ast_3}}
+        \caption{Method handles tree - second call (string).}\vspace{-1em}
         \label{ast3}
       \end{figure*}
 
@@ -575,7 +576,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
     \begin{figure}[!h]
       \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_mh_mt}}
-      \caption{methodtype and methodhandle constant.}
+      \caption{methodtype and methodhandle constant.}\vspace{-1em}
       \label{MTMHldc}
     \end{figure}
 
@@ -593,7 +594,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       \begin{figure}[!h]
         \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_gen_exa}}
-        \caption{invoke-generic/exact instruction.}
+        \caption{invoke-generic/exact instruction.}\vspace{-1em}
         \label{INGEins}
       \end{figure}
 
@@ -605,7 +606,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       \begin{figure}[!h]
         \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_indy}}
-        \caption{invoke-dynamic instruction.}
+        \caption{invoke-dynamic instruction.}\vspace{-1em}
         \label{INDYins}
       \end{figure}
 
@@ -665,12 +666,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \subsubsection{invoke-dynamic}
       The call site is found in the current class but if it is the first time that we read this instruction, the call site is not created yet.
       In this case, we need to call the bootstrap method associated to the instruction first.
-      So we decode the arguments of the bootstrap method and do an up call to the method ``callBootstrapMethod'' (Figure \ref{implBSM}).
+      So we decode the arguments of the bootstrap method and do an up call to the method ``callBootstrapMethod''.% (Figure \ref{implBSM}).
       It returns a call site that is stored in the class.
 
       \begin{figure}[!h]
         \centering \input{figures/snip_meth_bsm}\vspace{-1.5em}
-        \caption{snippet - ``callBootstrapMethod''.}
+        \caption{snippet - ``callBootstrapMethod''.}\vspace{-1em}
         \label{implBSM}
       \end{figure}
 
@@ -695,11 +696,11 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       which calls the method invoke according to the number of arguments.
       ``invokeWithArguments'' is separated on many functions to allow optimizations by the JIT.
 
-      \begin{figure}[!h]
-        \centering \input{figures/snip_meth_iwa}\vspace{-1.5em}
-        \caption{snippet - ``invokeWithArguments''.}
-        \label{implIWA}
-      \end{figure}
+%       \begin{figure}[!h]
+%         \centering \input{figures/snip_meth_iwa}\vspace{-1.5em}
+%         \caption{snippet - ``invokeWithArguments''.}
+%         \label{implIWA}
+%       \end{figure}
 
       When the callsite is returned, we verify its integrity.
       We check if it or its target is not null and if the target's type and the type given are the same.
@@ -729,7 +730,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       specific to execution of combiners, in Java (Figure \ref{implINTERP}).
 
       \begin{figure}[!h]
-        \centering \input{figures/snip_meth_interp}\vspace{-1.5em}
+        \centering \input{figures/snip_meth_interp}\vspace{-1em}
         \caption{snippet - ``invokeCombiner''.}
         \label{implINTERP}
       \end{figure}
@@ -828,7 +829,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   \begin{figure}[!h]
     \resizebox{\linewidth}{!}{\input{figures/tikz_res_mutable}}
-    \caption{Method handle interpreter vs classic Java calls.}
+    \caption{Method handle interpreter vs classic Java calls.}\vspace{-1em}
     \label{Rmutable}
   \end{figure}
 
@@ -851,75 +852,10 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   At the time of the writing, our implementation is not fast enough to be used in production, we have focused on the conformance of the \JSR.
   To simplify the implementation, we have just integrated our solution in the ``portable'' interpreter written in C and not in assembler code.
-  
+
+\section{Conclusion}
 
 \appendix
-\section{Get and compile the project}
-
-  Our project is divided into several parts.
-  The main parts are the changes to the Java API (libcore-292\cite{bb-libcore}) and those of Dalvik and ``dx'' (dalvik-292\cite{bb-dalvik}).
-  To compile our project, you need to download each part and sources of Android.
-  To simplify this task, we put a project on BitBucket called ``Android 292''\cite{bb-android}.
-  Once recovered, a python script (aosp.py) allows to recover the entire project:
-%   Notre projet est divisé en plusieurs parties.
-%   Les principales étant les modifications de l'API Java (libcore-292\cite{bb-libcore}) et celles de Dalvik et de ``dx'' (dalvik-292\cite{bb-dalvik});
-%   Pour pouvoir compiler notre projet, il vous faut télécharger chaque partie ainsi que les sources d'Android.
-%   Pour simplifier cette tache, nous avons mis un projet sur BitBucket appelé ``Android 292''\cite{bb-android}.
-%   Une fois récupéré, un script python (aosp.py) vous permettra de récupérer l'intégralité du projet:
-
-  {\scriptsize \begin{verbatim}
-    python aosp.py
-  \end{verbatim}}\vspace{-.8em}
-
-  To compile the project, you must be on a GNU/Linux 64bits machine and initialize your environment to compile the AOSP\cite{android-sources}.
-  Once your environment ready, type the following commands:
-%   Pour compiler le projet, vous devez être sur une distribution GNU/Linux 64bits et initialiser votre environnement pour compiler l'AOSP\cite{android-sources}.
-%   Une fois votre environnement pret, tapez les commandes suivantes:
- 
-  {\scriptsize \begin{verbatim}
-    export EXPERIMENTAL_USE_JAVA7=true
-    source build/envsetup.sh
-    lunch full-eng # see README.md for more details
-    make
-  \end{verbatim}}\vspace{-.8em}
-
-  Once the project is compiled, you can run the emulator by typing:
-%   Une fois le projet compilé, vous pouvez lancer l'émulateur en tapant:
-
-  {\scriptsize \begin{verbatim}
-    emulator
-  \end{verbatim}}\vspace{-.8em}
-
-  Be sure to use the ``portable'' interpreter:
-%   Assurez vous d'utiliser l'interpreteur ``portable'':
-
-  {\scriptsize \begin{verbatim}
-    adb shell stop
-    adb shell setprop dalvik.vm.execution-mode int:portable
-    adb shell start
-  \end{verbatim}}\vspace{-.8em}
-
-  Regarding the SDK, the commands are:
-%   En ce qui concerne le SDK, les commandes sont:
-
-  {\scriptsize \begin{verbatim}
-    export EXPERIMENTAL_USE_JAVA7=true
-    source build/envsetup.sh
-    lunch sdk-eng
-    make sdk
-  \end{verbatim}}\vspace{-.8em}
-
-  The compiled project will produce an archive named:\\
-%   Le projet compilé produira une archive nommée:\\
-  ``out/host/linux-x86/sdk/android-sdk\_eng.{\it XXX}\_linux-x86.zip''
-  ({\it XXX} fits your login).
-  Unzip it and add the SDK to your IDE as a classic Android SDK.
-%   {\bf XXX} correspond a votre login.
-%   Décompressez la et ajoutez le SDK à votre IDE comme pour un SDK classique.
-
-\section{Acknowledgments}
-
-\noindent \fixme{Acknowledgments, if needed.}
 
 % We recommend abbrvnat bibliography style.
 
@@ -989,6 +925,56 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   Android, ``Initializing a Build Environment'' - \url{https://source.android.com/source/initializing.html}.
 
 \end{thebibliography}
+
+\section{Get and compile the project}
+
+  Our project is divided into several parts.
+  The main parts are the changes to the Java API (libcore-292\cite{bb-libcore}) and those of Dalvik and ``dx'' (dalvik-292\cite{bb-dalvik}).
+  To compile our project, you need to download each part and sources of Android.
+  To simplify this task, we put a project on BitBucket called ``Android 292''\cite{bb-android}.
+  Once recovered, a python script (aosp.py) allows to recover the entire project:
+
+  {\scriptsize \begin{verbatim}
+    python aosp.py
+  \end{verbatim}}\vspace{-.8em}
+
+  To compile the project, you must be on a GNU/Linux 64bits machine and initialize your environment to compile the AOSP\cite{android-sources}.
+  Once your environment ready, type the following commands:
+ 
+  {\scriptsize \begin{verbatim}
+    export EXPERIMENTAL_USE_JAVA7=true
+    source build/envsetup.sh
+    lunch full-eng # see README.md for more details
+    make
+  \end{verbatim}}\vspace{-.8em}
+
+  Once the project is compiled, you can run the emulator by typing:
+
+  {\scriptsize \begin{verbatim}
+    emulator
+  \end{verbatim}}\vspace{-.8em}
+
+  Be sure to use the ``portable'' interpreter:
+
+  {\scriptsize \begin{verbatim}
+    adb shell stop
+    adb shell setprop dalvik.vm.execution-mode int:portable
+    adb shell start
+  \end{verbatim}}\vspace{-.8em}
+
+  Regarding the SDK, the commands are:
+
+  {\scriptsize \begin{verbatim}
+    export EXPERIMENTAL_USE_JAVA7=true
+    source build/envsetup.sh
+    lunch sdk-eng
+    make sdk
+  \end{verbatim}}\vspace{-.8em}
+
+  The compiled project will produce an archive named:\\
+  ``android-sdk\_eng.{\it XXX}\_linux-x86.zip''
+  ({\it XXX} fits your login).
+  Unzip it and add the SDK to your IDE as a classic Android SDK.
 
 
 \end{document}

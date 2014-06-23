@@ -1,20 +1,12 @@
 {\scriptsize \begin{verbatim}
-import static java.lang.invoke.MethodType.*
-
-public class RT {
-    ...
-  private static final Lookup lookup = MethodHandles.lookup();
-
   public static CallSite bootstrap(
       Lookup caller, String name, MethodType type)
       throws IllegalAccessException, NoSuchMethodException {
-    MethodType mt = methodType(Object.class,
-                               MutableCallSite.class,
-                               Object[].class);
-    MethodHandle mh =
-      lookup.findStatic(BootStraps.class, "change", mt);
+    MethodType mt = MethodType.methodType(Object.class,
+                                          MutableCallSite.class,
+                                          Object[].class);
+    MethodHandle mh = MethodHandles.lookup()
+        .findStatic(BootStraps.class, "change", mt);
     return new CSMutableBind(type, mh);
   }
-    ...
-}
 \end{verbatim} }

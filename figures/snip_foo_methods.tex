@@ -1,8 +1,4 @@
 {\scriptsize \begin{verbatim}
-import static java.lang.invoke.MetodType.*;
-
-public class RT {
-    ...
   private static Object plus(int a, int b) {
     return a + b;
   }
@@ -21,23 +17,22 @@ public class RT {
 
   static {
     try {
-      MethodType mti =
-        methodType(Object.class, int.class, int.class);
+      MethodType mti = MetodType
+          .methodType(Object.class, int.class, int.class);
       TARGET_INT =
         lookup.findStatic(BootStraps.class, "plus", mti);
 
-      MethodType mts =
-        methodType(Object.class, String.class, int.class);
+      MethodType mts = MetodType
+          .methodType(Object.class, String.class, int.class);
       TARGET_STRING =
         lookup.findStatic(BootStraps.class, "plus", mts);
 
-      MethodType mtc =
-        methodType(boolean.class, Object.class, Class.class);
+      MethodType mtc = MetodType
+          .methodType(boolean.class, Object.class, Class.class);
       TARGET_CHECK =
         lookup.findStatic(BootStraps.class, "check", mtc);
     } catch (NoSuchMethodException|IllegalAccessException e) {
       throw new AssertionError(e);
     }
-    ...
-}
+  }
 \end{verbatim} }

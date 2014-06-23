@@ -1,8 +1,4 @@
 {\scriptsize \begin{verbatim}
-import static java.lang.invoke.MethodHandles.*;
-
-public class RT {
-    ...
   private static Object change(
       MutableCallSite callSite, Object[] arguments)
       throws Throwable {
@@ -16,13 +12,12 @@ public class RT {
     } else {
       throw new LinkageError("bad receiver class");
     }
-    MethodHandle test =
-      insertArguments(TARGET_CHECK, 1, aClass);
-    test = dropArguments(test, 1, type.parameterType(1));
-    callSite.setTarget(
-      guardWithTest(test, target, callSite.getTarget()));
+    MethodHandle test = MethodHandles
+        .insertArguments(TARGET_CHECK, 1, aClass);
+    test = MethodHandles
+        .dropArguments(test, 1, type.parameterType(1));
+    callSite.setTarget(MethodHandles
+        .guardWithTest(test, target, callSite.getTarget()));
     return target.invokeWithArguments(arguments);
   }
-    ...
-}
 \end{verbatim} }
