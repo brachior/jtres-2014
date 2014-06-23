@@ -1,27 +1,29 @@
 \begin{tikzpicture}[scale=2]
-  \node[rectangle, draw=black, align=center, text width=1in](A1) at (0,0){MethodHandle};
-  \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=3em] (direct) at ([yshift=-3em,xshift=-4em]A1.south west){};
-  \node[below right] at (direct.north west) {Direct};
+%   \node[rectangle, draw=black, align=center, text width=1in](A1) at (0,0){MethodHandle};
+  \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=3em] (direct) at (0,0){};
+  \node[below right] at (direct.north west) {MethodHandle (Direct)};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.6in] at ([xshift=1.48em,yshift=.3em]direct.west){virtual};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.6in, inner ysep=.045in] at ([xshift=4.28em,yshift=.3em]direct.west){static};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.3in] at ([xshift=1em,yshift=-.7em]direct.west){get};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.3in] at ([xshift=2.85em,yshift=-.7em]direct.west){put};
   \node[below, align=center, text width=.3in, inner ysep=.085in] at ([xshift=4.68em,yshift=-.4em]direct.west){\dots};
 
-  \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=3em] (comb) at ([yshift=-3em]A1.south){};
+  \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=3em] (comb) at ([xshift=-5em,yshift=-3em]direct.south){};
   \node[below right] at (comb.north west) {Combiner};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.6in, inner ysep=.055in] at ([xshift=1.5em,yshift=.3em]comb.west){GWT};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.6in] at ([xshift=4.3em,yshift=.3em]comb.west){AsType};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.6in] at ([xshift=1.5em,yshift=-.7em]comb.west){Spreader};
   \node[below, align=center, text width=.3in, inner ysep=.085in] at ([xshift=4.4em,yshift=-.4em]comb.west){\dots};
 
-
-  \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=3em] (invoke) at ([yshift=-3em,xshift=4em]A1.south east){};
+  \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=3em] (invoke) at ([yshift=-3em,xshift=2em]direct.south east){};
   \node[below right] at (invoke.north west) {Invoker};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.8in, inner ysep=.055in] at ([xshift=2.9em,yshift=.3em]invoke.west){exactInvoker};
   \node[rectangle, rounded corners, draw=black, align=center, text width=.8in] at ([xshift=2.9em,yshift=-.7em]invoke.west){invoker};
   
-  \draw[thick,<-](A1) -- ++(0,-0.3) -| (direct);
-  \draw[thick,<-](A1) -- ++(0,-0.3) -| (comb);
-  \draw[thick,<-](A1) -- ++(0,-0.3) -| (invoke);
+%   \draw[thick,<-](A1) -- ++(0,-0.3) -| (direct);
+%   \draw[thick,<-](A1) -- ++(0,-0.3) -| (comb);
+%   \draw[thick,<-](A1) -- ++(0,-0.3) -| (invoke);
+
+  \draw[thick,<-](direct) -- ++(0,-0.7) -| (comb);
+  \draw[thick,<-](direct) -- ++(0,-0.7) -| (invoke);
 \end{tikzpicture}

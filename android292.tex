@@ -101,7 +101,7 @@ on code generation at runtime which requires too much computing power and energy
 
 This paper describes our implementation of the \JSR in Dalvik.
 First, we adapt the class format specification of the \JSR which is stack based and implicitly rely on the fact that the bytecode
-can be rewritten at runtime, to the opcode specification of Dalvik wich is register based and read only. 
+can be rewritten at runtime, to the opcode specification of Dalvik which is register based and read only. 
 Then we explain, how we represent the different kinds of method handles in Java, and how the method handles are interpreted,
 using either the C interpreter for the low level method handle or a Java flexible but slow interpreter for the ``combiner`` method handles.
 
@@ -215,7 +215,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
     This \Jsr is composed of two parts, the first part, specifying the semantics of
     newly introduced opcodes and the second part defining an API: ``java.lang.invoke''.\\
-    This API allows to create runtime typesafe function pointers (as java.lang.invoke.MethodHandle)
+    This API allows to create runtime type safe function pointers (as java.lang.invoke.MethodHandle)
     and methods to combine those pointers to do things like composition, arguments conversion,
     arguments permutation, \dots
 
@@ -334,7 +334,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
       for classical Java method calls like invokestatic or invokevirtual
       \footnote{There is also a minor difference between the generic call semantics and the call semantics of
-        the Java Language Specification, if the method is a varargs and the call as the same arity as the method.
+        the Java Language Specification, if the method is a varargs and the call as the same number of parameters as the method.
         The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.}.
       The exact call semantics is more strict, and the generic call semantics is more permissive than the classical call semantics.
 
@@ -377,7 +377,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       This method takes a look at the dynamic type of {\bf a} (let say an integer),
       finds the corresponding implementation of the {\bf plus} method
       and then re-links a method handles tree represented by a combiner called {\bf GuardWithTest}
-      which is quivalent to a test {\bf if .. then .. else}.
+      which is equivalent to a test {\bf if .. then .. else}.
 
       There is no existing method handle in the API that are able to do a class check,
       but it's easy to construct one. The method named {\bf check} checks if an argument class
@@ -554,7 +554,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     This rewrite is fast, because we only can copy the previous DEX file and only insert the
     constant pools for method types, method handles, invokedynamics and
     bootstrap arguments with a size of zero and add a 0 in the header of a class at the
-    position corresponding to the callsites table.
+    position corresponding to the CallSites table.
     The size of the DEX header and the class headers change but no offsets inside each parts.
 
 \section{New opcodes}
@@ -678,7 +678,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \subsection{invoke instructions}
       All new instructions work with a method handle so we have written a method, inside the interpreter, which treats a method handle.
       It invokes the method, gets or sets a field and calls the method handle interpreter depending to the kind of the method handle.
-      It also uses the interpreter mecanism to store the return value.
+      It also uses the interpreter mechanism to store the return value.
       This method is called ``invokeMethodHandle''.
 
     \subsubsection{invoke-exact and invoke-generic}
@@ -706,7 +706,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \end{figure}
 
       A bootstrap method needs at least three arguments:
-      a lookup (Lookup) that is a security token object encapsulating access rigths of class containing the invoke-dynamic opcode;
+      a lookup (Lookup) that is a security token object encapsulating access rights of class containing the invoke-dynamic opcode;
       an arbitrary name (String) specified as parameter of the invokedynamic opcode;
       a method type (MethodType), that is a reified object of the descriptor specified as parameter of the invoke-dynamic opcode;
       and any constant values specified as bootstrap arguments of the invoke-dynamic opcode.
@@ -732,12 +732,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 %         \label{implIWA}
 %       \end{figure}
 
-      When the callsite is returned, we verify its integrity.
+      When the CallSite is returned, we verify its integrity.
       We check if it or its target is not null and if the target's type and the type given are the same.
-      Because the target's callsite could be uninitialized we have to check if the target contains a method handle or a method type.
+      Because the target's CallSite could be uninitialized we have to check if the target contains a method handle or a method type.
 
       When the bootstrap method returns its value, we have to store the call site.
-      And because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mecanism.
+      And because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mechanism.
       When we have the call site, we get its method handle.
       All method handles are volatiles so we have to get it atomically.
       At the end, we call it.
@@ -747,11 +747,11 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       A part of method handles allows to manipulate arguments, we call them: ``combiners''.
       Combiners can contain several method handles and at least one direct method handle.
-      Thereby, we can represent them by trees, reffered to here as method handles trees.
+      Thereby, we can represent them by trees, referred to here as method handles trees.
 
       Executing a combiner is often equivalent to executing many.
       Given that combiners cannot be final calls,
-      it is not interresting to do real calls, ie.~put on the execution stack,
+      it is not interesting to do real calls, ie.~put on the execution stack,
       each combiner and at the end call the direct method handle, which needs a real call.
 
       To execute direct method handles, we have to use the ``invoke-exact'' and ``invoke-generic'' instructions.
@@ -782,7 +782,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
      \label{invokers}
 
       Among method handles, we call "invoker" those which are high order method handles.
-      An invoker extracts the method handle passed as first pargument and calls it with the rest of arguments.
+      An invoker extracts the method handle passed as first argument and calls it with the rest of arguments.
       Its job is to simulate a call to the method ``invokeExact'' (exactInvoker) and ``invoke'' (invoker).
       The method type of an invoker is the same as the method handle it have to call with a MethodHandle at first parameter.
 
@@ -802,7 +802,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \end{figure}
 
       A problem remains when we want to execute the generic invoker with the semantics of ``invoke-exact''.
-      Reproducing the ``invoke-generic'' behaviour requires to copy a lot of code so,
+      Reproducing the ``invoke-generic'' behavior requires to copy a lot of code so,
       we choose to do an up call to the method ``invokeWithArguments'' which calls the method ``invoke''.
 
       Method handles contains also others invokers (``spreadInvoker'' and ``dynamicInvoker'') but we are able to treat them like combiners.
@@ -837,7 +837,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   \end{figure}
 
   To compare performances of new instructions and the reflection API,
-  we have written a test which calls N times a method using differents ways (instructions and reflection).
+  we have written a test which calls N times a method using different ways (instructions and reflection).
   This test is executed using \DALVIK without graphical.
 
   \begin{figure}[!h]
@@ -851,12 +851,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   We notice that calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are faster than others.
   ``invoke-dynamic'' takes a bit more time because it have to get a volatile method handle.
   Regarding ``invoke-generic'' with a method type different to the final call, the execution time increases.
-  This difference is due to the boxing mecanism which creates new objects.
+  This difference is due to the boxing mechanism which creates new objects.
   However, ``invoke-generic'' remains faster than the reflection API which requires to box all arguments and create an array of Object.\\
   
   Another test executes the example described in this article.
   We call N times a method which takes an Object and calls the right method according to the dynamic type of the argument.
-  We compare the execution time of the example using the instanceof mecanism, the reflection API and the method handle interpreter.
+  We compare the execution time of the example using the instanceof mechanism, the reflection API and the method handle interpreter.
 
   \begin{figure}[!h]
     \resizebox{\linewidth}{!}{\input{figures/tikz_res_mutable}}
