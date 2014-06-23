@@ -97,17 +97,17 @@ in order to improve and simplify the implementation of non-Java languages on top
 A far as we know, neither the JVMs that are compatible with Java ME 8 nor
 Android, while compatible at syntactical level with Java 7, implement this \Jsr.
 We believe this is due to the fact that current implementations for desktop and server rely
-on code generation at runtime which require too much computing power and energy.
+on code generation at runtime which requires too much computing power and energy.
 
 This paper describes our implementation of the \JSR in Dalvik.
 First, we adapt the class format specification of the \JSR which is stack based and implicitly rely on the fact that the bytecode
-can be rewritten at runtime to the opcode specification of Dalvik wich is register based and read only. 
+can be rewritten at runtime, to the opcode specification of Dalvik wich is register based and read only. 
 Then we explain, how we represent the different kinds of method handles in Java, and how the method handles are interpreted,
-using either the C interpreter for the low level method handle or a Java flexible but slow interpreter for the ``combiner`` method handle.
+using either the C interpreter for the low level method handle or a Java flexible but slow interpreter for the ``combiner`` method handles.
 
 At the end, we present a comparison of the execution time of the different kind of calls.
 This comparison shows that the implementation of the new instructions are faster than the reflection
-although the Java interpreter of combiners is slowed down by frequent objects creation.
+although the Java interpreter of combiners is slowed down by frequent object creations.
 \end{abstract}
 
 \category{CR-number}{subcategory}{third-level}
@@ -135,8 +135,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \ANDROID mainly run on embedded environments like smartphones and tablets,
     and supports ARM, Intel and MIPS architecture.
     
-    Even if hardware supporting \ANDROID become more efficients,
-    devices cannot as powerful as desktop computer because of miniaturization.
+    Even if hardwares supporting \ANDROID become more efficients,
+    devices cannot as powerful as desktop computers because of miniaturization.
     Being a mobile device also requires a minimal energetic consumption.
     Moreover, \ANDROID is a portable system and adaptable to a huge number of different devices,
     forcing it to abstract itself from hardware.
@@ -148,9 +148,9 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         It offers an hardware abstraction, an existing memory, process managements and a security and networking models;
       \item native libraries (C/C++)
         which provide most of features in the \ANDROID system;
-      \item a virtual machine called ``\DALVIK''.
+      \item a virtual machine called ``\DALVIK''
         which run the application written in Java but converted to the \DEX format.
-        \DALVIK uses the core API of Java but written from scratch
+        \DALVIK uses the core API of Java written from scratch
         which can be assimilated to the version 5 or 6 of the Java API;
       \item an application framework to enable the making of \ANDROID applications;
       \item and some default applications.
@@ -190,7 +190,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       \DALVIK cannot directly execute Java bytecode.
       It first has to translate the Java bytecode to the \DALVIK specific one called \DEX
-      which can then be optimized (\mbox{ODEX}) to save space (Figure \ref{DTC}).
+      which can then be optimized (dxopt) in a binary format (\mbox{ODEX}) to save space (Figure \ref{DTC}).
 
     \begin{figure}[!h]
       \centering \resizebox{\linewidth}{!}{\input{figures/tikz_struct_android}}
@@ -214,12 +214,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     to describe a specific semantics, independently of the semantics of the Java language.
 
     This \Jsr is composed of two parts, the first part, specifying the semantics of
-    newly introduced opcodes and the second part defining an API: java.lang.invoke.\\
+    newly introduced opcodes and the second part defining an API: ``java.lang.invoke''.\\
     This API allows to create runtime typesafe function pointers (as java.lang.invoke.MethodHandle)
     and methods to combine those pointers to do things like composition, arguments conversion,
     arguments permutation, \dots
 
-    The next sections will present the new API and the new instructions but before that,
+    The next sections will present the new API and instructions but before that,
     we want to introduce an example that we will use for the rest of the paper.
 
     \subsubsection{Example}
@@ -252,7 +252,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \input{figures/snip_foo_java}
 
       While this code works, it supposes that all the potentials variations of + are known at compile time,
-      something which is not true in most dynamic languages (Ruby, Groovy or Dart allows users to add
+      something which is not true in most dynamically typed languages (Ruby, Groovy or Dart allows users to add
       new versions of any operations).
       This code can also be slow because in real languages, the number of if ... instanceof branches
       can be greater than a dozen. 
@@ -265,7 +265,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       The classes (MethodHandle, MethodType, CallSite, etc.) specified by the \Jsr are grouped into a new
       package called ``java.lang.invoke'' and are directly understood by the \JVM.
-      These classes answer to one or more problems coming from dynamic languages optimizations or implementations.
+      These classes answer to one or more problems coming from Dynamically typed languages optimizations or implementations.
 
     \subsubsection{invoke-dynamic and MethodHandle}
 
@@ -273,7 +273,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       with the context where the opcode is located i.e.~the declaring class (encapsulated in a Lookup object),
       a symbolic name and the declared parameter types as a MethodType.
       Any subsequent execution of the invokedynamic opcode will call the function pointer
-      stored inside the callsite object returned by the bootstrap method.
+      stored inside the CallSite object returned by the bootstrap method.
       
       For our example, the code of {\bf foo} with invokedynamic is
 
@@ -296,16 +296,16 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       A method type represents the types of the arguments and the return value accepted and returned by a method handle,
       or expected by a method handle caller, i.e. a method type represents a method signature.
 
-      \begin{figure}[!h]
-        \centering \input{figures/snip_foo_methods}\vspace{-1.5em}
-        \caption{Example - methods with method types.}
-        \label{fooMTS}
-      \end{figure}
-
       All method types are immutable and can only be created by static factory methods,
       allowing implementation to intern them when necessary. 
       In our example, we need three method types (Figure \ref{fooMTS}), one for each method that we have to call:
       the ``check'' method; and the two methods ``plus''.
+
+      \begin{figure}[!h]
+        \centering \input{figures/snip_foo_methods}\vspace{-1.5em}
+        \caption{Example - methods with method types.}\vspace{-1em}
+        \label{fooMTS}
+      \end{figure}
 
     \subsubsection{MethodHandle / MethodHandles}
       \label{MH}
@@ -318,7 +318,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       The former kind of method handle is called a {\it direct method handle},
       the later is called a {\it combiner method handle}.
 
-      To guarantee runtime type safety, each method handle embodies a method type (of type MethodType)
+      To guarantee runtime type safety, each method handle embodies a method type (of type java.lang.invoke.MethodType)
       that describes the parameter types and the return type that a method handle accepts.
       When a method handle is called, the method type is checked using different semantics depending on the
       type of call.
@@ -327,27 +327,27 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \begin{itemize}
         \item the exact call semantics, in that case, the declared type of the arguments (and return value) at a call site
               must be exactly the same as the types of the method type.
-        \item the generic call semantics, in that case, the arguments can be converted using subtyping cponversions,
+        \item the generic call semantics, in that case, the arguments can be converted using subtyping conversions,
               widening primitive conversions, boxing and unboxing conversions and varargs conversions
               as defined in the Java Language Specification.
       \end{itemize}
       None of these semantics implement the calling semantics as defined by the Java Virtual Machine Specification
       for classical Java method calls like invokestatic or invokevirtual
       \footnote{There is also a minor difference between the generic call semantics and the call semantics of
-        the Java Language Specification if the method is a varargs and the call as the same number of parameters as the method.
+        the Java Language Specification, if the method is a varargs and the call as the same arity as the method.
         The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.}.
       The exact call semantics is more strict, and the generic call semantics is more permissive than the classical call semantics.
 
       Now, back to our example, in order to find the right target method (addition or concatenation),
       but for that we need to inspect the runtime type (the class exactly) of the argument of the call.
       The values of the arguments are not available when the bootstrap method is called, at linking time,
-      so we use an intermediary method, named {\bf change} in the code below, that will be registered as
-      target method for the first call. When this method will be called, the argument are known, and
-      we can decide which target method to call.
+      so we use an intermediary method, named {\bf change} in the code below (Figure \ref{fooCHANGE}),
+      that will be registered as target method for the first call.
+      When this method will be called, the argument are known, and we can decide which target method to call.
 
       \begin{figure}[!h]
         \centering \input{figures/snip_foo_callsite}\vspace{-1.5em}
-        \caption{Example - mutable call site.}
+        \caption{Example - mutable call site.}\vspace{-.25em}
         \label{fooMCS}
       \end{figure}
 
@@ -360,7 +360,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       on a CallSite (see below). So the method {\bf change} takes a CallSite as first parameter, this parameter
       will be curried using the combiner bindTo.
        
-      Thus, in the example, we convert each arguments to an Object using asType,
+      Thus, in the example, we convert each argument to an Object using asType,
       we collect them to form the array of Objects with asCollector and
       we add the call site at first argument with bindTo (Figure \ref{fooMCS}).
 
@@ -373,14 +373,14 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{ast1}
       \end{figure}
 
-      When the call site is created, the method handle tree is called, so the {\bf change} method (Figure \ref{fooCHANGE}) is called.
+      When the call site is created, the method handle tree is called, so the {\bf change} method is called.
       This method takes a look at the dynamic type of {\bf a} (let say an integer),
       finds the corresponding implementation of the {\bf plus} method
       and then re-links a method handles tree represented by a combiner called {\bf GuardWithTest}
       which is quivalent to a test {\bf if .. then .. else}.
 
       There is no existing method handle in the API that are able to do a class check,
-      but it's easy to construct one. The method named {\bf check}, check if an argument class
+      but it's easy to construct one. The method named {\bf check} checks if an argument class
       is identical to a class object taken as parameter and this parameter is curried
       (using insertArguments) to the class we need to check.
 
@@ -390,7 +390,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       \begin{figure}[!h]
         \centering \input{figures/snip_foo_change}\vspace{-1.5em}
-        \caption{Example - ``change'' method.}
+        \caption{Example - ``change'' method.}\vspace{-.7em}
         \label{fooCHANGE}
       \end{figure}
 
@@ -424,7 +424,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       As we have seen, a CallSite is a holder for a MethodHandle, which is called its target.
       An invokedynamic instruction linked to a CallSite delegates all calls to the site's current target.
       A same CallSite object may be associated with several invokedynamic
-      instructions\footnote{A callsite can also be ``free floating'', associated with no invokedynamic,
+      instructions\footnote{A CallSite can also be ``free floating'', associated with no invokedynamic,
       if you want to reuse the same mechanism to implement an interpreter in Java by example.}\\
 
       It has three immediate, concrete subclasses that may be either instantiated or subclassed:
@@ -448,12 +448,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   For this reason, we have developed a specific implementation of the \JSR for \DALVIK.
 
   Specifically for Android, because Android does not use the Java class file format specification,
-  we have re-interpreted the part of the JSR 292 spec that describes the class file format
+  we have re-interpreted the part of the \JSR specification that describes the class file format
   in order to translate it into the DEX file format.
   We have also implemented a way to execute all APKs previously created to run with our modified VM.
   This work is described in section~\ref{newConst}.
   
-  The section~\ref{implD} describe in detail the most important implementation parts of our work,
+  The section~\ref{implD} describe in detail the most important implementation part of our work,
   the execution of an invokedynamic opcode, a direct method handle, a combiner method handle or
   an invoker method handle by our modified VM.
   
@@ -464,38 +464,38 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 \label{newDEX}
 
   The main differences between the Java class file format and the Dalvik DEX format
-  are that
+  are that:
   \begin{itemize}
    \item There are several constant pools, one by type of constant.
-         all are shared by the whole applications
+         all are shared by the whole application
    \item The DEX format is mmapped\footnote{loaded in memory using mmap unix operation.}
     and read only at runtime.
   \end{itemize}
   
-  This implies that we need to introduce new constant pool to support the new opcodes.
+  This implies that we need to introduce new constant pools to support the new opcodes.
   Because constant pools are directly described in the header of the DEX,
-  this require a new header, making DEX file supporting the JSR 292 incompatible
+  this requires a new header, making DEX file supporting the JSR 292 incompatible
   with previous DEX file.
   
   \subsection{opcodes / constants}
-    The \JSR introduces 1 new opcode invokedynamic, change the semantics of ldc (load constant)
+    The \JSR introduces 1 new opcode invokedynamic, changes the semantics of ldc (load constant)
     to support loading constant method types and constant method handles and enhances the semantics
     of invokevirtual for the method MethodHandle.invokeExact and MethodHandle.invoke.
 
     Instead of overloading the already existing semantics, in Dalvik, we introduces several new opcodes,
     ``invoke-dynamic'' that does an invokedynamic,
     ``const-methodtype'' and ``const-methodhandle'' that respectively load a constant method type
-    and a constant method handle and ``invokeExact'' and ``invoke'' that requires that the first parameter
+    and a constant method handle and ``invokeExact'' and ``invoke'' which require that the first parameter
     is a MethodHandle.
 
     The program ``dx'' (Figure \ref{DTC}) was modified to take Java bytecode and 
-    transforms the Java opcode or Java invokevirtual to the corresponding instructions.
+    transform the Java opcode or Java invokevirtual to the corresponding instructions.
 
   \subsection{constant-pools}
     \label{CP}
 
     To support the newly introduced opcodes, we had to add 4 new constant pools,
-    one for constant method type, one form constant method handle, one for invokedynamic
+    one for constant method type, one for constant method handle, one for invokedynamic
     and one for the bootstrap arguments. (Figure \ref{SNA}).
 
     \begin{figure}[!h]
@@ -533,7 +533,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
     Given that in \DALVIK, the initialization of the Method structures is done when
     the class is initialized (when the vtable is filled), instead of storing a CallSite
-    table in each Method, we have decided to store this table at the class level.
+    table in each method, we have decided to store this table at the class level.
     
     For that reason, the DEX format of a class has a supplementary field storing
     the number of all callsites for every methods of that class. 
@@ -549,13 +549,13 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     because the DEX file is read only.
 
     \ANDROID has a mechanism that optimize a DEX file at the installation of
-    an APK using a program named ``dexopt'' (Figure \ref{DTC}).
-    We take advantage of this mechanism to at instalation time rewrite the APK to use our DEX format.
+    an APK using a program named ``dxopt'' (Figure \ref{DTC}).
+    We take advantage of this mechanism to at installation time rewrite the APK to use our DEX format.
     This rewrite is fast, because we only can copy the previous DEX file and only insert the
-    i.e. the constant pools for the constant method type, method handle, invokedynamic and
+    constant pools for method types, method handles, invokedynamics and
     bootstrap arguments with a size of zero and add a 0 in the header of a class at the
-    position corresponding to the callsite table.
-    The size of the DEX header and the classe headers change but no offsets inside each parts.
+    position corresponding to the callsites table.
+    The size of the DEX header and the class headers change but no offsets inside each parts.
 
 \section{New opcodes}
 \label{newConst}
@@ -601,8 +601,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \subsubsection{invoke-dynamic}
 
       An invoke-dynamic (Figure \ref{INDYins}) contains an integer corresponding to the call site number and an index in the constant-pool of invoke-dynamic.
-      This entry in the invoke-dynamic constant pool have all informations that we need to treat this instruction: bootstrap method, arguments, \dots (cf.~\ref{CP}).
-      A new opcode format has been added.
+      This entry in the invoke-dynamic constant pool have all informations that we need to treat this instruction: bootstrap method, arguments,
+      \dots~A new opcode format has been added.
 
       \begin{figure}[!h]
         \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_indy}}
