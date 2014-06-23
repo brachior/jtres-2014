@@ -615,8 +615,10 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       An invoke-dynamic (Figure \ref{INDYins}) contains an integer corresponding to the call site number
       and an index in the constant-pool of invoke-dynamic.
-      This entry in the invoke-dynamic constant pool contains the following information: bootstrap method, bootstrap arguments,
-      \dots~A new opcode format has been added.
+      The entry in the invoke-dynamic constant pool contains a name, a prototype, a bootstrap method and an index to
+      the bootstrap arguments. 
+      Because the invokedynamic instruction is resolved once, the method type corresponding to the call
+      is created once when the bootstrap method is called and not stored in the VM table.
 
       \begin{figure}[!h]
         \centering \resizebox{.9\linewidth}{!}{\input{figures/inst_indy}}
@@ -628,11 +630,16 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 \label{implD}
 
     \subsection{MethodHandle}
-      Method handles can be divide in three parts (Figure \ref{mhHier}):
+      We have chosen to divide the method handle in three kinds (Figure \ref{mhHier})
+      depending on how we have decided to implement calls.
+      :
       \begin{itemize}
-        \item direct method handles which are treated by a call to the method {\bf invoke} or {\bf invokeExact};
-        \item combiners which require specific treatments;
-        \item and invokers which simulate an ``invoke'' or ``invokeExact'' call.
+        \item direct method handles are implemented inside the C interpreter
+              either by a classical call (virtual, direct, static, \dots)
+              or by a field access (get, put) with a possible ``static'' and ``volatile'' variation ;
+        \item combiners are implemented by a Java interpreter detailed in section~\ref{combiners};
+        \item and invokers which are also implemented in the C interpreter but using a form of tail call
+              detailed in section~\ref{invokers}.
       \end{itemize}
 
       \begin{figure}[!h]
@@ -641,15 +648,11 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{mhHier}
       \end{figure}
 
-      Each part gathers different kinds of method handle.
-      The ``direct'' part contains all method handles which do an invoke (virtual, direct, static, \dots)
-      and a field access (get, put) with a possible ``static'' and ``volatile'' form.
-      The ``combiner'' part aggregates all method handles that we cannot call directly.
-      We treat these method handles with a specific interpreter detailed in section \ref{combiners}.
-      The last part ("invoker") is formed by special method handles which need a specific manipulation in the Dalvik interpreter.
-      Each part is treated differently by the Dalvik interpreter.
+      In term of Java Class hierarchy, the direct method handles are represented by the class MethodHandle,
+      the combiners are represented by subclasses of the class InterpretMH which is a subclass of MethodHandle
+      and the combiners are represented by the class Invoker which is a subclass of MethodHandle.
 
-      We distinguish all kinds of method handle with several binary masks to perform dispatch between the different treatments.
+      
 
       \begin{figure}[!h]
         \centering \input{figures/snip_methodhandle}\vspace{-1.5em}
@@ -657,7 +660,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{mhFields}
       \end{figure}
 
-      A MethodHandle is described by: the declaring class; the method type; the kind and the slot corresponding to the method/field/\dots
+      A MethodHandle is described by: the declaring class of the method to call/field to access;
+      the method type; the kind and the slot which is an index to the method for non virtual method,
+      a vtable/itable index for the virtual call/interface call and an offset inside the data structure
+      for the fields.
+      The field \bf{kind} of MethodHandle is used to indicate the kind of method handle inside the C interpreter and we use
+      several bits masks to dispatch between the different treatments.
 
       We have decided to create the method handles in Java and not in the VM.
       For a direct method handle created using the Lookup API, these methods first check
@@ -665,8 +673,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       the method handle in Java. As in our example, we suppose that these methods are
       mostly stored inside static final fields thus their cost of creation is amortized.
       For an other method handle, these method handles are usually created more frequently
-      (but usually in a slow path). Those method handle does not require any action by the VM
-      thus are fully created in Java.
+      and those method handle does not require any action by the VM thus are fully created in Java.
 
     \subsection{invoke instructions}
       All new instructions work with a method handle so we have written a method, inside the interpreter, which treats a method handle.
@@ -772,6 +779,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       We pile up only if we have a direct method handle, which is not a subtree.
 
     \subsection{Invokers}
+     \label{invokers}
 
       Among method handles, we call "invoker" those which are high order method handles.
       An invoker extracts the method handle passed as first pargument and calls it with the rest of arguments.
