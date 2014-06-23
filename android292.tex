@@ -696,37 +696,30 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       If all the conversions works, we call the shared code that invoke the method handle.
   
     \subsubsection{invoke-dynamic}
-      The call site is found in the current class but if it is the first time that we read this instruction, the call site is not created yet.
-      In this case, we need to call the bootstrap method associated to the instruction first.
-      So we decode the arguments of the bootstrap method and do an up call to the method ``callBootstrapMethod''.% (Figure \ref{implBSM}).
-      It returns a call site that is stored in the class.
-
+      To find the method handle to call, we find the class that contains the current opcode,
+      use the callsite index to get the method handle at the index
+      in the callsite table associated with the current class.
+      If the pointer is null, it means that the bootstrap method was not called,
+      so we decode the bootstrap argument and do an up call to a Java method named ``callBootstrapMethod'' % (Figure \ref{implBSM})
+      inside MethodHandle that will call the bootstrap method in Java (using invokeWithArguments (Figure \ref{implIWA})
+      which is based on invoke-generic).
+      
       \begin{figure}[!h]
         \centering \input{figures/snip_meth_bsm}\vspace{-1.5em}
         \caption{snippet - ``callBootstrapMethod''.}\vspace{-1em}
         \label{implBSM}
       \end{figure}
 
-      A bootstrap method needs at least three arguments:
-      a lookup (Lookup) that is a security token object encapsulating access rights of class containing the invoke-dynamic opcode;
-      an arbitrary name (String) specified as parameter of the invokedynamic opcode;
-      a method type (MethodType), that is a reified object of the descriptor specified as parameter of the invoke-dynamic opcode;
-      and any constant values specified as bootstrap arguments of the invoke-dynamic opcode.
+      The bootstrap method returns a CallSite, the code checks that the CallSite as the right MethodType
+      and a target with the right MethodType and will store the target of the callsite inside the table
+      associated with the current class.
 
-      At first, we have to create the lookup from the given  declaring class.
-      We treat the bootstrap method differently if arguments are given or not.
-      If no argument are given, we call directly the bootstrap method
-      with ``invokeExact'' and basic arguments (types are known).
-      We add the basic arguments into the other arguments.
-      We do not want strong method types into the bootstrap arguments,
-      therefore they are represented by strings which are translated to method types.
-      Because arguments are seen like an array of Object,
-      we have to call the ``invoke'' method.
-      The ``invoke'' method needs the true signature when it is called,
-      so we have to dispatch arguments to create the real signature.
-      To do that, we call the method ``invokeWithArguments'' (Figure \ref{implIWA})
-      which calls the method invoke according to the number of arguments.
-      ``invokeWithArguments'' is separated on many functions to allow optimizations by the JIT.
+      Because several threads may execute a code containing the same invoke-dynamic instruction
+      at the same time, this code is racy. In order to be sure that every thread see the same callsite
+      after the initialisation, the read inside the callsite table is a volatile read and the write
+      is done using a compare-and-set with null as expected value.
+      If the compare-and-set fail, we re-read the callsite table at the right index again with the volaile semantics
+      and call the method handle which is guaranteed to be non-null.   
 
 %       \begin{figure}[!h]
 %         \centering \input{figures/snip_meth_iwa}\vspace{-1.5em}
@@ -734,18 +727,11 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 %         \label{implIWA}
 %       \end{figure}
 
-      When the CallSite is returned, we verify its integrity.
-      We check if it or its target is not null and if the target's type and the type given are the same.
-      Because the target's CallSite could be uninitialized we have to check if the target contains a method handle or a method type.
-
-      When the bootstrap method returns its value, we have to store the call site.
-      And because this instruction can be read by many threads, we use an atomic ``compare-and-set'' mechanism.
-      When we have the call site, we get its method handle.
-      All method handles are volatiles so we have to get it atomically.
-      At the end, we call it.
 
     \subsection{Combiners}
     \label{combiners}
+
+      
 
       A part of method handles allows to manipulate arguments, we call them: ``combiners''.
       Combiners can contain several method handles and at least one direct method handle.
@@ -881,17 +867,18 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   We don't find any implementation of the \JSR on an embedded virtual machine.
   Note also that the \Jsr 360 (describing the embedded part of the JDK) specify that the ``invokedynamic'' instruction is not included\cite{jcp-jsr-360}.
 
-
-
-  At the time of the writing, our implementation is not fast enough to be used in production, we have focused on the conformance of the \JSR.
-  To simplify the implementation, we have just integrated our solution in the ``portable'' interpreter written in C and not in assembler code.
-
+  
 \section{Conclusion}
+
+
 
   This implementation of the \JSR associates the ``invoke'' and ``invokeExact'' methods to specific instructions
   and defines an interpreter written in Java to treat method handles trees (combiners).
   We noted that the execution times of the new instructions are better than those of the reflexion.
   However, the method handles trees interpreter suffers lot of slowing down because of frequent object creations.
+
+  At the time of the writing, our implementation is not fast enough to be used in production, we have focused on the conformance of the \JSR.
+  To simplify the implementation, we have just integrated our solution in the ``portable'' interpreter written in C and not in assembler code.
   
   To solve this problem, we will envisage to limit the object creation numbers in evaluating the maximum number of a method handles tree arguments
   and we will try to see the C variables stack as an object in Java.
