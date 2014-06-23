@@ -203,16 +203,17 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     Since late 90's, a lot of language
     implementors have chosen the JVM as their target platform \cite{wiki-jvm-lang},
     for several reasons such as the size of the ecosystem,
-    the presence of mature GCs and Just In Time compilers (JIT).
+    the presence of mature GCs and Just In Time compilers (JITs).
 
     The aim of this \Jsr is to ease the implementation of dynamically typed languages
     by providing a new way to do function calls that allows language implementors
-    to describe a specific semantics, independantly of the semantics of the Java language.
+    to describe a specific semantics, independently of the semantics of the Java language.
 
     This \Jsr is composed of two parts, the first part, specifying the semantics of
-    new opcodes and the second part defining an API: java.lang.invoke.
-    This API allows to create runtime typesafe function pointers (java.lang.invoke.MethodHandle)
-    and methods to combine those pointers to do things like composition, argument permutation, \dots.
+    newly introduced opcodes and the second part defining an API: java.lang.invoke.
+    This API allows to create runtime typesafe function pointers (as java.lang.invoke.MethodHandle)
+    and methods to combine those pointers to do things like composition, arguments conversion,
+    arguments permutation, \dots.
 
     The next sections will present the new API and the new instructions but before that,
     we want to introduce an example that we will use for the rest of the paper.
