@@ -855,6 +855,14 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
 \section{Conclusion}
 
+  This implementation of the \JSR associates the ``invoke'' and ``invokeExact'' methods to specific instructions
+  and defines an interpreter written in Java to treat method handles trees (combiners).
+  We noted that the execution times of the new instructions are better than those of the reflexion.
+  However, the method handles trees interpreter suffers lot of slowing down because of frequent object creations.
+  
+  To solve this problem, we will envisage to limit the object creation numbers in evaluating the maximum number of a method handles tree arguments
+  and we will try to see the C variables stack as an object in Java.
+
 \appendix
 
 % We recommend abbrvnat bibliography style.
