@@ -227,7 +227,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       For the first call to {\bf foo}, {\bf a} is an integer so the symbol {\bf +} refers
       to the function {\it +(int,int)} while for the second call to {\bf foo}, {\bf a} is a string, {\bf +} refers to the function {\it +(String,String)}.
 
-      If one try to translate this code in Java bytecode, it would be something like:
+      If one try to translate this code to Java bytecode, it would be something like:
 
       \input{figures/snip_foo_bytecode}
 
@@ -238,8 +238,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       which is also an object in the example.
 
       The code above does not work because invokevirtual is an existing Java bytecode that calls
-      a virtual method using the Java semantics so the Virtual Machine or more precisely
-      the bytecode verifier will check that there exists a method '+' on java.lang.Object
+      a virtual method using the Java semantics so the Java Virtual Machine or more precisely
+      the bytecode verifier will check that there is an existing method '+' on java.lang.Object
       that takes an integer and returns an Object. If you have already used Java, you know
       that this method does not exist. The bytecode verification will then fail.
 
