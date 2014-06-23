@@ -122,21 +122,20 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   \subsection{Android}
 
-    \ANDROID is the mobile operating system created by Google.
+    \ANDROID is a mobile operating system created by Google.
     It is an open-source project called ``\ANDROID Open-Source Project'' (AOSP).
     In Q2 2013, \ANDROID occupies almost 80\% of the market share with more than 187 million units shipped \cite{idc-website}.
     The success of \ANDROID can be explained by an open project and an open market
     which are very attractive for devices producers, service providers and application developers \cite{ieee-butler-android-landscape}\cite{ieee-paulson-shift-dynamic-languages}.
 
-    \ANDROID mainly run on embedded environments like smartphones and tablets.
-    Therefore, strong constraints apply to \ANDROID
-    and it have to support ARM architecture and now Intel architecture.
+    \ANDROID mainly run on embedded environments like smartphones and tablets,
+    and supports ARM, Intel and MIPS architecture.
     
-    Even if hardwares supporting \ANDROID become more efficients,
-    devices cannot be more powerful than desktop computer because of miniaturization.
+    Even if hardware supporting \ANDROID become more efficients,
+    devices cannot as powerful as desktop computer because of miniaturization.
     Being a mobile device also requires a minimal energetic consumption.
-    Moreover, \ANDROID is portable system and it have to be adaptable to different devices.
-    Forcing it to abstract itself from hardware.
+    Moreover, \ANDROID is a portable system and adaptable to a huge number of different devices,
+    forcing it to abstract itself from hardware.
 
     The \ANDROID architecture is described like a ``software stack'' (Figure \ref{ASA}).
     It's composed of:
@@ -146,9 +145,8 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \item native libraries (C/C++)
         which provide most of features in the \ANDROID system;
       \item a virtual machine called ``\DALVIK''.
-        It is a important component of \ANDROID.
-        It runs applications converted to the \DEX format.
-        \DALVIK uses a core API written from scratch in Java
+        which run the application written in Java but converted to the \DEX format.
+        \DALVIK uses the core API of Java but written from scratch
         which can be assimilated to the version 5 or 6 of the Java API;
       \item an application framework to enable the making of \ANDROID applications;
       \item and some default applications.
@@ -157,7 +155,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \subsubsection{Differences between the JVM and \DALVIK}
 
       The main difference between these two machines is that \DALVIK is register based while the \JVM is stack based.
-      A stack based virutal machine (VM) uses more instructions to manipulate data and to implement Java code than a register based VM.
+      A stack based virtual machine (VM) uses more instructions to manipulate data and to implement Java code than a register based VM.
       But the register based VM instructions tends to be larger in terms of code size\cite{ieee-paul-kundu-energy-perspective}.
 
       \begin{figure}[!h]
@@ -166,19 +164,18 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{SJA}
       \end{figure}
 
-      The bytecode Java is given in a ``.class'' file and contains the code of a unique class (Figure \ref{SJA}).
+      The Java bytecode is given in a ``.class'' file and contains the code of a unique class (Figure \ref{SJA}).
       The file is made of a series of tables which describes various informations, the code of the class and some other things.
       The code contains references to these tables.
       Among these tables, the constant-pool stores most of the constant values of the class (numbers or texts)
       and more evolved elements (data types, class names, attribute names, \dots).
 
       At the opposite, \DEX format contains all the code of the application (Figure \ref{SJA}).
-      It will be loaded in one piece.
-      It is a read-only format, the code cannot be changed at runtime.
+      It is a read-only format, loaded in one piece, so the code cannot be changed or modified at runtime.
       Duplicate constants such as strings used in multiple class files
       are included only once in the \DEX file to save space.
       Unlike the \JVM, \DALVIK uses one constant-pool by type of constant
-      except for the primitive types which are directly encoded with the opcode.
+      except for the primitive types which are directly encoded within the opcode.
       It leads more smaller indexes for instructions.\\
 
       \begin{figure}[!h]
@@ -188,7 +185,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \end{figure}
 
       \DALVIK cannot directly execute Java bytecode.
-      It first have to translate the Java bytecode to the \DALVIK specific one called \DEX
+      It first has to translate the Java bytecode to the \DALVIK specific one called \DEX
       which can then be optimized (\mbox{ODEX}) to save space (Figure \ref{DTC}).
 
     \begin{figure}[!h]
