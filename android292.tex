@@ -731,40 +731,39 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \subsection{Combiners}
     \label{combiners}
 
+      A combiner is a method handle that combine several method handle and when invoked
+      does things like argument conversions, method folding, or {\bf if .. then .. else}.
+      Because a combiner delegate a part of its invocation to other method handles,
+      it can be seen as a tree with the combiners as internal nodes and the direct
+      method handles as leafs.
+
+      It exist a lot of combiners and some may be introduced in the next version
+      of the Java\footnote{A new combiner was proposed for Java 8 but was eventually rejected just before the release.}.
+      So we have decided to implement the interpreter of these combiners in Java
+      to be more flexible and avoid to bloat the code of the VM even if the execution may be slower.
+
+      Executing a combiner is often equivalent to execute several other method handle
+      combiners before executing a direct method handle at the end of the chain,
+      therefore we have decided to not implement the Java interpreter as a classical
+      tree interpreter in order to avoid a sequence of up call/down call because while
+      the combiner interpreter is written in Java, ``invoke-exact'' and ``invoke-generic'' instructions
+      are handled by the C interpreter and to avoid to push too many stack frames that may blow the stack.
       
-
-      A part of method handles allows to manipulate arguments, we call them: ``combiners''.
-      Combiners can contain several method handles and at least one direct method handle.
-      Thereby, we can represent them by trees, referred to here as method handles trees.
-
-      Executing a combiner is often equivalent to executing many.
-      Given that combiners cannot be final calls,
-      it is not interesting to do real calls, ie.~put on the execution stack,
-      each combiner and at the end call the direct method handle, which needs a real call.
-
-      To execute direct method handles, we have to use the ``invoke-exact'' and ``invoke-generic'' instructions.
-      But we cannot call them through the interpreter, we can only do in Java.
-      To avoid a Java up call for each combiner, we have chosen to write an interpreter,
-      specific to execution of combiners, in Java (Figure \ref{implINTERP}).
-
       \begin{figure}[!h]
         \centering \input{figures/snip_meth_interp}\vspace{-1em}
         \caption{snippet - ``invokeCombiner''.}
         \label{implINTERP}
       \end{figure}
 
-      This interpreter is implemented using a continuation mechanism (context) to treat the return value.
-      Each combiner execute its own code and can produce a 'context'.
-      For example, AsType converts arguments and produces a context if it has to convert the return value.
-      When the interpreter treats a direct method handle,
-      which means a method handle produced by a call to ``lookup.findXXX(\dots)'' (instance, static, getter, \dots),
-      it does an invoke-generic and check if a context exist.
-      If there is a context, the interpreter executes the second part of the method handle
-      and convert the return value in the case of AsType.
-      Afterwards, the interpreter repeats the loop.
+      The Java interpreter (Figure~\ref{implINTERP}) is implemented using a continuation mechanism
+      (\bf{context}) that will remember how the return value of a specific combiner must be processed.
+      For example, the combiner AsType converts the arguments and produces a context if it has
+      to convert the return value and then the interpreter compute the next combiner using a loop until it calls
+      a direct method handle that will return a return value. At the point the contexts will be unwinded
+      to execute the conversion on the return value specified by AsType. 
 
-      This implementation avoids to pile up a call in the stack for each method handle.
-      We pile up only if we have a direct method handle, which is not a subtree.
+      So only calls to direct method handle goes to the C interpreter, otherwise, the execution of the combiners
+      in done inside the loop of the Java interpreter.
 
     \subsection{Invokers}
      \label{invokers}
