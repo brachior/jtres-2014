@@ -536,7 +536,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     table in each method, we have decided to store this table at the class level.
     
     For that reason, the DEX format of a class has a supplementary field storing
-    the number of all callsites for every methods of that class. 
+    the number of all CallSites for every methods of that class. 
     This number is calculated when generating the DEX file by the program ``dx''.
 
   \subsection{retro-compatibility}
@@ -563,7 +563,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
     There are two ways to create a constant method handle, either using the ``const-methodhandle''
     instruction (Figure \ref{MTMHldc}) or as arguments of a bootstrap method.
-    Given that the ``const-methodhandle''instruction is rarely used and
+    Given that the ``const-methodhandle'' instruction is rarely used and
     a bootstrap method is called once, we have chosen to not implement a cache
     of resolved method handle in the VM.
 
@@ -711,14 +711,14 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \end{figure}
 
       The bootstrap method returns a CallSite, the code checks that the CallSite as the right MethodType
-      and a target with the right MethodType and will store the target of the callsite inside the table
+      and a target with the right MethodType and will store the target of the CallSite inside the table
       associated with the current class.
 
       Because several threads may execute a code containing the same invoke-dynamic instruction
-      at the same time, this code is racy. In order to be sure that every thread see the same callsite
-      after the initialisation, the read inside the callsite table is a volatile read and the write
+      at the same time, this code is racy. In order to be sure that every thread see the same CallSite
+      after the initialization, the read inside the CallSites table is a volatile read and the write
       is done using a compare-and-set with null as expected value.
-      If the compare-and-set fail, we re-read the callsite table at the right index again with the volaile semantics
+      If the compare-and-set fail, we re-read the CallSites table at the right index again with the volatile semantics
       and call the method handle which is guaranteed to be non-null.   
 
 %       \begin{figure}[!h]
@@ -884,7 +884,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
   implemented in the context of a VM running on embedded devices.
 
   Our implementation associates the ``invoke'' and ``invokeExact'' methods to specific instructions,
-  modifyies the C interpreter to execute direct method handles and invokers, uses a Java interpreter for the support
+  modifies the C interpreter to execute direct method handles and invokers, uses a Java interpreter for the support
   the execution of combiner method handles. 
   As we noted, the execution times of the new instructions are better than their reflexion counterpart,
   however, the combiner method handle interpreter suffers a lot of slowing down due to its frequent object creations.
