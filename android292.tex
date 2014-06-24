@@ -864,36 +864,34 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \label{Rmutable}
   \end{figure}
 
-  We notice on Figure \ref{Rmutable} that our method handle interpreter is really slow,
+  We notice on Figure~\ref{Rmutable} that our method handle interpreter is really slow,
   due to the fact that in order to call the Java method handle interpreter the arguments need to be boxed creating a lot of objects.
 
 \section{Related Works}
+  Because there are few implementations of the \JSR and that the IBM J9 implementation is done behind close doors,
+  there are not a lot of published paper on that subject.
 
-  
-  Currently, the OpenJDK is the only open-source implementation of the \JSR.
-  This JSR has often evolved since its request in 2006\cite{jcp-jsr-292}.
-  In 2009, a paper of John R. Rose (\JSR spec leader) describes an implementation of the \Jsr, now obsolete\cite{vmil-rose-indy-2009}.
-  In 2010, John R. Rose and al. published a paper presenting the implementation in the JDK 7\cite{pppj-rose-indy-2010}.
-  Today, no paper explains the LambdaForm-based implementation of the JDK 8.
+  In 2009, a paper of John R. Rose, the spec leader of the \JSR describes an implementation of the \JSR,
+  now obsolete\cite{vmil-rose-indy-2009}. In 2010, another paper by John R. Rose and Christian Thalinger present the implementation
+  that was released with the OpenJDK 7~\cite{pppj-rose-indy-2010}. This implementation was throw out and a new one, named lambda-form,
+  was developed and shipped with the release of the OpenJDK 8. As far as we know, there is no published paper on this approach.
 
-  We don't find any implementation of the \JSR on an embedded virtual machine.
-  Note also that the \Jsr 360 (describing the embedded part of the JDK) specify that the ``invokedynamic'' instruction is not included\cite{jcp-jsr-360}.
-
+  In embedded space, JamVM supports the \JSR but its implementation re-use the OpenJDK 8 classes.
+  The \Jsr 360, that describes the CLDC 8 version of Java explicitly specifies that an embedded JVM doesn't have to support the  ``invokedynamic'' instruction~\cite{jcp-jsr-360}.
   
 \section{Conclusion}
+  In this paper, we have shown how the \JSR can be re-interpreted for the Android DEX format and
+  implemented in the context of a VM running on embedded devices.
 
+  Our implementation associates the ``invoke'' and ``invokeExact'' methods to specific instructions,
+  modifyies the C interpreter to execute direct method handles and invokers, uses a Java interpreter for the support
+  the execution of combiner method handles. 
+  As we noted, the execution times of the new instructions are better than their reflexion counterpart,
+  however, the combiner method handle interpreter suffers a lot of slowing down due to its frequent object creations.
 
-
-  This implementation of the \JSR associates the ``invoke'' and ``invokeExact'' methods to specific instructions
-  and defines an interpreter written in Java to treat method handles trees (combiners).
-  We noted that the execution times of the new instructions are better than those of the reflexion.
-  However, the method handles trees interpreter suffers lot of slowing down because of frequent object creations.
-
-  At the time of the writing, our implementation is not fast enough to be used in production, we have focused on the conformance of the \JSR.
-  To simplify the implementation, we have just integrated our solution in the ``portable'' interpreter written in C and not in assembler code.
-  
-  To solve this problem, we will envisage to limit the object creation numbers in evaluating the maximum number of a method handles tree arguments
-  and we will try to see the C variables stack as an object in Java.
+  To solve this problem, we will envisage to reduce the number of object creation by creating a Java representation of
+  a C interpreter stack frame allowing to shuffle the arguments without doing the boxing/unboxing operations that
+  makes the current implementation slow.
 
 \appendix
 
