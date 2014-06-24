@@ -662,7 +662,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       the method type; the kind and the slot which is an index to the method for non virtual method,
       a vtable/itable index for the virtual call/interface call and an offset inside the data structure
       for the fields.
-      The field \bf{kind} of MethodHandle is used to indicate the kind of method handle inside the C interpreter and we use
+      The field {\bf kind} of MethodHandle is used to indicate the kind of method handle inside the C interpreter and we use
       several bits masks to dispatch between the different treatments.
 
       We have decided to create the method handles in Java and not in the VM.
@@ -761,7 +761,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
       \end{figure}
 
       The Java interpreter (Figure~\ref{implINTERP}) is implemented using a continuation mechanism
-      (\bf{context}) that will remember how the return value of a specific combiner must be processed.
+      ({\bf context}) that will remember how the return value of a specific combiner must be processed.
       For example, the combiner AsType converts the arguments and produces a context if it has
       to convert the return value and then the interpreter compute the next combiner using a loop until it calls
       a direct method handle that will return a return value. At the point the contexts will be unwinded
