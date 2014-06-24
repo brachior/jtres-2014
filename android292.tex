@@ -739,8 +739,13 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
       It exist a lot of combiners and some may be introduced in the next version
       of the Java\footnote{A new combiner was proposed for Java 8 but was eventually rejected just before the release.}.
-      So we have decided to implement the interpreter of these combiners in Java
+      Thus we have decided to implement the interpreter of these combiners in Java
       to be more flexible and avoid to bloat the code of the VM even if the execution may be slower.
+      
+      When a combiner is called, the C interpreter will box all the argument values inside an array of Object
+      and then do an up call to call a Java code that will modify the arguments by modifying the array
+      of objects and then will use invoke-generic (exactly invokeWithArguments that use invoke-generic)
+      to re-transform the Object back to their real values.  
 
       Executing a combiner is often equivalent to execute several other method handle
       combiners before executing a direct method handle at the end of the chain,
@@ -768,19 +773,26 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \subsection{Invokers}
      \label{invokers}
 
-      Among method handles, we call "invoker" those which are high order method handles.
-      An invoker extracts the method handle passed as first argument and calls it with the rest of arguments.
-      Its job is to simulate a call to the method ``invokeExact'' (exactInvoker) and ``invoke'' (invoker).
-      The method type of an invoker is the same as the method handle it have to call with a MethodHandle at first parameter.
+      Among the method handles, the \JSR called ``invokers'' those which are high order method handles i.e.
+      a method handle that has its first argument that is a method handle and that when invoked,
+      extract the first argument and call it with with the rest of arguments.
 
-      Because we cannot simulate an ``invoke-exact'' in Java, we have to add support code in the Dalvik interpreter.
-      And to avoid unnecessary up calls, we treat the generic invoker in the interpreter too.
-      Each invoker can be executed either by the ``invoke'' method or by the ``invokeExact'' method, so we have four call semantics.
-
-      In the Dalvik interpreter, the execution of an invoker acts as an optimized tail call.
-      The method handle to call (invokee) is extracted from the first argument and the other arguments are shifted.
-      Then the interpreter executes itself again using a goto.
-      In order to perform the second pointer check, we store the expected method type of the invokee as a field of the MHInvoker class (Figure \ref{invokeeFields}).
+      The invoker that simulate an invoke-exact is called exactInvoker, and the one that simulate
+      an invoke-generic is called invoker. The method type of an invoker is the same as the method handle
+      it has to call with a MethodHandle at first parameter.
+      Each invoker can be executed either by a call to the method ``invoke'' or by a call to the method ``invokeExact'',
+      so there are four call semantics.
+      
+      We cannot simulate the semantics of an invoke-exact call in the Java combiner interpreter
+      (when the Java interpreter is called the arguments are boxed) and to avoid an unnecessary up call
+      for the invoker (the one with the invoke-generic semantics), the exact invoker and the generic invoker
+      are handled by the C interpreter.
+      
+      In the C interpreter, the execution of an invoker acts as a tail call,
+      the method handle to call (the invokee) is extracted from the first argument and the other arguments are shifted.
+      then the interpreter re-executes itself again using a goto.
+      In order to perform the second pointer check, we store the expected method type of the invokee as a field of the MHInvoker class
+      (Figure \ref{invokeeFields}).
 
       \begin{figure}[!h]
         \centering \input{figures/snip_mh_invoker}\vspace{-1.5em}
@@ -788,26 +800,27 @@ method handles, method handle adapters, Android, Dalvik, embedded system
         \label{invokeeFields}
       \end{figure}
 
-      A problem remains when we want to execute the generic invoker with the semantics of ``invoke-exact''.
-      Reproducing the ``invoke-generic'' behavior requires to copy a lot of code so,
+      In the special case where the generic invoker is invoked with the semantics of invoke-exact,
       we choose to do an up call to the method ``invokeWithArguments'' which calls the method ``invoke''.
 
-      Method handles contains also others invokers (``spreadInvoker'' and ``dynamicInvoker'') but we are able to treat them like combiners.
+      The method handle API contains others invokers (the ``spreadInvoker'' and the ``dynamicInvoker'')
+      but we are able to handle them as combiners.
 
 \section{Result}
  \label{result}
 
-  The modifications made to run the \JSR have a cost in terms of code.
-  About 2600 lines of code were required to tell {\bf dx} how to translate new instructions.
-  Dalvik was given about 3200 lines of code excluding duplications of code for each interpreter.
-  And finally, the introduction of the package ``java/lang/invoke'' asked about 7000 lines of code in the Java API.
+  The modifications made to implement the \JSR have a cost in terms of size of code.
+  About 2600 lines of code were required to tell {\bf dx} how to translate the new instructions,
+  3200 lines of codes are added into Dalvik excluding duplications of code for each interpreter generated by Android itself.
+  And finally, the introduction of the package ``java/lang/invoke'' required about 7000 lines of code of Java code.
 
 %   \fixme{impact sur le binaire (4.4.3/4.4.3.292) libdvm(718992/739484) [20k]; android.jar(20522674/20533106) [20k]; dalvikvm(9500/9500)}
 
-  In terms of binary size, the library containing the interpreter (libdvm.so) increases by twenty kilo-bytes as well as the Java API in the SDK (android.jar).
-  A DEX file size increases proportionally in respect to the number of classes.
-  Figure \ref{Rsize} shows some DEX file sizes contained in Android.
-  We are able to note that the impact of our implementation is faint if the program does not use the \JSR.
+  In terms of binary size, the library containing the interpreter (libdvm.so) increases by twenty kilo-bytes
+  as well as the Java API in the SDK (android.jar).
+  A DEX file size using the new encoding increases proportionally in respect to the number of classes.
+  Figure \ref{Rsize} shows some DEX file sizes contained in Android but
+  the impact of the new DEX file format is negligible if the program does not use the \JSR opcodes.
 
   \begin{figure}[h]
     \pgfplotstableread{
@@ -825,7 +838,7 @@ method handles, method handle adapters, Android, Dalvik, embedded system
 
   To compare performances of new instructions and the reflection API,
   we have written a test which calls N times a method using different ways (instructions and reflection).
-  This test is executed using \DALVIK without graphical.
+  This test is executed using \DALVIK in command line mode.
 
   \begin{figure}[!h]
     \resizebox{\linewidth}{!}{\input{figures/tikz_res_invokes}}
@@ -833,12 +846,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \label{Rinvoke}
   \end{figure}
 
-  Figure \ref{Rinvoke} shows results for 10000, 100000 and 1000000.
-  Below these values, we cannot see strictly the differences between each kind of execution.
-  We notice that calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are faster than others.
-  ``invoke-dynamic'' takes a bit more time because it have to get a volatile method handle.
-  Regarding ``invoke-generic'' with a method type different to the final call, the execution time increases.
-  This difference is due to the boxing mechanism which creates new objects.
+  Figure \ref{Rinvoke} shows results for 10000, 100000 and 1000000 executions.
+  Below these number of executions, we cannot see any real the differences between each kind of invocation.
+  Calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are faster than others,
+  ``invoke-dynamic'' takes a bit more time because of the volatile load to get the method handle.
+  Regarding ``invoke-generic'' with a method type different from the target method handle type, the execution time increases.
+  due to the boxing mechanism which creates new objects at each call.
   However, ``invoke-generic'' remains faster than the reflection API which requires to box all arguments and create an array of Object.\\
   
   Another test executes the example described in this article.
@@ -851,12 +864,12 @@ method handles, method handle adapters, Android, Dalvik, embedded system
     \label{Rmutable}
   \end{figure}
 
-  We notice on Figure \ref{Rmutable} that our method handle interpreter is really slow.
-  The method handle interpreter manipulates arguments.
-  It have to create an array each time a reduce or an increase of the arguments number happens.
+  We notice on Figure \ref{Rmutable} that our method handle interpreter is really slow,
+  due to the fact that in order to call the Java method handle interpreter the arguments need to be boxed creating a lot of objects.
 
 \section{Related Works}
 
+  
   Currently, the OpenJDK is the only open-source implementation of the \JSR.
   This JSR has often evolved since its request in 2006\cite{jcp-jsr-292}.
   In 2009, a paper of John R. Rose (\JSR spec leader) describes an implementation of the \Jsr, now obsolete\cite{vmil-rose-indy-2009}.
