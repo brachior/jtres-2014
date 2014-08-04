@@ -5,7 +5,8 @@
     {73}{55ci}
     {
       \begin{listminimal}{6cm}
-        \item 73 : invoke-dynamic \{vC, vD, vE, vF, vG\}, indy$@$BBBB, \#ZZZZZZZZ
+        \item 73 : invoke-dynamic \{vC, vD, vE, vF, vG\},
+        \item \hspace{.6in} indy$@$BBBB, \#ZZZZZZZZ
           \item \hspace{.2in}A:C-G : like invoke-exact and invoke-generic
           \item \hspace{.2in}B : invoke-dynamic reference index (16 bits)
           \item \hspace{.2in}Z : callsite\_index (32 bits)
@@ -15,8 +16,9 @@
     {79}{5rci}
     {
       \begin{listminimal}{6cm}
-        \item 79 : invoke-dynamic/range \{vCCCC .. vNNNN\}, indy$@$BBBB, \#ZZZZZZZZ
-          \item \hspace{.2in}A:C-N : like invoke-exact/range and invoke-generic/range
+        \item 79 : invoke-dynamic/range \{vCCCC .. vNNNN\},
+        \item \hspace{.6in} indy$@$BBBB, \#ZZZZZZZZ
+          \item \hspace{.2in}A:C-N : like invoke-\{exact|generic\}/range
           \item \hspace{.2in}B : invoke-dynamic reference index (16 bits)
           \item \hspace{.2in}Z : callsite\_index (32 bits)
       \end{listminimal}

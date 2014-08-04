@@ -17,17 +17,17 @@
 
   static {
     try {
-      MethodType mti = MetodType
+      MethodType mti = MethodType
           .methodType(Object.class, int.class, int.class);
       TARGET_INT =
         lookup.findStatic(BootStraps.class, "plus", mti);
 
-      MethodType mts = MetodType
+      MethodType mts = MethodType
           .methodType(Object.class, String.class, int.class);
       TARGET_STRING =
         lookup.findStatic(BootStraps.class, "plus", mts);
 
-      MethodType mtc = MetodType
+      MethodType mtc = MethodType
           .methodType(boolean.class, Object.class, Class.class);
       TARGET_CHECK =
         lookup.findStatic(BootStraps.class, "check", mtc);
