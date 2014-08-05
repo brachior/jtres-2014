@@ -653,7 +653,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       In term of Java Class hierarchy, the direct method handles are represented by the class MethodHandle,
       the combiners are represented by subclasses of the class InterpretMH which is a subclass of MethodHandle
-      and the combiners are represented by the class Invoker which is a subclass of MethodHandle (Figure~\ref{mhFields}).
+      and the combiners are represented by the class Invoker which is a subclass of MethodHandle.
 
       \begin{figure}[!ht]
         \centering \input{figures/snip_methodhandle}\vspace{-1.5em}
@@ -664,7 +664,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       A MethodHandle is described by: the declaring class of the method to call/field to access;
       the method type; the kind and the slot which is an index to the method for non virtual method,
       a vtable/itable index for the virtual call/interface call and an offset inside the data structure
-      for the fields.
+      for the fields (Figure~\ref{mhFields}).
       The field {\bf kind} of MethodHandle is used to indicate the kind of method handle inside the C interpreter and we use
       several bits masks to dispatch between the different treatments.
 
@@ -825,7 +825,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   Figure~\ref{Rsize} shows some DEX file sizes contained in \ANDROID but
   the impact of the new DEX file format is negligible if the program does not use the \JSR opcodes.
 
-  \begin{figure}[h]
+  \begin{figure}[!ht]
     \pgfplotstableread{
       %4.4.3    %4.4.3.292
 0     2056     2088
@@ -834,7 +834,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 3     5728     5764
 4     1444     1476
     }\dataset
-    \resizebox{\linewidth}{!}{\input{figures/tikz_res_sizes}}
+    \resizebox{.9\linewidth}{!}{\input{figures/tikz_res_sizes}}
     \caption{DEX file size comparison.}
     \label{Rsize}
   \end{figure}
