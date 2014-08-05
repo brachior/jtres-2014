@@ -1,21 +1,24 @@
 \begin{tikzpicture}[font=\tiny]
+  \definecolor{gray1}{HTML}{797979}
+  \definecolor{gray2}{HTML}{393939}
+
   \tikzset{every node/.style={rounded corners}}
   \node[rectangle, draw=black, align=left, text width=1.38in, inner ysep=8.6em] (apk) at ([xshift=6em]jar.east){};
   \node[below right] at (apk.north west) {.apk};
   \node[rectangle, draw=black, align=left, text width=1.35in, inner ysep=8em] (dex) at (3.805,-.9){};
   \node[below right] at (dex.north west) {.dex};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (3.8,1.3){Header};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (2.9,.83){Strings Constant Pool};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (2.9,.25){Type/Class Constant Pool};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (2.9,-.34){Field\\Constant Pool};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (2.9,-.92){Method Constant Pool};
-  \node[rectangle, fill=green!30, draw=black, align=center, text width=.6in] at (4.7,.83){MethodType Constant Pool};
-  \node[rectangle, fill=green!30, draw=black, align=center, text width=.6in] at (4.7,.25){MethodHandle Constant Pool};
-  \node[rectangle, fill=green!30, draw=black, align=center, text width=.6in] at (4.7,-.34){Invokedynamic Constant Pool};
-  \node[rectangle, fill=green!30, draw=black, align=center, text width=.6in] at (4.7,-.92){BootstrapArgs Constant Pool};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (3.8,-1.50){Class Definitions};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (3.8,-1.97){Field List};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (3.8,-2.33){Method List};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (3.8,-2.69){Code Header};
-  \node[rectangle, fill=gray!30, draw=black, align=center, text width=.6in] at (3.8,-3.16){Local Variables};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (3.8,1.3){Header};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (2.9,.83){Strings Constant Pool};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (2.9,.25){Type/Class Constant Pool};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (2.9,-.34){Field\\Constant Pool};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (2.9,-.92){Method Constant Pool};
+  \node[rectangle, fill=gray1!30, draw=black, align=center, text width=.6in] at (4.7,.83){MethodType Constant Pool};
+  \node[rectangle, fill=gray1!30, draw=black, align=center, text width=.6in] at (4.7,.25){MethodHandle Constant Pool};
+  \node[rectangle, fill=gray1!30, draw=black, align=center, text width=.6in] at (4.7,-.34){Invokedynamic Constant Pool};
+  \node[rectangle, fill=gray1!30, draw=black, align=center, text width=.6in] at (4.7,-.92){BootstrapArgs Constant Pool};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (3.8,-1.50){Class Definitions};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (3.8,-1.97){Field List};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (3.8,-2.33){Method List};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (3.8,-2.69){Code Header};
+  \node[rectangle, fill=gray2!30, draw=black, align=center, text width=.6in] at (3.8,-3.16){Local Variables};
 \end{tikzpicture}

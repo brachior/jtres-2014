@@ -1,5 +1,7 @@
 \documentclass{sig-alternate}
 
+\usepackage{refcheck}
+
 \usepackage{tikz}
 \usetikzlibrary{plotmarks,arrows,positioning}
 \usepackage{pgfplotstable}
@@ -11,7 +13,7 @@
 \usepackage{stfloats}
 \usepackage{hyperref}
 \hypersetup{
-    bookmarks=false,        % show bookmarks bar?
+%    bookmarks=false,        % show bookmarks bar?
     unicode=false,          % non-Latin characters in Acrobat’s bookmarks
     pdftoolbar=true,        % show Acrobat’s toolbar?
     pdfmenubar=true,        % show Acrobat’s menu?
@@ -93,7 +95,7 @@
 
 \begin{abstract}
 \ANDROID OS uses for its applicative part a Java-based virtual machine called Dalvik.
-Java 7 introduces a new instructions set as well as a new API  specified by the \JSR
+Java 7 introduces a new instructions set as well as a new API  specified by the \JSR~\cite{jcp-jsr-292}
 in order to improve and simplify the implementation of non-Java languages on top of the Java Virtual Machine.
 As far as we know, neither the JVMs that are compatible with Java ME 8 nor
 \ANDROID, while compatible at syntactical level with Java 7, implement this \Jsr.
@@ -129,9 +131,10 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     \ANDROID is a mobile operating system created by Google.
     It is an open-source project called ``\ANDROID Open-Source Project'' (AOSP).
-    As of Q2 2013, \ANDROID occupies almost 80\% of the market share with more than 187 million units shipped \cite{idc-website}.
+    As of Q2 2013, \ANDROID occupies almost 80\% of the market share with more than 187 million units shipped~\cite{idc-website}.
     The success of \ANDROID can be explained by an open project and an open market,
-    which are very attractive for device producers, service providers, and application developers \cite{ieee-butler-android-landscape}\cite{ieee-paulson-shift-dynamic-languages}.
+    which are very attractive for device producers, service providers, and application developers
+   ~\cite{ieee-butler-android-landscape}\cite{ieee-paulson-shift-dynamic-languages}.
     \ANDROID mainly runs on embedded environments like smartphones and tablets,
     and supports ARM, Intel and MIPS architecture.
     
@@ -141,7 +144,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     Moreover, \ANDROID is a portable system and adaptable to a huge number of different devices,
     forcing it to abstract itself from hardware.
 
-    The \ANDROID architecture is described like a ``software stack'' (Figure \ref{ASA}).
+    The \ANDROID architecture is described like a ``software stack'' (Figure~\ref{ASA}).
     It's composed of:
     \begin{itemize}
       \item a modified version of the Linux kernel.
@@ -156,9 +159,9 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       \item default applications.
     \end{itemize}
 
-    \begin{figure}[!h]
+    \begin{figure}[!ht]
       \centering \resizebox{\linewidth}{!}{\input{figures/tikz_struct_android}}
-      \caption{\ANDROID system architecture \cite{wiki-android}.}
+      \caption{\ANDROID system architecture~\cite{wiki-android}.}\vspace{-1em}
       \label{ASA}
     \end{figure}
 
@@ -166,21 +169,21 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       The main difference between these two machines is that \DALVIK is register based while the \JVM is stack based.
       A stack based virtual machine (VM) uses more instructions to manipulate data and to implement Java code than a register based VM.
-      But the register based VM instructions tend to be larger in terms of code size\cite{ieee-paul-kundu-energy-perspective}.
+      But the register based VM instructions tend to be larger in terms of code size~\cite{ieee-paul-kundu-energy-perspective}.
 
-      The Java bytecode is given in a ``.class'' file and contains the code of a unique class (Figure \ref{SJA}).
+      The Java bytecode is given in a ``.class'' file and contains the code of a unique class (Figure~\ref{SJA}).
       The file is made of a serie of tables which describe various information, the code of the class and some other things.
       The code contains references to these tables.
       Among these tables, the constant-pool stores most of the constant values of the class (numbers or texts)
       and more evolved elements (data types, class names, attribute names, \dots).
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \resizebox{\linewidth}{!}{\input{figures/tikz_struct_jar_apk}}
-        \caption{structure of JAR and APK files.}\vspace{-1em}
+        \caption{structure of JAR and APK files.}\vspace{-.5em}
         \label{SJA}
       \end{figure}
 
-      In contrast, \DEX format contains all classes (".class" files) of the application (Figure \ref{SJA}).
+      In contrast, \DEX format contains all classes (".class" files) of the application (Figure~\ref{SJA}).
       It is a read-only format, loaded in one piece, so the code cannot be changed or modified at runtime.
       Duplicate constants, such as strings, used in multiple class files
       are included only once in the \DEX file to save space.
@@ -188,7 +191,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       except for the primitive types which are directly encoded within the opcode.
       It leads more smaller indexes for instructions.\\
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \resizebox{\linewidth}{!}{\input{figures/tikz_dex_toolschain}}
         \caption{\ANDROID application tools-chain.}
         \label{DTC}
@@ -196,7 +199,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       \DALVIK cannot directly execute Java bytecode.
       It first has to translate the Java bytecode to \DEX (the \DALVIK specific bytecode),
-      which can then be optimized (dxopt) in a binary format (\mbox{ODEX}) to save space (Figure \ref{DTC}).
+      which can then be optimized (dxopt) in a binary format (\mbox{ODEX}) to save space (Figure~\ref{DTC}).
 
   \subsection{Java Specification Request 292}
 
@@ -205,7 +208,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     modifying both the Java language specification and the \JVM specification.
 
     Since late 90's, a lot of language
-    implementors have chosen the JVM as their target platform \cite{wiki-jvm-lang},
+    implementors have chosen the JVM as their target platform~\cite{wiki-jvm-lang},
     for several reasons such as the size of the ecosystem,
     the presence of mature GCs and Just In Time compilers (JITs).
 
@@ -223,7 +226,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     But before that, we want to introduce an example that we will use for the rest of the paper.
 
     \subsubsection{Example}
-      Let suppose we have the following code in Groovy \cite{lang-groovy}:
+      Let suppose we have the following code in Groovy~\cite{lang-groovy}:
 
       \input{figures/snip_foo_groovy}
 
@@ -247,6 +250,8 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       In Java, this method does not exist. The bytecode verification will then fail.
 
       Another possible translation is to use a cascade of \emph{if ... instanceof}.
+
+      \vspace{1em}
 
       \input{figures/snip_foo_java}
 
@@ -279,11 +284,11 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       \input{figures/snip_foo_indy}
 
       The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called, with a lookup object corresponding to the class containing {\bf foo},
-      the string {\bf ``+''} and a MethodType corresponding to the descriptor:\\``(LObject;I)LObject;'' (Figure \ref{fooBSM}).
+      the string {\bf ``+''} and a MethodType corresponding to the descriptor:\\``(LObject;I)LObject;'' (Figure~\ref{fooBSM}).
       Moreover, invokedynamic comes with an API that allows to create several data patterns
       dynamically and lazily like for example a tree of if ... instanceof branches.
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_foo_bsm}\vspace{-1.5em}
         \caption{Example - bootstrap method.}
         \label{fooBSM}
@@ -296,10 +301,10 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       All method types are immutable and can only be created by static factory methods,
       allowing implementation to intern them when necessary. 
-      In our example, we need three method types (Figure \ref{fooMTS}), one for each method that we have to call:
+      In our example, we need three method types (Figure~\ref{fooMTS}), one for each method that we have to call:
       the ``check'' method; and the two methods ``plus''.
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_foo_methods}\vspace{-1.5em}
         \caption{Example - methods with method types.}\vspace{-1em}
         \label{fooMTS}
@@ -336,7 +341,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
         The generic call semantics will not try to do the varargs conversion if the last parameter is not an array.}.
       The exact call semantics is more strict, and the generic call semantics is more permissive than the classical call semantics.
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_foo_change}\vspace{-1.5em}
         \caption{Example - ``change'' method.}\vspace{-.7em}
         \label{fooCHANGE}
@@ -345,11 +350,11 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       Now, back to our example, in order to find the right target method (addition or concatenation),
       but for that we need to inspect the runtime type (the class exactly) of the argument of the call.
       The values of the arguments are not available when the bootstrap method is called at linking time,
-      so we use an intermediary method, named {\bf change} in the code below (Figure \ref{fooCHANGE}),
+      so we use an intermediary method, named {\bf change} in the code below (Figure~\ref{fooCHANGE}),
       that will be registered as target method for the first call.
       When this method will be called, the arguments are known, and we can decide which target method to call.
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_foo_callsite}\vspace{-1.5em}
         \caption{Example - mutable call site.}\vspace{-.25em}
         \label{fooMCS}
@@ -366,12 +371,12 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
        
       Thus, in the example, we convert each argument to an Object using asType,
       we collect them to form the array of Objects with asCollector and
-      we add the call site at first argument with bindTo (Figure \ref{fooMCS}).
+      we add the call site at first argument with bindTo (Figure~\ref{fooMCS}).
 
-      \noindent This adaptation forms the tree of the Figure \ref{ast1}.
+      \noindent This adaptation forms the tree of the Figure~\ref{ast1}.
 
       % graph 1
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \resizebox{.7\linewidth}{!}{\input{figures/tikz_ast_1}}
         \caption{Method handles tree - bootstrap method.}\vspace{-1em}
         \label{ast1}
@@ -396,10 +401,10 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       the method is called with an Object and an integer, so we first need to drop the second
       argument with dropArguments and then insert the java.lang.Class corresponding to an integer
       (java.lang.Integer) with insertArguments.
-      This adaptation forms the tree of the Figure \ref{ast2}.
+      This adaptation forms the tree of the Figure~\ref{ast2}.
 
       % graph 2
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \hspace{-.6in} \resizebox{1.3\linewidth}{!}{\input{figures/tikz_ast_2}}
         \caption{Method handles tree - first call (integer).}\vspace{-1em}
         \label{ast2}
@@ -408,7 +413,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       If 'a' is a string, the method {\bf change} is called again,
       installing a new method handle tree testing if 'a' is a string in order to call {\it plus(String,int)Object}
       delegating to the previous method handle tree otherwise.
-      This adaptation form the tree of the Figure \ref{ast3}.
+      This adaptation form the tree of the Figure~\ref{ast3}.
 
       % graph 3
       \begin{figure*}[!b]
@@ -486,7 +491,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     and a constant method handle and ``invokeExact'' and ``invoke'' which require that the first parameter
     is a MethodHandle.
 
-    The program ``dx'' (Figure \ref{DTC}) was modified to take Java bytecode and 
+    The program ``dx'' (Figure~\ref{DTC}) was modified to take Java bytecode and 
     transform the Java opcode or Java invokevirtual to the corresponding instructions.
 
   \subsection{constant-pools}
@@ -494,9 +499,9 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     To support the newly introduced opcodes, we had to add 4 new constant pools,
     one for constant method type, one for constant method handle, one for invoke-dynamic
-    and one for the bootstrap arguments. (Figure \ref{SNA}).
+    and one for the bootstrap arguments. (Figure~\ref{SNA}).
 
-    \begin{figure}[!h]
+    \begin{figure}[!ht]
       \centering \resizebox{.45\linewidth}{!}{\input{figures/tikz_struct_new_apk}}
       \caption{structure of new APK files.}
       \label{SNA}
@@ -510,9 +515,9 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     And the BootstrapArguments entry contains its arguments number
     and a data block representing the arguments.
     Each argument is encoded with a tag followed by a constant pool index or
-    an immediate primitive value according to the tag (Figure \ref{CPentries}).
+    an immediate primitive value according to the tag (Figure~\ref{CPentries}).
 
-    \begin{figure}[!h]
+    \begin{figure}[!ht]
       \centering \input{figures/snip_dvm_struct_mt}
       \centering \input{figures/snip_dvm_struct_mh}
       \centering \input{figures/snip_dvm_struct_indy}
@@ -547,7 +552,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     because the DEX file is read only.
 
     \ANDROID has a mechanism that optimizes a DEX file at the installation of
-    an APK using a program named ``dxopt'' (Figure \ref{DTC}).
+    an APK using a program named ``dxopt'' (Figure~\ref{DTC}).
     We take advantage of this mechanism to rewrite at installation time the APK to use our DEX format.
     This rewrite is fast, because we only can copy the previous DEX file and only insert the
     constant pools for method types, method handles, invoke-dynamics and
@@ -560,7 +565,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   \subsection{New constants}
 
     There are two ways to create a constant method handle, either using the ``const-methodhandle''
-    instruction (Figure \ref{MTMHldc}) or as arguments of a bootstrap method.
+    instruction (Figure~\ref{MTMHldc}) or as arguments of a bootstrap method.
     Given that the ``const-methodhandle'' instruction is rarely used and
     a bootstrap method is called once, we have chosen to not implement a cache
     of resolved method handle in the VM.
@@ -584,7 +589,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     using a strong reference in the Java cache while a method type created by a user code in Java
     is hold by a weak reference and reclaimed by the GC if not be used anymore.    
 
-    \begin{figure}[!h]
+    \begin{figure}[!ht]
       \centering \resizebox{1.\linewidth}{!}{\input{figures/inst_mh_mt}}
       \caption{methodtype and methodhandle constant.}\vspace{-1em}
       \label{MTMHldc}
@@ -598,12 +603,12 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     \subsubsection{invoke-exact and invoke-generic}
 
-      The instruction invoke-exact and invoke-generic (Figure \ref{INGEins}) contain an index
+      The instruction invoke-exact and invoke-generic (Figure~\ref{INGEins}) contain an index
       in the constant-pool of method types which are resolved lazily.
       This method type represents the order and types of the arguments passed to the instruction, the first argument excluded.
       The first argument is the method handle we have to call.\\
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \resizebox{1.\linewidth}{!}{\input{figures/inst_gen_exa}}
         \caption{invoke-generic/exact instruction.}\vspace{-1em}
         \label{INGEins}
@@ -611,14 +616,14 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     \subsubsection{invoke-dynamic}
 
-      An invoke-dynamic (Figure \ref{INDYins}) contains an integer corresponding to the call site number
+      An invoke-dynamic (Figure~\ref{INDYins}) contains an integer corresponding to the call site number
       and an index in the constant-pool of invoke-dynamic.
       The entry in the invoke-dynamic constant pool contains a name, a prototype, a bootstrap method and an index to
       the bootstrap arguments. 
       Because the invoke-dynamic instruction is resolved once, the method type corresponding to the call
       is created once when the bootstrap method is called and not stored in the VM table.
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \resizebox{1.\linewidth}{!}{\input{figures/inst_indy}}
         \caption{invoke-dynamic instruction.}\vspace{-1em}
         \label{INDYins}
@@ -628,7 +633,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 \label{implD}
 
     \subsection{MethodHandle}
-      We have chosen to divide the method handle in three kinds (Figure \ref{mhHier})
+      We have chosen to divide the method handle in three kinds (Figure~\ref{mhHier})
       depending on how we have decided to implement calls.
       :
       \begin{itemize}
@@ -640,7 +645,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
               detailed in section~\ref{invokers}.
       \end{itemize}
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \resizebox{\linewidth}{!}{\input{figures/tikz_mh_hierarchy}}
         \caption{Method handles hierarchy.}
         \label{mhHier}
@@ -648,9 +653,9 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       In term of Java Class hierarchy, the direct method handles are represented by the class MethodHandle,
       the combiners are represented by subclasses of the class InterpretMH which is a subclass of MethodHandle
-      and the combiners are represented by the class Invoker which is a subclass of MethodHandle.
+      and the combiners are represented by the class Invoker which is a subclass of MethodHandle (Figure~\ref{mhFields}).
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_methodhandle}\vspace{-1.5em}
         \caption{Method handle fields.}
         \label{mhFields}
@@ -695,14 +700,14 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   
     \subsubsection{invoke-dynamic}
       To find the method handle to call, we find the class that contains the current opcode,
-      use the callsite index to get the method handle at the index
+      use the callsite index to get the method handle
       in the callsite table associated with the current class.
       If the pointer is null, it means that the bootstrap method was not called,
-      so we decode the bootstrap argument and do an up call to a Java method named ``callBootstrapMethod'' % (Figure \ref{implBSM})
-      inside MethodHandle that will call the bootstrap method in Java (using invokeWithArguments (Figure \ref{implIWA})
-      which is based on invoke-generic).
+      so we decode the bootstrap argument and do an up call to a Java method named ``callBootstrapMethod'' (Figure~\ref{implBSM})
+      inside MethodHandle that will call the bootstrap method in Java.
+      % (using invokeWithArguments (Figure~\ref{implIWA}) which is based on invoke-generic).
       
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_meth_bsm}\vspace{-1.5em}
         \caption{snippet - ``callBootstrapMethod''.}\vspace{-1em}
         \label{implBSM}
@@ -719,7 +724,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       If the compare-and-set fails, we re-read the CallSites table at the right index again with the volatile semantics
       and call the method handle which is guaranteed to be non-null.   
 
-%       \begin{figure}[!h]
+%       \begin{figure}[!ht]
 %         \centering \input{figures/snip_meth_iwa}\vspace{-1.5em}
 %         \caption{snippet - ``invokeWithArguments''.}
 %         \label{implIWA}
@@ -752,7 +757,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       the combiner interpreter is written in Java, ``invoke-exact'' and ``invoke-generic'' instructions
       are handled by the C interpreter and to avoid to push too many stack frames that may blow the stack.
       
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_meth_interp}\vspace{-1em}
         \caption{snippet - ``invokeCombiner''.}
         \label{implINTERP}
@@ -790,9 +795,9 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       the method handle to call (the invokee) is extracted from the first argument and the other arguments are shifted.
       then the interpreter re-executes itself again using a goto.
       In order to perform the second pointer check, we store the expected method type of the invokee as a field of the MHInvoker class
-      (Figure \ref{invokeeFields}).
+      (Figure~\ref{invokeeFields}).
 
-      \begin{figure}[!h]
+      \begin{figure}[!ht]
         \centering \input{figures/snip_mh_invoker}\vspace{-1.5em}
         \caption{Method handle invokee fields.}
         \label{invokeeFields}
@@ -817,7 +822,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   In terms of binary size, the library containing the interpreter (libdvm.so) increases by twenty kilo-bytes
   as well as the Java API in the SDK (android.jar).
   A DEX file size using the new encoding increases proportionally in respect to the number of classes.
-  Figure \ref{Rsize} shows some DEX file sizes contained in \ANDROID but
+  Figure~\ref{Rsize} shows some DEX file sizes contained in \ANDROID but
   the impact of the new DEX file format is negligible if the program does not use the \JSR opcodes.
 
   \begin{figure}[h]
@@ -838,13 +843,13 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   we have written a test which calls N times a method using different ways (instructions and reflection).
   This test is executed using \DALVIK in command line mode.
 
-  \begin{figure}[!h]
+  \begin{figure}[!ht]
     \resizebox{\linewidth}{!}{\input{figures/tikz_res_invokes}}
     \caption{JSR 292 instructions vs reflection API.}
     \label{Rinvoke}
   \end{figure}
 
-  Figure \ref{Rinvoke} shows results for 10000, 100000 and 1000000 executions.
+  Figure~\ref{Rinvoke} shows results for 10000, 100000 and 1000000 executions.
   Below these number of executions, we cannot see any real the differences between each kind of invocation.
   Calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are faster than others,
   ``invoke-dynamic'' takes a bit more time because of the volatile load to get the method handle.
@@ -856,7 +861,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   We call N times a method which takes an Object and calls the right method according to the dynamic type of the argument.
   We compare the execution time of the example using the instanceof mechanism, the reflection API and the method handle interpreter.
 
-  \begin{figure}[!h]
+  \begin{figure}[!ht]
     \resizebox{\linewidth}{!}{\input{figures/tikz_res_mutable}}
     \caption{Method handle interpreter vs classic Java calls.}\vspace{-1em}
     \label{Rmutable}
@@ -870,12 +875,13 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   there are not a lot of published paper on that subject.
 
   In 2009, a paper of John R. Rose, the spec leader of the \JSR describes an implementation of the \JSR,
-  now obsolete\cite{vmil-rose-indy-2009}. In 2010, another paper by John R. Rose and Christian Thalinger present the implementation
+  now obsolete~\cite{vmil-rose-indy-2009}. In 2010, another paper by John R. Rose and Christian Thalinger present the implementation
   that was released with the OpenJDK 7~\cite{pppj-rose-indy-2010}. This implementation was thrown own and a new one, named lambda-form,
   was developed and shipped with the release of the OpenJDK 8. As far as we know, there is no published paper on this approach.
 
   In embedded space, JamVM supports the \JSR but its implementation re-use the OpenJDK 8 classes.
-  The \Jsr 360, that describes the CLDC 8 version of Java explicitly specifies that an embedded JVM does not have to support the  ``invokedynamic'' instruction~\cite{jcp-jsr-360}.
+  The \Jsr 360, that describes the CLDC 8 version of Java explicitly specifies that
+  an embedded JVM does not have to support the  ``invokedynamic'' instruction~\cite{jcp-jsr-360}.
   
 \section{Conclusion}
   In this paper, we have shown how the \JSR can be re-interpreted for the \ANDROID DEX format and
@@ -964,16 +970,16 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 \section{Get and compile the project}
 
   Our project is divided into several parts.
-  The main parts are the changes to the Java API (libcore-292\cite{bb-libcore}) and those of Dalvik and ``dx'' (dalvik-292\cite{bb-dalvik}).
+  The main parts are the changes to the Java API (libcore-292~\cite{bb-libcore}) and those of Dalvik and ``dx'' (dalvik-292~\cite{bb-dalvik}).
   To compile our project, you need to download each part and sources of \ANDROID.
-  To simplify this task, we put a project on BitBucket called ``\ANDROID 292''\cite{bb-android}.
+  To simplify this task, we put a project on BitBucket called ``\ANDROID 292''~\cite{bb-android}.
   Once recovered, a python script (aosp.py) allows to recover the entire project:
 
   {\scriptsize \begin{verbatim}
     python aosp.py
   \end{verbatim}}\vspace{-.8em}
 
-  To compile the project, you must be on a GNU/Linux 64bits machine and initialize your environment to compile the AOSP\cite{android-sources}.
+  To compile the project, you must be on a GNU/Linux 64bits machine and initialize your environment to compile the AOSP~\cite{android-sources}.
   Once your environment ready, type the following commands:
  
   {\scriptsize \begin{verbatim}
