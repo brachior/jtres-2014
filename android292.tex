@@ -3,7 +3,7 @@
 \usepackage{refcheck}
 
 \usepackage{tikz}
-\usetikzlibrary{plotmarks,arrows,positioning}
+\usetikzlibrary{plotmarks,shapes,arrows,positioning}
 \usepackage{pgfplotstable}
 \pgfplotsset{compat=newest}
 \usepackage{caption}
@@ -277,13 +277,20 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       with the context where the opcode is located i.e.~the declaring class (encapsulated in a Lookup object),
       a symbolic name and the declared parameter types as a MethodType.
       Any subsequent execution of the invokedynamic opcode will call the function pointer
-      stored inside the CallSite object returned by the bootstrap method.
+      stored inside the CallSite object returned by the bootstrap method (Figure~\ref{indyFC}).
+
+      \begin{figure}[!ht]
+        \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_indy_instruction}}
+        \caption{invokedynamic instruction execution.}
+        \label{indyFC}
+      \end{figure}
       
       For our example, the code of {\bf foo} with invokedynamic is
 
       \input{figures/snip_foo_indy}
 
-      The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called, with a lookup object corresponding to the class containing {\bf foo},
+      The first time that {\bf foo} is executed, the bootstrap method of the class RT will be called,
+      with a lookup object corresponding to the class containing {\bf foo},
       the string {\bf ``+''} and a MethodType corresponding to the descriptor:\\``(LObject;I)LObject;'' (Figure~\ref{fooBSM}).
       Moreover, invokedynamic comes with an API that allows to create several data patterns
       dynamically and lazily like for example a tree of if ... instanceof branches.
@@ -356,7 +363,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       \begin{figure}[!ht]
         \centering \input{figures/snip_foo_callsite}\vspace{-1.5em}
-        \caption{Example - mutable call site.}\vspace{-.25em}
+        \caption{Example - mutable call site.}\vspace{-1.5em}
         \label{fooMCS}
       \end{figure}
 
@@ -416,7 +423,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       This adaptation form the tree of the Figure~\ref{ast3}.
 
       % graph 3
-      \begin{figure*}[!b]
+      \begin{figure*}[!ht]
         \centering \resizebox{.8\linewidth}{!}{\input{figures/tikz_ast_3}}
         \caption{Method handles tree - second call (string).}\vspace{-1em}
         \label{ast3}
@@ -634,8 +641,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     \subsection{MethodHandle}
       We have chosen to divide the method handle in three kinds (Figure~\ref{mhHier})
-      depending on how we have decided to implement calls.
-      :
+      depending on how we have decided to implement calls:
       \begin{itemize}
         \item direct method handles are implemented inside the C interpreter
               either by a classical call (virtual, direct, static, \dots)
@@ -644,6 +650,10 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
         \item and invokers which are also implemented in the C interpreter but using a form of tail call
               detailed in section~\ref{invokers}.
       \end{itemize}
+
+      To perform some optimizations, we cannot treat at the same way these three kinds of method handles.
+      Basically, the C implementation avoids unnecessary boxing and to pile up the execution stack.
+      On the other hand, the Java implementation simplify argument manipulations.
 
       \begin{figure}[!ht]
         \centering \resizebox{\linewidth}{!}{\input{figures/tikz_mh_hierarchy}}
@@ -673,8 +683,8 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       if the target method exists in the class using a native method and then create
       the method handle in Java. As in our example, we suppose that these methods are
       mostly stored inside static final fields thus their cost of creation is amortized.
-      For another method handle, these method handles are usually created more frequently
-      and those method handles does not require any action by the VM thus are fully created in Java.
+      For the other method handles, they are usually created more frequently
+      and do not require any action by the VM thus are fully created in Java.
 
     \subsection{invoke instructions}
       All new invoke instructions work the same way by first extracting the method handle

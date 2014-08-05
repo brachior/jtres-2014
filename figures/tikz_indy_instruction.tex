@@ -1,0 +1,11 @@
+\begin{tikzpicture}[scale=1]
+    \node [rectangle, draw, text width=6.5em, text centered, rounded corners] (inst) at (0,0) {invokedynamic instruction};
+    \node [diamond, draw, text width=7em, text badly centered, inner sep=0pt, aspect=3] (callsite) at ([yshift=-3em]inst.south) {call site exists?};
+    \node [rectangle, draw, text width=8em, text centered, rounded corners] (call) at ([xshift=7.5em]callsite.east) {call\\ bootstrap method};
+    \node [rectangle, draw, text width=7em, text centered, rounded corners] (exec) at ([yshift=-3em]callsite.south) {execute target};
+
+    \path [draw, -latex'] (inst) -- (callsite);
+    \path [draw, -latex'] (callsite) -- node [above] {no} (call);
+    \path [draw, -latex'] (callsite) -- node [left] {yes} (exec);
+    \path [draw, -latex'] (call) |- (exec);
+\end{tikzpicture}
