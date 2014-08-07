@@ -105,7 +105,7 @@ on code generation at runtime which requires too much computing power and energy
 This paper describes our implementation of the \JSR in Dalvik.
 First, we adapt the class format specification of the \JSR which is stack based and implicitly relies on the fact that the bytecode
 can be rewritten at runtime, to the opcode specification of Dalvik which is register based and read only. 
-Then we explain, how we represent the different kinds of method handles in Java, and how the method handles are interpreted,
+Then we explain, how we represent the different kinds of method handles in Java, and how method handles are interpreted,
 using either the C interpreter for the low level method handle or a Java flexible but slow interpreter for the ``combiner`` method handles.
 
 At the end, we present a comparison of the execution time of the different kinds of calls.
@@ -131,7 +131,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     \ANDROID is a mobile operating system created by Google.
     It is an open-source project called ``\ANDROID Open-Source Project'' (AOSP).
-    As of Q2 2013, \ANDROID occupies almost 80\% of the market share with more than 187 million units shipped~\cite{idc-website}.
+    As of Q1 2014, \ANDROID occupies more than 80\% of the smartphone OS market share with more than 80 million units shipped~\cite{idc-website}.
     The success of \ANDROID can be explained by an open project and an open market,
     which are very attractive for device producers, service providers, and application developers
    ~\cite{ieee-butler-android-landscape}\cite{ieee-paulson-shift-dynamic-languages}.
@@ -151,7 +151,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
         It offers hardware abstraction, memory management, process management, as well as a security model, and a network model;
       \item native libraries (C/C++),
         which provide most of features in the \ANDROID system;
-      \item a virtual machine called ``\DALVIK''
+      \item a virtual machine called ``\DALVIK'',
         which executes the application written in Java but converted to the \DEX format.
         \DALVIK uses the core API of Java written from scratch
         which can be assimilated to the version 5 or 6 of the Java API;
@@ -183,7 +183,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
         \label{SJA}
       \end{figure}
 
-      In contrast, \DEX format contains all classes (".class" files) of the application (Figure~\ref{SJA}).
+      In contrast, \DEX file contains all classes (".class" files) of the application (Figure~\ref{SJA}).
       It is a read-only format, loaded in one piece, so the code cannot be changed or modified at runtime.
       Duplicate constants, such as strings, used in multiple class files
       are included only once in the \DEX file to save space.
@@ -256,7 +256,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       \input{figures/snip_foo_java}
 
       While this code works, it supposes that all the potentials variations of + are known at compile time,
-      something that is not true in most dynamically typed languages (Ruby, Groovy or Dart allows users to add
+      something that is not true in most dynamically typed languages (Ruby, Groovy or Dart allow users to add
       new versions of any operations).
       This code can also be slow because in real languages, the number of if ... instanceof branches
       can be greater than a dozen. 
@@ -264,8 +264,8 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       To solve these issues, the \Jsr introduces a new bytecode named invokedynamic, which has no predefined
       linking semantics and lets an external Java\footnote{or any languages that can be compiled to Java bytecode} code
       named the bootstrap method to specify the linking semantics.
-      This method returns a CallSite object that is a box that contains a method handle (a function pointer)
-      that will be used for the subsequent calls.
+      This method returns a CallSite object that is a box containing a MethodHandle (a function pointer).
+      The latter will be used for subsequent calls.
 
       The classes (MethodHandle, MethodType, CallSite, etc.) specified by the \Jsr are grouped into a new
       package called ``java.lang.invoke'' and are directly understood by the \JVM.
@@ -396,7 +396,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       which is equivalent to a test {\bf if .. then .. else}.
 
       There is no existing method handle in the API that are able to do a class check,
-      but it's easy to construct one. The method named {\bf check} checks if an argument class
+      but it's easy to construct one. The method named {\bf check} (Figure~\ref{fooMTS}) checks if an argument class
       is identical to a class object taken as parameter and this parameter is curried
       (using insertArguments) to the class we need to check.
 
@@ -431,11 +431,11 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     \subsubsection{CallSite}
 
-      As we have seen, a CallSite is a holder for a MethodHandle, which is called its target.
+      A CallSite is a holder for a MethodHandle, which is called its target.
       An invokedynamic instruction linked to a CallSite delegates all calls to the site's current target.
       A same CallSite object may be associated with several invokedynamic
       instructions\footnote{A CallSite can also be ``free floating'', associated with no invokedynamic,
-      if you want to reuse the same mechanism to implement an interpreter in Java by example.}\\
+      if you want to reuse the same mechanism to implement an interpreter in Java by example.}.\\
 
       It has three immediate, concrete subclasses that may be either instantiated or subclassed:
       \begin{enumerate}
@@ -447,7 +447,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       The new target must have the same type as the previous one.
 
 \section{\ANDROID 292}
-  At the current time, there only exist two complete implementations of \JSR.
+  At the current time, there only exists two complete implementations of \JSR.
   %There are a few complete implementations of the \JSR, mostly two.
   The OpenJDK Hotspot which is the reference implementation of Java and is also used in the Oracle JDK
   and the IBM J9 implementation used in the IBM JDK.
@@ -495,8 +495,10 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     Instead of overloading the already existing semantics, in Dalvik, we introduce several new opcodes,
     ``invoke-dynamic'' that does an invokedynamic,
     ``const-methodtype'' and ``const-methodhandle'' that respectively load a constant method type
-    and a constant method handle and ``invokeExact'' and ``invoke'' which require that the first parameter
-    is a MethodHandle.
+    and a constant method handle and
+    ``invoke-exact'' and ``invoke-generic'' representing respectively a call to the ``invokeExact'' method and to the ``invoke'' method.
+    We choose to introduce these two instructions [mettre quelque chose ici !!!].
+%     ``invokeExact'' and ``invoke'' which require that the first parameter is a MethodHandle.
 
     The program ``dx'' (Figure~\ref{DTC}) was modified to take Java bytecode and 
     transform the Java opcode or Java invokevirtual to the corresponding instructions.
@@ -565,7 +567,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
     constant pools for method types, method handles, invoke-dynamics and
     bootstrap arguments with a size of zero and add a 0 in the header of a class at the
     position corresponding to the CallSites table.
-    The size of the DEX header and the class headers change but no offsets inside each parts.
+    The size of the DEX header and the class headers change but nothing changes at the offsets.
 
 \section{New opcodes}
 \label{newConst}
@@ -579,7 +581,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
     Because we have chosen to create method handle in Java (section~\ref{implD}),
     resolving a constant method handle is done by resolving the corresponding information
-    in the constant pool and create it by an up call to the Java side.
+    in the constant pool and create it by a call to the Java side.
 
     While constant method handles are not interned by the VM, some of the constant method types,
     are interned by the VM. Because we implement the runtime safety check of the invoke-exact
@@ -663,7 +665,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       In term of Java Class hierarchy, the direct method handles are represented by the class MethodHandle,
       the combiners are represented by subclasses of the class InterpretMH which is a subclass of MethodHandle
-      and the combiners are represented by the class Invoker which is a subclass of MethodHandle.
+      and the invokers are represented by the class Invoker which is a subclass of MethodHandle.
 
       \begin{figure}[!ht]
         \centering \input{figures/snip_methodhandle}\vspace{-1.5em}
@@ -713,7 +715,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       use the callsite index to get the method handle
       in the callsite table associated with the current class.
       If the pointer is null, it means that the bootstrap method was not called,
-      so we decode the bootstrap argument and do an up call to a Java method named ``callBootstrapMethod'' (Figure~\ref{implBSM})
+      so we decode the bootstrap argument and call the Java method named ``callBootstrapMethod'' (Figure~\ref{implBSM})
       inside MethodHandle that will call the bootstrap method in Java.
       % (using invokeWithArguments (Figure~\ref{implIWA}) which is based on invoke-generic).
       
@@ -756,15 +758,15 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       to be more flexible and avoid to bloat the code of the VM even if the execution may be slower.
       
       When a combiner is called, the C interpreter will box all the argument values inside an array of Object
-      and then do an up call to call a Java code that will modify the arguments by modifying the array
-      of objects and then will use invoke-generic (exactly invokeWithArguments that use invoke-generic)
+      and then calls a Java code that will modify the arguments by modifying the array
+      of objects and then will use invoke-generic (exactly the method "invokeWithArguments" that uses invoke-generic)
       to re-transform the Object back to their real values.  
 
       Executing a combiner is often equivalent to executing several other method handle
       combiners before executing a direct method handle at the end of the chain.
       Therefore we have decided to not implement the Java interpreter as a classical
-      tree interpreter in order to avoid a sequence of up call/down call because while
-      the combiner interpreter is written in Java, ``invoke-exact'' and ``invoke-generic'' instructions
+      tree interpreter in order to avoid a sequence of back and forth between the C side and the Java side
+      because while the combiner interpreter is written in Java, ``invoke-exact'' and ``invoke-generic'' instructions
       are handled by the C interpreter and to avoid to push too many stack frames that may blow the stack.
       
       \begin{figure}[!ht]
@@ -777,7 +779,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       ({\bf context}) that will remember how the return value of a specific combiner must be processed.
       For example, the combiner AsType converts the arguments and produces a context if it has
       to convert the return value and then the interpreter compute the next combiner using a loop until it calls
-      a direct method handle that will return a return value. At the point the contexts will be unwinded
+      a direct method handle that will return a value. At the point the contexts will be unwinded
       to execute the conversion on the return value specified by AsType. 
 
       So only calls to direct method handles go to the C interpreter.
@@ -788,22 +790,22 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 
       Among the method handles, the \JSR called ``invokers'' those which are high order method handles i.e.
       a method handle that has its first argument that is a method handle and that when invoked,
-      extract the first argument and call it with with the rest of arguments.
+      extract the first argument and call it with the rest of arguments.
 
       The invoker that simulates an invoke-exact is called exactInvoker, and the one that simulates
-      an invoke-generic is called invoker. The method type of an invoker is the same as the method handle
-      it has to call with a MethodHandle at first parameter.
+      an invoke-generic is called invoker. The method type of an invoker is the same as the method handle.
+      It has to call with a MethodHandle at first parameter.
       Each invoker can be executed either by a call to the method ``invoke'' or by a call to the method ``invokeExact'',
       so there are four call semantics.
       
       We cannot simulate the semantics of an invoke-exact call in the Java combiner interpreter
-      (when the Java interpreter is called the arguments are boxed) and to avoid an unnecessary up call
+      (when the Java interpreter is called the arguments are boxed) and to avoid an unnecessary call to the Java side
       for the invoker (the one with the invoke-generic semantics), the exact invoker and the generic invoker
       are handled by the C interpreter.
       
       In the C interpreter, the execution of an invoker acts as a tail call,
       the method handle to call (the invokee) is extracted from the first argument and the other arguments are shifted.
-      then the interpreter re-executes itself again using a goto.
+      Then the interpreter re-executes itself again using a goto.
       In order to perform the second pointer check, we store the expected method type of the invokee as a field of the MHInvoker class
       (Figure~\ref{invokeeFields}).
 
@@ -814,7 +816,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
       \end{figure}
 
       In the special case where the generic invoker is invoked with the semantics of invoke-exact,
-      we choose to do an up call to the method ``invokeWithArguments'' which calls the method ``invoke''.
+      we choose to call the Java method ``invokeWithArguments'' which calls the method ``invoke''.
 
       The method handle API contains other invokers (the ``spreadInvoker'' and the ``dynamicInvoker'')
       but we are able to handle them as combiners.
@@ -825,7 +827,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   The modifications made to implement the \JSR have a cost in terms of size of code.
   About 2600 lines of code were required to tell {\bf dx} how to translate the new instructions,
   3200 lines of codes are added into Dalvik excluding duplications of code for each interpreter generated by \ANDROID itself.
-  And finally, the introduction of the package ``java/lang/invoke'' required about 7000 lines of code of Java code.
+  And finally, the introduction of the package ``java/lang/invoke'' required about 7000 lines of Java code.
 
 %   \fixme{impact sur le binaire (4.4.3/4.4.3.292) libdvm(718992/739484) [20k]; android.jar(20522674/20533106) [20k]; dalvikvm(9500/9500)}
 
@@ -860,10 +862,10 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   \end{figure}
 
   Figure~\ref{Rinvoke} shows results for 10000, 100000 and 1000000 executions.
-  Below these number of executions, we cannot see any real the differences between each kind of invocation.
+  Below these number of executions, we cannot see any real differences between each kind of invocation.
   Calls to ``invoke-exact'' and to ``invoke-generic'' with the right method type (behaving as an ``invoke-exact'') are faster than others,
   ``invoke-dynamic'' takes a bit more time because of the volatile load to get the method handle.
-  Regarding ``invoke-generic'' with a method type different from the target method handle type, the execution time increases.
+  Regarding ``invoke-generic'' with a method type different from the target method handle type, the execution time increases,
   due to the boxing mechanism which creates new objects at each call.
   However, ``invoke-generic'' remains faster than the reflection API which requires to box all arguments and create an array of Object.\\
   
@@ -878,7 +880,8 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
   \end{figure}
 
   We notice on Figure~\ref{Rmutable} that our method handle interpreter is really slow,
-  due to the fact that in order to call the Java method handle interpreter the arguments need to be boxed creating a lot of objects.
+  due to the fact that in order to call the Java method handle interpreter the arguments need to be boxed creating a lot of objects
+  and the argument manipulations need to create objects too.
 
 \section{Related Work}
   Because there are few implementations of the \JSR and that the IBM J9 implementation is done behind close doors,
@@ -922,7 +925,7 @@ method handles, method handle adapters, \ANDROID, Dalvik, embedded system
 %   \softraggedright
 
   \bibitem{idc-website}
-  IDC website (2013) - \\ \url{www.idc.com/getdoc.jsp?containerId=prUS24257413}.
+  IDC website (2014) - \\ \url{http://www.idc.com/prodserv/smartphone-os-market-share.jsp}.
 
   \bibitem{ieee-butler-android-landscape}
   Butler, M., ``\ANDROID: Changing the Mobile Landscape'', Pervasive Computing, IEEE , vol.10, no.1, pp.4,7, Jan.-March 2011.
